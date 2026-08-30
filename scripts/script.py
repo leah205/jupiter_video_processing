@@ -26,8 +26,10 @@ def align_images(frame1, frame2):
     frame2 = cv2.normalize(frame2, None, alpha = 0, beta = 255, norm_type = cv2.NORM_MINMAX)
     frame2 = cv2.GaussianBlur(frame2, (3,3), 0)
 
-    (cX1, cY1) = get_center_of_mass(frame1[:, :, 0])
-    (cX2, cY2)  = get_center_of_mass(frame2[:, :, 0])
+    intensity1, intensity2 = frame1[:, :, 0], frame2[:, :, 0]
+
+    (cX1, cY1) = get_center_of_mass(intensity1)
+    (cX2, cY2)  = get_center_of_mass(intensity2)
     print("center of mass 1, 2", cX1, cY1, cX2, cY2)
 
     offset_x, offset_y = cX1 - cX2,  cY1 - cY2
@@ -51,9 +53,10 @@ def align_images(frame1, frame2):
     cv2.imshow("translated frame 1", translated_frame1)
     cv2.waitKey(0)
 
-    images = [frame2, translated_frame1]
     
-    stacked = np.mean(images, axis=0).astype(np.uint16)
+    stacked = (translated_frame1.astype(np.float32) + frame2.astype(np.float32)) / 2
+    stacked = stacked.astype(np.uint8)
+    print(stacked)
     cv2.imshow("stacked image", stacked)
     cv2.waitKey(0)
    
