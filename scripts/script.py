@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 def get_planet_mask(frame):
     frame = cv2.GaussianBlur(frame, (3, 3), 0)
     ret, thresh = cv2.threshold(frame, 50, 255, cv2.THRESH_BINARY)
+    print(thresh.shape)
     return thresh
 
 def get_avg_gradient_mag(frame):
