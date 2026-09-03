@@ -17,19 +17,10 @@ def get_avg_gradient_mag(frame):
 
     gx = gx.astype(np.float32)
     gy = gy.astype(np.float32)
-    # gy = cv2.convertScaleAbs(gy)
-
-    # combined = cv2.addWeighted(gx, 0.5, gy, 0.5)
-    # why need to cast to flat?
     g_mag = np.sqrt((gx ** 2), (gy ** 2))
     planet_g_mags = g_mag[get_planet_mask(frame)]
     planet_g_mags = planet_g_mags.flatten()
     return np.mean(planet_g_mags, axis = 0)
-
-
-
-
-
 
 
 def get_center_of_mass(frame):
@@ -56,10 +47,6 @@ def translate_cm(frame, ref_x, ref_y):
     height, width = frame.shape[:2]
     translated_frame = cv2.warpAffine(frame, translation_matrix, (width, height))
     return translated_frame
-
-
-
-
 
 def stack_images(frame_arr):  
     stacked = np.mean(frame_arr, axis = 0).astype(np.uint8)
