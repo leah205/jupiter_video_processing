@@ -90,13 +90,20 @@ cv::Mat stack_images(cv::Mat frames[], int num_frames)
     int *sum_ptr = sum_mat.ptr<int>(0);
     for (int i = 0; i < num_frames; i++)
     {
+        int nc = num_cols;
+        int nl = num_rows;
         cv::Mat cur = frames[i];
-        for (int row = 0; row < num_rows; row++)
+        if (cur.isContinuous())
+        {
+            nl = 1;
+            nc = nc * nl;
+        }
+        for (int row = 0; row < nl; row++)
         {
             // why not just use one pointer here?
             uchar *p = cur.ptr(row);
             int *sum_ptr = sum_mat.ptr<int>(row);
-            for (int col = 0; col < num_cols; col++)
+            for (int col = 0; col < nc; col++)
             {
                 *sum_ptr += *p;
                 sum_ptr++;
