@@ -38,15 +38,18 @@ void get_planet_mask(cv::Mat frame, cv::Mat &mask)
  *
  * @param frame
  */
-void preprocess(cv::Mat &frame)
+cv::Mat preprocess(cv::Mat frame)
 {
-    cv::normalize(frame, frame, 0, 255, cv::NORM_MINMAX);
+    cv::Mat processed;
+    cv::normalize(frame, processed, 0, 255, cv::NORM_MINMAX);
+    return processed;
 }
 
-void align_frame(cv::Mat &frame, cv::Point cm, cv::Point ref)
+cv::Mat align_frame(cv::Mat frame, cv::Point cm, cv::Point ref)
 {
-    cv::extractChannel(frame, frame, 0);
+    cv::Mat aligned_frame;
 
+    cv::extractChannel(frame, frame, 0);
     double offset_x, offset_y;
     offset_x = cm.x - ref.x;
     offset_y = cm.y - ref.y;
@@ -55,7 +58,8 @@ void align_frame(cv::Mat &frame, cv::Point cm, cv::Point ref)
     int height = frame.cols;
     int width = frame.rows;
 
-    cv::warpAffine(frame, frame, translation_matrix, cv::Size(width, height));
+    cv::warpAffine(frame, aligned_frame, translation_matrix, cv::Size(width, height));
+    return aligned_frame;
 }
 
 cv::Point get_center_of_mass(cv::Mat frame)
@@ -76,8 +80,10 @@ cv::Point get_center_of_mass(cv::Mat frame)
     return p;
 }
 
-void stack_images(cv::Mat frames[], cv::Mat stacked, int num_frames)
+cv::Mat stack_images(cv::Mat frames[], int num_frames)
 {
+    cv::Mat stacked;
+
     int num_rows = frames[0].rows;
     int num_cols = frames[0].cols;
     cv::Mat sum_mat = cv::Mat::zeros(num_rows, num_cols, CV_32SC1);
@@ -103,20 +109,9 @@ void stack_images(cv::Mat frames[], cv::Mat stacked, int num_frames)
                 p++;
             }
         }
-
-        if (i == 0)
-        {
-            cv::Mat display;
-            cv::normalize(sum_mat, display, 0, 255, cv::NORM_MINMAX, CV_8UC1);
-            cv::imshow("sum", display);
-            cv::waitKey(0);
-            break;
-        }
     }
-    cv::normalize(sum_mat, sum_mat, 0, 1 << 16, cv::NORM_MINMAX);
-    sum_mat.convertTo(sum_mat, CV_16UC1);
-    cv::imshow("sum matrix", sum_mat);
-    cv::waitKey(0);
+    cv::normalize(sum_mat, stacked, 0, 1 << 16, cv::NORM_MINMAX, CV_16UC1);
+    return stacked;
 }
 
 int main()
@@ -139,8 +134,8 @@ int main()
 
     cv::Mat frame;
     bool ret = cap.read(frame);
-    preprocess(frame);
-    get_array_info(frame);
+    frame = preprocess(frame);
+    // get_array_info(frame);
 
     cv::Point ref_cm = get_center_of_mass(frame);
 
@@ -156,13 +151,14 @@ int main()
 
         preprocess(frame);
         cv::Point cm = get_center_of_mass(frame);
-        align_frame(frame, cm, ref_cm);
+        frame = align_frame(frame, cm, ref_cm);
 
         *cur_frame = frame;
         cur_frame++;
     }
-    cv::Mat stacked;
-    stack_images(translated_frames, stacked, frame_num);
+    cv::Mat stacked = stack_images(translated_frames, frame_num);
+    cv::imshow("stacked", stacked);
+    cv::waitKey(0);
     cap.release();
     return 0;
 }
