@@ -88,14 +88,8 @@ cv::Mat stack_images(cv::Mat frames[], int num_frames)
     int num_cols = frames[0].cols;
     cv::Mat sum_mat = cv::Mat::zeros(num_rows, num_cols, CV_32SC1);
     int *sum_ptr = sum_mat.ptr<int>(0);
-    for (int i = 0; i < num_frames - 1; i++)
+    for (int i = 0; i < num_frames; i++)
     {
-        if (i == 0)
-        {
-            get_array_info(frames[0]);
-            cv::imshow("frame", frames[i]);
-            cv::waitKey(0);
-        }
         cv::Mat cur = frames[i];
         for (int row = 0; row < num_rows; row++)
         {
@@ -118,6 +112,10 @@ int main()
 {
     cv::VideoCapture cap("../data/2026-03-18-0236_9-Jupiter_656HIA.avi");
     int frame_num = cap.get(cv::CAP_PROP_FRAME_COUNT);
+    int fps = cap.get(cv::CAP_PROP_FPS);
+
+    std::cout << "number of frames: " << frame_num << std::endl;
+    std::cout << "frames per second: " << fps << std::endl;
 
     if (!cap.isOpened())
     {
@@ -135,6 +133,8 @@ int main()
     cv::Mat frame;
     bool ret = cap.read(frame);
     frame = preprocess(frame);
+    *cur_frame = frame;
+    cur_frame++;
     // get_array_info(frame);
 
     cv::Point ref_cm = get_center_of_mass(frame);
