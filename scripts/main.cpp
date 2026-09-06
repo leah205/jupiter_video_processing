@@ -33,8 +33,37 @@ void get_planet_mask(cv::Mat frame, cv::Mat &mask)
     cv::threshold(blurred, mask, 10, 255, cv::THRESH_BINARY);
 };
 
+double get_avg_gradient_mag(cv::Mat frame)
+{
+    int rows = frame.rows;
+    int cols = frame.cols;
+
+    double total_mag;
+
+    cv::Mat magx = cv::Mat::zeros(rows, cols, CV_32FC1);
+    cv::Mat mag_mat = cv::Mat::zeros(rows, cols, CV_32FC1);
+    cv::Mat magy = cv::Mat::zeros(rows, cols, CV_32FC1);
+
+    cv::GaussianBlur(frame, frame, cv::Size(3, 3), 0);
+
+    cv::Sobel(frame, magx, CV_16SC1, 1, 0, 3, 1, 0, cv::BORDER_DEFAULT);
+    cv::Sobel(frame, magy, CV_16SC1, 0, 1, 3, 1, 0, cv::BORDER_DEFAULT);
+    // optimize later
+    int *mag_x_ptr = magx.ptr<int>(0);
+    int *mag_y_ptr = magy.ptr<int>(0);
+    for (int r = 0; r < magx.rows; r++)
+    {
+        for (int c = 0; c < magx.cols; c++)
+        {
+            total_mag = std::sqrt(pow(*(mag_x_ptr++), 2) + pow(*(mag_y_ptr++), 2));
+        }
+    }
+    double avg_mag = total_mag / (rows * cols);
+    return avg_mag;
+}
+
 /**
- * @brief
+ * @brief returns frame with values normalized between 0 and 255
  *
  * @param frame
  */
@@ -45,6 +74,14 @@ cv::Mat preprocess(cv::Mat frame)
     return processed;
 }
 
+/**
+ * @brief aligns frame so that centroid matches with planet centroid of reference
+ *
+ * @param frame
+ * @param cm
+ * @param ref
+ * @return cv::Mat
+ */
 cv::Mat align_frame(cv::Mat frame, cv::Point cm, cv::Point ref)
 {
     cv::Mat aligned_frame;
@@ -61,6 +98,13 @@ cv::Mat align_frame(cv::Mat frame, cv::Point cm, cv::Point ref)
     cv::warpAffine(frame, aligned_frame, translation_matrix, cv::Size(width, height));
     return aligned_frame;
 }
+
+/**
+ * @brief Get the center of mass object
+ *
+ * @param frame
+ * @return cv::Point
+ */
 
 cv::Point get_center_of_mass(cv::Mat frame)
 {
@@ -80,6 +124,14 @@ cv::Point get_center_of_mass(cv::Mat frame)
     return p;
 }
 
+/**
+ * @brief stacks frames and normalizes 16-bit result
+ *
+ * @param frames
+ * @param num_frames
+ * @return cv::Mat
+ */
+
 cv::Mat stack_images(cv::Mat frames[], int num_frames)
 {
     cv::Mat stacked;
@@ -93,14 +145,13 @@ cv::Mat stack_images(cv::Mat frames[], int num_frames)
         int nc = num_cols;
         int nl = num_rows;
         cv::Mat cur = frames[i];
-        if (cur.isContinuous())
+        if (cur.isContinuous() && sum_mat.isContinuous())
         {
+            nc = num_cols * num_rows;
             nl = 1;
-            nc = nc * nl;
         }
         for (int row = 0; row < nl; row++)
         {
-            // why not just use one pointer here?
             uchar *p = cur.ptr(row);
             int *sum_ptr = sum_mat.ptr<int>(row);
             for (int col = 0; col < nc; col++)
@@ -111,6 +162,10 @@ cv::Mat stack_images(cv::Mat frames[], int num_frames)
             }
         }
     }
+    cv::normalize(sum_mat, sum_mat, 0, 1 << 16, cv::NORM_MINMAX, CV_16UC1);
+
+    cv::imshow("sum mat", sum_mat);
+    cv::waitKey(0);
     cv::normalize(sum_mat, stacked, 0, 1 << 16, cv::NORM_MINMAX, CV_16UC1);
     return stacked;
 }
