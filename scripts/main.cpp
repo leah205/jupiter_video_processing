@@ -1,5 +1,7 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
+#include <numeric>
+#include <cmath>
 
 // g++ main.cpp  -g -o my_program $(pkg-config --cflags --libs opencv4) - turn into make file
 
@@ -24,13 +26,14 @@ void get_array_info(cv::Mat frame)
  * @param mask
  */
 
-void get_planet_mask(cv::Mat frame, cv::Mat &mask)
+cv::Mat get_planet_mask(cv::Mat frame)
 {
-
+    cv::Mat mask;
     cv::Mat blurred;
     // should i blur here?
     cv::GaussianBlur(frame, blurred, cv::Size(3, 3), 0);
     cv::threshold(blurred, mask, 10, 255, cv::THRESH_BINARY);
+    return mask;
 };
 
 double get_avg_gradient_mag(cv::Mat frame)
@@ -39,15 +42,17 @@ double get_avg_gradient_mag(cv::Mat frame)
     int cols = frame.cols;
 
     double total_mag;
-
+    cv::Mat mask = get_planet_mask(frame);
+    cv::Mat masked;
+    frame.copyTo(masked, mask);
     cv::Mat magx = cv::Mat::zeros(rows, cols, CV_32FC1);
     cv::Mat mag_mat = cv::Mat::zeros(rows, cols, CV_32FC1);
     cv::Mat magy = cv::Mat::zeros(rows, cols, CV_32FC1);
 
     cv::GaussianBlur(frame, frame, cv::Size(3, 3), 0);
 
-    cv::Sobel(frame, magx, CV_16SC1, 1, 0, 3, 1, 0, cv::BORDER_DEFAULT);
-    cv::Sobel(frame, magy, CV_16SC1, 0, 1, 3, 1, 0, cv::BORDER_DEFAULT);
+    cv::Sobel(masked, magx, CV_16SC1, 1, 0, 3, 1, 0, cv::BORDER_DEFAULT);
+    cv::Sobel(masked, magy, CV_16SC1, 0, 1, 3, 1, 0, cv::BORDER_DEFAULT);
     // optimize later
     int *mag_x_ptr = magx.ptr<int>(0);
     int *mag_y_ptr = magy.ptr<int>(0);
@@ -99,6 +104,22 @@ cv::Mat align_frame(cv::Mat frame, cv::Point cm, cv::Point ref)
     return aligned_frame;
 }
 
+std::vector<size_t> get_selected_indices(std::vector<cv::Mat> frames, double quality_score_arr[], int select_amount)
+{
+    // change to returning indices and then pass indices function to stacking
+
+    std::vector<size_t> indices(frames.size());
+    std::vector<cv::Mat *> selected_frames;
+    std::iota(indices.begin(), indices.end(), 0);
+    std::sort(indices.begin(), indices.end(), [&](size_t a, size_t b)
+              { return quality_score_arr[a] > quality_score_arr[b]; });
+    std::vector<size_t> selected_indices(indices.begin(), indices.begin() + select_amount);
+    std::cout << "index 1: " << indices[0] << std::endl;
+    std::cout << "total size of indices: " << indices.size() << std::endl;
+    std::cout << "size of selected indices: " << selected_indices.size() << std::endl;
+    return selected_indices;
+}
+
 /**
  * @brief Get the center of mass object
  *
@@ -108,9 +129,7 @@ cv::Mat align_frame(cv::Mat frame, cv::Point cm, cv::Point ref)
 
 cv::Point get_center_of_mass(cv::Mat frame)
 {
-    cv::Mat mask = cv::Mat::zeros(frame.rows, frame.cols, CV_8UC3);
-
-    get_planet_mask(frame, mask);
+    cv::Mat mask = get_planet_mask(frame);
 
     cv::extractChannel(mask, mask, 0);
     cv::Moments m = cv::moments(mask, true);
@@ -132,19 +151,20 @@ cv::Point get_center_of_mass(cv::Mat frame)
  * @return cv::Mat
  */
 
-cv::Mat stack_images(cv::Mat frames[], int num_frames)
+cv::Mat stack_images(std::vector<cv::Mat> frames, std::vector<size_t> selected_indices)
 {
     cv::Mat stacked;
-
+    size_t select_num = selected_indices.size();
     int num_rows = frames[0].rows;
     int num_cols = frames[0].cols;
     cv::Mat sum_mat = cv::Mat::zeros(num_rows, num_cols, CV_32SC1);
     int *sum_ptr = sum_mat.ptr<int>(0);
-    for (int i = 0; i < num_frames; i++)
+    for (int i = 0; i < select_num; i++)
     {
+        int frame_index = selected_indices[i];
         int nc = num_cols;
         int nl = num_rows;
-        cv::Mat cur = frames[i];
+        cv::Mat cur = frames[frame_index];
         if (cur.isContinuous() && sum_mat.isContinuous())
         {
             nc = num_cols * num_rows;
@@ -162,10 +182,6 @@ cv::Mat stack_images(cv::Mat frames[], int num_frames)
             }
         }
     }
-    cv::normalize(sum_mat, sum_mat, 0, 1 << 16, cv::NORM_MINMAX, CV_16UC1);
-
-    cv::imshow("sum mat", sum_mat);
-    cv::waitKey(0);
     cv::normalize(sum_mat, stacked, 0, 1 << 16, cv::NORM_MINMAX, CV_16UC1);
     return stacked;
 }
@@ -189,14 +205,16 @@ int main()
         std::cout << "Video opened successfully" << std::endl;
     }
 
-    cv::Mat translated_frames[frame_num];
-    cv::Mat *cur_frame = translated_frames;
+    std::vector<cv::Mat> translated_frames;
+    double mags_arr[frame_num];
+    double *mags_ptr = mags_arr;
 
     cv::Mat frame;
     bool ret = cap.read(frame);
     frame = preprocess(frame);
-    *cur_frame = frame;
-    cur_frame++;
+    translated_frames.push_back(frame);
+    *mags_ptr = get_avg_gradient_mag(frame);
+    mags_ptr++;
     // get_array_info(frame);
 
     cv::Point ref_cm = get_center_of_mass(frame);
@@ -212,13 +230,18 @@ int main()
         }
 
         preprocess(frame);
+
         cv::Point cm = get_center_of_mass(frame);
         frame = align_frame(frame, cm, ref_cm);
 
-        *cur_frame = frame;
-        cur_frame++;
+        translated_frames.push_back(frame);
+        *mags_ptr = get_avg_gradient_mag(frame);
+        mags_ptr++;
     }
-    cv::Mat stacked = stack_images(translated_frames, frame_num);
+    size_t select_amount = ceil((double)(frame_num) / 4);
+    std::vector<size_t> selected_indices = get_selected_indices(translated_frames, mags_arr, select_amount);
+
+    cv::Mat stacked = stack_images(translated_frames, selected_indices);
     cv::imshow("stacked", stacked);
     cv::waitKey(0);
     cap.release();
