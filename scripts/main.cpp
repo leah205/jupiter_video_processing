@@ -15,10 +15,18 @@ void get_array_info(cv::Mat frame)
     // 320
     std::cout << "cols: " << frame.cols << std::endl;
     std::cout << "channels: " << frame.channels() << std::endl;
-    // CV_8U (char)
+    // CV_8U (char) - 0
     std::cout << "data type: " << frame.type() << std::endl;
     std::cout << "depth: " << frame.depth() << std::endl;
 }
+
+// double get_mean_intensity(cv::Mat frame){
+//     int num_rows = frame.size();
+
+//     for(int i = 0; i < size; i++){
+
+//     }
+// }
 
 /**
  * @brief returns frame with values normalized between 0 and 255
@@ -29,7 +37,6 @@ cv::Mat preprocess(cv::Mat frame)
 {
     cv::Mat processed;
     cv::extractChannel(frame, frame, 0);
-
     cv::normalize(frame, processed, 0, 255, cv::NORM_MINMAX);
 
     return processed;
@@ -66,7 +73,7 @@ int main()
     std::vector<cv::Mat> frames;
     std::vector<double> mags_vec;
 
-    std::cout << "performing initial alignment..." << std::endl;
+    std::cout << "reading frames..." << std::endl;
 
     cv::Mat ref_frame;
     bool ret = cap.read(ref_frame);
@@ -89,20 +96,22 @@ int main()
         frames.push_back(frame);
     }
 
+    std::cout << "selecting frames..." << std::endl;
+
     for (int i = 0; i < frame_num; i++)
     {
         mags_vec.push_back(get_avg_gradient_mag(frames[i]));
     }
 
-    std::cout
-        << "selecting frames..." << std::endl;
     size_t select_amount = ceil((double)(frame_num) / 4);
     std::vector<size_t> selected_indices = get_selected_indices(frames, mags_vec, select_amount);
 
+    std::cout << "aligning frames..." << std::endl;
+
     std::vector<cv::Mat> aligned_frames = align_selected_to_ref(frames, ref_frame, selected_indices);
 
-    std::cout << "stacking frames... " << std::endl;
-    cv::Mat stacked = stack_images(frames, selected_indices);
+    std::cout << "stacking " << select_amount << " frames... " << std::endl;
+    cv::Mat stacked = stack_frames(aligned_frames);
     // cv::imshow("stacked", stacked);
     // cv::waitKey(0);
     cap.release();

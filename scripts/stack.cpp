@@ -24,24 +24,32 @@ double get_avg_gradient_mag(cv::Mat frame)
     cv::Mat mask = get_planet_mask(frame);
     cv::Mat masked;
     frame.copyTo(masked, mask);
-    cv::Mat magx = cv::Mat::zeros(rows, cols, CV_32FC1);
-    cv::Mat mag_mat = cv::Mat::zeros(rows, cols, CV_32FC1);
-    cv::Mat magy = cv::Mat::zeros(rows, cols, CV_32FC1);
-
+    cv::Mat magx;
+    cv::Mat magy;
     cv::GaussianBlur(frame, frame, cv::Size(3, 3), 0);
 
-    cv::Sobel(masked, magx, CV_8UC1, 1, 0, 3, 1, 0, cv::BORDER_DEFAULT);
-    cv::Sobel(masked, magy, CV_8UC1, 0, 1, 3, 1, 0, cv::BORDER_DEFAULT);
-    // optimize later
-    uchar *mag_x_ptr = magx.ptr<uchar>(0);
-    uchar *mag_y_ptr = magy.ptr<uchar>(0);
-    for (int r = 0; r < magx.rows; r++)
+    cv::Sobel(masked, magx, CV_32FC1, 1, 0, 3, 1, 0, cv::BORDER_DEFAULT);
+    cv::Sobel(masked, magy, CV_32FC1, 0, 1, 3, 1, 0, cv::BORDER_DEFAULT);
+
+    int nr = rows;
+    int nc = cols;
+    if (magx.isContinuous() && magy.isContinuous())
     {
-        for (int c = 0; c < magx.cols; c++)
+        nc = nr * nc;
+        nr = 1;
+    }
+    for (int r = 0; r < nr; r++)
+    {
+        float *mag_x_ptr = magx.ptr<float>(r);
+        float *mag_y_ptr = magy.ptr<float>(r);
+
+        for (int c = 0; c < nc; c++)
         {
-            double mag_x = *mag_x_ptr;
-            double mag_y = *mag_y_ptr;
-            total_mag = std::sqrt(mag_x * mag_x + mag_y * mag_y);
+            float mag_x = (float)*mag_x_ptr;
+            float mag_y = (float)*mag_y_ptr;
+            total_mag = (double)std::sqrt((mag_x * mag_x + mag_y * mag_y));
+            mag_x_ptr++;
+            mag_y_ptr++;
         }
     }
     double avg_mag = total_mag / (rows * cols);
@@ -61,19 +69,21 @@ std::vector<size_t> get_selected_indices(std::vector<cv::Mat> frames, std::vecto
     return selected_indices;
 }
 
-cv::Mat stack_images(std::vector<cv::Mat> frames, std::vector<size_t> selected_indices)
+cv::Mat stack_frames(std::vector<cv::Mat> frames)
 {
     cv::Mat stacked;
-    size_t select_num = selected_indices.size();
+    size_t num_frames = frames.size();
     int num_rows = frames[0].rows;
     int num_cols = frames[0].cols;
+    std::cout << "channels: " << frames[0].channels() << std::endl;
+    std::cout << "depth: " << frames[0].depth() << std::endl;
+
     cv::Mat sum_mat = cv::Mat::zeros(num_rows, num_cols, CV_32SC1);
-    for (size_t i = 0; i < select_num; i++)
+    for (size_t i = 0; i < num_frames; i++)
     {
-        int frame_index = selected_indices[i];
         int nc = num_cols;
         int nl = num_rows;
-        cv::Mat cur = frames[frame_index];
+        cv::Mat cur = frames[i];
         if (cur.isContinuous() && sum_mat.isContinuous())
         {
             nc = num_cols * num_rows;
