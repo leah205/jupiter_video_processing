@@ -72,7 +72,6 @@ int main()
     bool ret = cap.read(ref_frame);
     ref_frame = preprocess(ref_frame);
     frames.push_back(ref_frame);
-    mags_vec.push_back(get_avg_gradient_mag(ref_frame));
 
     cv::Mat frame;
 
@@ -87,17 +86,20 @@ int main()
         }
 
         frame = preprocess(frame);
-
         frames.push_back(frame);
-        mags_vec.push_back(get_avg_gradient_mag(frame));
     }
 
-    std::vector<cv::Mat> aligned_frames = align_all_to_ref(frames, ref_frame);
+    for (int i = 0; i < frame_num; i++)
+    {
+        mags_vec.push_back(get_avg_gradient_mag(frames[i]));
+    }
 
     std::cout
         << "selecting frames..." << std::endl;
     size_t select_amount = ceil((double)(frame_num) / 4);
     std::vector<size_t> selected_indices = get_selected_indices(frames, mags_vec, select_amount);
+
+    std::vector<cv::Mat> aligned_frames = align_selected_to_ref(frames, ref_frame, selected_indices);
 
     std::cout << "stacking frames... " << std::endl;
     cv::Mat stacked = stack_images(frames, selected_indices);
