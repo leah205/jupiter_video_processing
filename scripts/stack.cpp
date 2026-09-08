@@ -46,7 +46,7 @@ double get_avg_gradient_mag(cv::Mat frame)
     return avg_mag;
 }
 
-std::vector<size_t> get_selected_indices(std::vector<cv::Mat> frames, double quality_score_arr[], int select_amount)
+std::vector<size_t> get_selected_indices(std::vector<cv::Mat> frames, std::vector<double> quality_score_vec, int select_amount)
 {
     // change to returning indices and then pass indices function to stacking
 
@@ -54,7 +54,7 @@ std::vector<size_t> get_selected_indices(std::vector<cv::Mat> frames, double qua
     std::vector<cv::Mat *> selected_frames;
     std::iota(indices.begin(), indices.end(), 0);
     std::sort(indices.begin(), indices.end(), [&](size_t a, size_t b)
-              { return quality_score_arr[a] > quality_score_arr[b]; });
+              { return quality_score_vec[a] > quality_score_vec[b]; });
     std::vector<size_t> selected_indices(indices.begin(), indices.begin() + select_amount);
     return selected_indices;
 }
