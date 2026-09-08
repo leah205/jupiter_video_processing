@@ -39,7 +39,9 @@ double get_avg_gradient_mag(cv::Mat frame)
     {
         for (int c = 0; c < magx.cols; c++)
         {
-            total_mag = std::sqrt(pow(*(mag_x_ptr++), 2) + pow(*(mag_y_ptr++), 2));
+            double mag_x = *mag_x_ptr;
+            double mag_y = *mag_y_ptr;
+            total_mag = std::sqrt(mag_x * mag_x + mag_y * mag_y);
         }
     }
     double avg_mag = total_mag / (rows * cols);
