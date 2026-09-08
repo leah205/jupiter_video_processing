@@ -30,11 +30,11 @@ double get_avg_gradient_mag(cv::Mat frame)
 
     cv::GaussianBlur(frame, frame, cv::Size(3, 3), 0);
 
-    cv::Sobel(masked, magx, CV_16SC1, 1, 0, 3, 1, 0, cv::BORDER_DEFAULT);
-    cv::Sobel(masked, magy, CV_16SC1, 0, 1, 3, 1, 0, cv::BORDER_DEFAULT);
+    cv::Sobel(masked, magx, CV_8UC1, 1, 0, 3, 1, 0, cv::BORDER_DEFAULT);
+    cv::Sobel(masked, magy, CV_8UC1, 0, 1, 3, 1, 0, cv::BORDER_DEFAULT);
     // optimize later
-    int *mag_x_ptr = magx.ptr<int>(0);
-    int *mag_y_ptr = magy.ptr<int>(0);
+    uchar *mag_x_ptr = magx.ptr<uchar>(0);
+    uchar *mag_y_ptr = magy.ptr<uchar>(0);
     for (int r = 0; r < magx.rows; r++)
     {
         for (int c = 0; c < magx.cols; c++)

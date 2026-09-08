@@ -28,7 +28,10 @@ void get_array_info(cv::Mat frame)
 cv::Mat preprocess(cv::Mat frame)
 {
     cv::Mat processed;
+    cv::extractChannel(frame, frame, 0);
+
     cv::normalize(frame, processed, 0, 255, cv::NORM_MINMAX);
+
     return processed;
 }
 
@@ -83,7 +86,7 @@ int main()
             break;
         }
 
-        preprocess(frame);
+        frame = preprocess(frame);
 
         frames.push_back(frame);
         mags_vec.push_back(get_avg_gradient_mag(frame));
@@ -96,7 +99,7 @@ int main()
     size_t select_amount = ceil((double)(frame_num) / 4);
     std::vector<size_t> selected_indices = get_selected_indices(frames, mags_vec, select_amount);
 
-        std::cout << "stacking frames... " << std::endl;
+    std::cout << "stacking frames... " << std::endl;
     cv::Mat stacked = stack_images(frames, selected_indices);
     // cv::imshow("stacked", stacked);
     // cv::waitKey(0);

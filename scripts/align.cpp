@@ -13,8 +13,6 @@
 cv::Point get_center_of_mass(cv::Mat frame)
 {
     cv::Mat mask = get_planet_mask(frame);
-
-    cv::extractChannel(mask, mask, 0);
     cv::Moments m = cv::moments(mask, true);
 
     if (std::abs(m.m00) < 1e-8)
@@ -38,7 +36,6 @@ cv::Mat align_frame(cv::Mat frame, cv::Point cm, cv::Point ref)
 {
     cv::Mat aligned_frame;
 
-    cv::extractChannel(frame, frame, 0);
     double offset_x, offset_y;
     offset_x = cm.x - ref.x;
     offset_y = cm.y - ref.y;
