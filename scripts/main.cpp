@@ -33,13 +33,46 @@ void get_array_info(cv::Mat frame)
  *
  * @param frame
  */
-cv::Mat preprocess(cv::Mat frame)
+void compress(cv::Mat &frame)
 {
-    cv::Mat processed;
     cv::extractChannel(frame, frame, 0);
-    cv::normalize(frame, processed, 0, 255, cv::NORM_MINMAX);
+    // cv::normalize(frame, processed, 0, 255, cv::NORM_MINMAX);
+}
 
-    return processed;
+/**
+ * @brief Get the mean intensity object
+ *
+ * @param frame single channel cv::Mat with data type CV_8UC1
+ */
+
+double get_mean_intensity(cv::Mat &frame)
+{
+    int nr = frame.rows;
+    int nc = frame.cols;
+    double sum;
+
+    if (frame.isContinuous())
+    {
+        nc = nc * nr;
+        nr = 1;
+
+        for (int r = 0; r < nr; r++)
+        {
+            uchar *ptr = frame.ptr(r);
+            for (int c = 0; c < nc; c++)
+            {
+
+                sum += (*ptr);
+                ptr++;
+            }
+        }
+    }
+    std::cout << "mean intensity: " << sum / (nr * nc) << std::endl;
+    return sum / (nr * nc);
+}
+
+void normalize_to_mean_intensity(cv::Mat &frame)
+{
 }
 
 /**
@@ -77,7 +110,9 @@ int main()
 
     cv::Mat ref_frame;
     bool ret = cap.read(ref_frame);
-    ref_frame = preprocess(ref_frame);
+
+    compress(ref_frame);
+    get_mean_intensity(ref_frame);
     frames.push_back(ref_frame);
 
     cv::Mat frame;
@@ -92,7 +127,7 @@ int main()
             break;
         }
 
-        frame = preprocess(frame);
+        compress(frame);
         frames.push_back(frame);
     }
 
