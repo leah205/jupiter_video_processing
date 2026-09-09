@@ -6,12 +6,13 @@
 /**
  * @brief Get the center of mass object
  *
- * @param frame
- * @return cv::Point
+ * @param frame single channel 8-bit matrix
+ * @return cv::Point, center of mass of planet
  */
 
 cv::Point get_center_of_mass(cv::Mat frame)
 {
+
     cv::Mat mask = get_planet_mask(frame);
     cv::Moments m = cv::moments(mask, true);
 
@@ -25,15 +26,18 @@ cv::Point get_center_of_mass(cv::Mat frame)
 }
 
 /**
- * @brief aligns frame so that centroid matches with planet centroid of reference
+ * @brief aligns frame
  *
- * @param frame
- * @param cm
- * @param ref
- * @return cv::Mat
+ *  aligns frame so that its planet center of mass matches with that of the reference frame
+ *
+ * @param frame 8-bit single channel matrix
+ * @param cm cv::Point center of mass
+ * @param ref cv::Point center of mass of reference frame
+ * @return cv::Mat aligned frame
  */
 cv::Mat align_frame(cv::Mat frame, cv::Point cm, cv::Point ref)
 {
+
     cv::Mat aligned_frame;
 
     double offset_x, offset_y;
@@ -47,6 +51,17 @@ cv::Mat align_frame(cv::Mat frame, cv::Point cm, cv::Point ref)
     cv::warpAffine(frame, aligned_frame, translation_matrix, cv::Size(width, height));
     return aligned_frame;
 }
+
+/**
+ * @brief aligns best frames
+ *
+ * aligns all quality selected frames to the center of mass of reference frame
+ *
+ * @param frames all frames
+ * @param ref_frame frame to align to
+ * @param selected_indices indices of frames to align and stack
+ * @return std::vector<cv::Mat>
+ */
 
 std::vector<cv::Mat> align_selected_to_ref(std::vector<cv::Mat> frames, cv::Mat ref_frame, std::vector<size_t> selected_indices)
 {

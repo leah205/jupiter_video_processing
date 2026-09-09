@@ -7,14 +7,13 @@
 #include "helpers.h"
 
 /**
- * @brief Get the planet mask object
+ * @brief Get the avg gradient mag
  *
- * Creates planet mask based on hard coded intensity threshold
+ * computes the average gradient magnitude of all the pixels in the frame
  *
- * @param frame
- * @param mask
+ * @param frame 8-bit single channel matrix
+ * @return double of average gradient magnitude of all pixels in frame
  */
-
 double get_avg_gradient_mag(cv::Mat frame)
 {
     int rows = frame.rows;
@@ -56,11 +55,20 @@ double get_avg_gradient_mag(cv::Mat frame)
     return avg_mag;
 }
 
-std::vector<size_t> get_selected_indices(std::vector<cv::Mat> frames, std::vector<double> quality_score_vec, int select_amount)
-{
-    // change to returning indices and then pass indices function to stacking
+/**
+ * @brief Get the selected indices object
+ *
+ * Gets the indices of the best scoring frames according to some quality metric
+ *
+ * @param quality_score_vec list of computed quality scores corresponding to frames in video
+ * @param select_amount number of frames to select
+ * @return std::vector<size_t>
+ */
 
-    std::vector<size_t> indices(frames.size());
+std::vector<size_t> get_selected_indices(std::vector<double> quality_score_vec, int select_amount)
+{
+
+    std::vector<size_t> indices(quality_score_vec.size());
     std::vector<cv::Mat *> selected_frames;
     std::iota(indices.begin(), indices.end(), 0);
     std::sort(indices.begin(), indices.end(), [&](size_t a, size_t b)
@@ -69,14 +77,21 @@ std::vector<size_t> get_selected_indices(std::vector<cv::Mat> frames, std::vecto
     return selected_indices;
 }
 
+/**
+ * @brief gets the stacked frame matrix
+ *
+ * Stacks all the given frames and normalizes intensity
+ *
+ * @param frames frames to stack
+ * @return single-channel 16-bit cv::Mat
+ */
+
 cv::Mat stack_frames(std::vector<cv::Mat> frames)
 {
     cv::Mat stacked;
     size_t num_frames = frames.size();
     int num_rows = frames[0].rows;
     int num_cols = frames[0].cols;
-    std::cout << "channels: " << frames[0].channels() << std::endl;
-    std::cout << "depth: " << frames[0].depth() << std::endl;
 
     cv::Mat sum_mat = cv::Mat::zeros(num_rows, num_cols, CV_32SC1);
     for (size_t i = 0; i < num_frames; i++)
