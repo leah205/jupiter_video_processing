@@ -80,8 +80,8 @@ int main()
 
     std::cout << "stacking " << select_amount << " frames... " << std::endl;
     cv::Mat stacked = stack_frames(aligned_frames);
-    // cv::imshow("stacked", stacked);
-    // cv::waitKey(0);
+    cv::imshow("stacked", stacked);
+    cv::waitKey(0);
     cap.release();
 
     duration = static_cast<double>(cv::getTickCount()) - duration;

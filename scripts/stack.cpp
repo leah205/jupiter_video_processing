@@ -5,6 +5,7 @@
 
 #include "stack.h"
 #include "helpers.h"
+#include "align.h"
 
 /**
  * @brief Get the avg gradient mag
@@ -16,37 +17,52 @@
  */
 double get_avg_gradient_mag(cv::Mat frame)
 {
-    int rows = frame.rows;
-    int cols = frame.cols;
 
-    double total_mag;
+    double total_mag = 0;
     cv::Mat mask = get_planet_mask(frame);
-    cv::Mat masked;
-    frame.copyTo(masked, mask);
-    cv::Mat magx;
-    cv::Mat magy;
-    cv::GaussianBlur(frame, frame, cv::Size(3, 3), 0);
+    cv::Mat innerMask = cv::Mat::zeros(mask.size(), CV_8UC1);
 
-    cv::Sobel(masked, magx, CV_32FC1, 1, 0, 3, 1, 0, cv::BORDER_DEFAULT);
-    cv::Sobel(masked, magy, CV_32FC1, 0, 1, 3, 1, 0, cv::BORDER_DEFAULT);
+    cv::Rect rect = cv::boundingRect(mask);
+    double radius = cv::min(rect.width, rect.height) / 2.0;
+
+    cv::Point cm = get_center_of_mass(mask);
+    cv::circle(innerMask, cm, radius * 0.9, cv::Scalar(255), cv::FILLED);
+
+    cv::Mat croppedFrame = frame(rect);
+    cv::Mat croppedInnerMask = innerMask(rect);
+
+    int rows = croppedFrame.rows;
+    int cols = croppedFrame.cols;
+
+    cv::Mat magx_frame;
+    cv::Mat magy_frame;
+
+    cv::Sobel(croppedFrame, magx_frame, CV_32FC1, 1, 0, 3, 1, 0, cv::BORDER_DEFAULT);
+    cv::Sobel(croppedFrame, magy_frame, CV_32FC1, 0, 1, 3, 1, 0, cv::BORDER_DEFAULT);
 
     int nr = rows;
     int nc = cols;
-    if (magx.isContinuous() && magy.isContinuous())
+
+    if (magx_frame.isContinuous() && magy_frame.isContinuous() && croppedFrame.isContinuous() && croppedInnerMask.isContinuous())
     {
         nc = nr * nc;
         nr = 1;
     }
     for (int r = 0; r < nr; r++)
     {
-        float *mag_x_ptr = magx.ptr<float>(r);
-        float *mag_y_ptr = magy.ptr<float>(r);
+        float *mag_x_ptr = magx_frame.ptr<float>(r);
+        float *mag_y_ptr = magy_frame.ptr<float>(r);
+        uchar *mask_ptr = croppedInnerMask.ptr<uchar>(r);
 
         for (int c = 0; c < nc; c++)
         {
-            float mag_x = (float)*mag_x_ptr;
-            float mag_y = (float)*mag_y_ptr;
-            total_mag += (double)std::sqrt((mag_x * mag_x + mag_y * mag_y));
+            if (*mask_ptr)
+            {
+                float mag_x = (float)*mag_x_ptr;
+                float mag_y = (float)*mag_y_ptr;
+                total_mag += (double)std::sqrt((mag_x * mag_x + mag_y * mag_y));
+            }
+            mask_ptr++;
             mag_x_ptr++;
             mag_y_ptr++;
         }
