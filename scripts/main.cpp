@@ -5,7 +5,6 @@
 
 #include "stack.h"
 #include "align.h"
-#include "normalize.h"
 
 // g++ main.cpp -pg -O0  -g -o my_program $(pkg-config --cflags --libs opencv4)
 
@@ -48,11 +47,9 @@ int main()
     bool ret = cap.read(ref_frame);
 
     compress(ref_frame);
-    double mean_intensity = get_mean_intensity(ref_frame);
     frames.push_back(ref_frame);
 
     cv::Mat frame;
-    int second = true;
     while (true)
     {
 
@@ -64,12 +61,6 @@ int main()
         }
 
         compress(frame);
-
-        if (second)
-        {
-            normalize_to_mean_intensity(frame, mean_intensity);
-            second = false;
-        }
         frames.push_back(frame);
     }
 
