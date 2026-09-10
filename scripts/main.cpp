@@ -5,64 +5,19 @@
 
 #include "stack.h"
 #include "align.h"
+#include "normalize.h"
 
 // g++ main.cpp -pg -O0  -g -o my_program $(pkg-config --cflags --libs opencv4)
 
 /**
- * @brief returns frame with values normalized between 0 and 255
+ * @brief converts frame to single channel
  *
  * @param frame
  */
 void compress(cv::Mat &frame)
 {
     cv::extractChannel(frame, frame, 0);
-    // cv::normalize(frame, processed, 0, 255, cv::NORM_MINMAX);
 }
-
-/**
- * @brief Get the mean intensity object
- *
- * @param frame single channel matrix with data type CV_8UC1
- * @return mean intensity of pixels in frame
- */
-
-double get_mean_intensity(cv::Mat &frame)
-{
-    int nr = frame.rows;
-    int nc = frame.cols;
-    double sum;
-
-    if (frame.isContinuous())
-    {
-        nc = nc * nr;
-        nr = 1;
-
-        for (int r = 0; r < nr; r++)
-        {
-            uchar *ptr = frame.ptr(r);
-            for (int c = 0; c < nc; c++)
-            {
-
-                sum += (*ptr);
-                ptr++;
-            }
-        }
-    }
-    std::cout << "mean intensity: " << sum / (nr * nc) << std::endl;
-    return sum / (nr * nc);
-}
-
-void normalize_to_mean_intensity(cv::Mat &frame)
-{
-}
-
-/**
- * @brief stacks frames and normalizes 16-bit result
- *
- * @param frames
- * @param num_frames
- * @return cv::Mat
- */
 
 int main()
 {
@@ -93,11 +48,11 @@ int main()
     bool ret = cap.read(ref_frame);
 
     compress(ref_frame);
-    get_mean_intensity(ref_frame);
+    double mean_intensity = get_mean_intensity(ref_frame);
     frames.push_back(ref_frame);
 
     cv::Mat frame;
-
+    int second = true;
     while (true)
     {
 
@@ -109,6 +64,12 @@ int main()
         }
 
         compress(frame);
+
+        if (second)
+        {
+            normalize_to_mean_intensity(frame, mean_intensity);
+            second = false;
+        }
         frames.push_back(frame);
     }
 
