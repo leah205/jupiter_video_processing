@@ -5,6 +5,7 @@
 
 #include "stack.h"
 #include "align.h"
+#include "helpers.h"
 
 // g++ main.cpp -pg -O0  -g -o my_program $(pkg-config --cflags --libs opencv4)
 
@@ -47,6 +48,15 @@ int main()
     bool ret = cap.read(ref_frame);
 
     compress(ref_frame);
+
+    cv::Mat ref_mask = get_planet_mask(ref_frame);
+    cv::Mat innerMask = cv::Mat::zeros(ref_mask.size(), CV_8UC1);
+    cv::Rect rect = cv::boundingRect(ref_mask);
+
+    double radius = cv::min(rect.width, rect.height) / 2.0;
+    cv::Point cm = get_center_of_mass(ref_mask);
+    cv::circle(innerMask, cm, radius * 0.9, cv::Scalar(255), cv::FILLED);
+
     frames.push_back(ref_frame);
 
     cv::Mat frame;
@@ -68,7 +78,7 @@ int main()
 
     for (int i = 0; i < frame_num; i++)
     {
-        mags_vec.push_back(get_avg_gradient_mag(frames[i]));
+        mags_vec.push_back(get_avg_gradient_mag(frames[i], innerMask, rect));
     }
 
     size_t select_amount = ceil((double)(frame_num) / 4);

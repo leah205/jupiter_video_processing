@@ -100,11 +100,9 @@ std::vector<size_t> get_selected_indices(std::vector<double> quality_score_vec, 
 
 cv::Mat stack_frames(std::vector<cv::Mat> frames)
 {
-    cv::imshow("first frame", frames[0]);
-    cv::waitKey(0);
+
     cv::Mat stacked;
     size_t num_frames = frames.size();
-    std::cout << num_frames << std::endl;
     int num_rows = frames[0].rows;
     int num_cols = frames[0].cols;
 
@@ -118,14 +116,6 @@ cv::Mat stack_frames(std::vector<cv::Mat> frames)
     }
 
     sum_mat = sum_mat / cv::Scalar(num_frames);
-    minMaxLoc(sum_mat, &min, &max);
-    std::cout << "min: " << min << "max: " << max << std::endl;
     sum_mat.convertTo(stacked, CV_16UC1, 65535.0 / 255.0);
-
-    minMaxLoc(stacked, &min, &max);
-    std::cout << "min: " << min << "max: " << max << std::endl;
-
-    cv::imshow("stack test", stacked);
-    cv::waitKey(0);
     return stacked;
 }
