@@ -15,21 +15,17 @@
  * @param frame 8-bit single channel matrix
  * @return double of average gradient magnitude of all pixels in frame
  */
-double get_avg_gradient_mag(cv::Mat frame)
+double get_avg_gradient_mag(cv::Mat frame, cv::Mat inner_mask, cv::Rect rect)
 {
 
     double total_mag = 0;
-    cv::Mat mask = get_planet_mask(frame);
-    cv::Mat innerMask = cv::Mat::zeros(mask.size(), CV_8UC1);
 
-    cv::Rect rect = cv::boundingRect(mask);
-    double radius = cv::min(rect.width, rect.height) / 2.0;
-
-    cv::Point cm = get_center_of_mass(mask);
-    cv::circle(innerMask, cm, radius * 0.9, cv::Scalar(255), cv::FILLED);
+    // gets cropped frame around disc
 
     cv::Mat croppedFrame = frame(rect);
-    cv::Mat croppedInnerMask = innerMask(rect);
+
+    // gets cropped mask around disc
+    cv::Mat croppedInnerMask = inner_mask(rect);
 
     int rows = croppedFrame.rows;
     int cols = croppedFrame.cols;
@@ -104,34 +100,32 @@ std::vector<size_t> get_selected_indices(std::vector<double> quality_score_vec, 
 
 cv::Mat stack_frames(std::vector<cv::Mat> frames)
 {
+    cv::imshow("first frame", frames[0]);
+    cv::waitKey(0);
     cv::Mat stacked;
     size_t num_frames = frames.size();
+    std::cout << num_frames << std::endl;
     int num_rows = frames[0].rows;
     int num_cols = frames[0].cols;
 
     cv::Mat sum_mat = cv::Mat::zeros(num_rows, num_cols, CV_32SC1);
-    for (size_t i = 0; i < num_frames; i++)
+    double min, max;
+
+    for (size_t i = 0; i < frames.size(); i++)
     {
-        int nc = num_cols;
-        int nl = num_rows;
-        cv::Mat cur = frames[i];
-        if (cur.isContinuous() && sum_mat.isContinuous())
-        {
-            nc = num_cols * num_rows;
-            nl = 1;
-        }
-        for (int row = 0; row < nl; row++)
-        {
-            uchar *p = cur.ptr(row);
-            int *sum_ptr = sum_mat.ptr<int>(row);
-            for (int col = 0; col < nc; col++)
-            {
-                *sum_ptr += *p;
-                sum_ptr++;
-                p++;
-            }
-        }
+
+        sum_mat += frames[i];
     }
-    cv::normalize(sum_mat, stacked, 0, 1 << 16, cv::NORM_MINMAX, CV_16UC1);
+
+    sum_mat = sum_mat / cv::Scalar(num_frames);
+    minMaxLoc(sum_mat, &min, &max);
+    std::cout << "min: " << min << "max: " << max << std::endl;
+    sum_mat.convertTo(stacked, CV_16UC1, 65535.0 / 255.0);
+
+    minMaxLoc(stacked, &min, &max);
+    std::cout << "min: " << min << "max: " << max << std::endl;
+
+    cv::imshow("stack test", stacked);
+    cv::waitKey(0);
     return stacked;
 }
