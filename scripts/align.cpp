@@ -65,12 +65,7 @@ cv::Mat align_frame(cv::Mat frame, cv::Point cm, cv::Point ref)
 
 std::vector<cv::Mat> align_selected_to_ref(std::vector<cv::Mat> frames, cv::Mat ref_frame, std::vector<size_t> selected_indices)
 {
-    int frame_num = 600;
-    cv::imshow("worst quality frame: ", frames[selected_indices[frame_num - 1]]);
-    cv::waitKey(0);
 
-    cv::imshow("best quality frame: ", frames[selected_indices[0]]);
-    cv::waitKey(0);
     cv::Point ref_cm = get_center_of_mass(ref_frame);
     std::vector<cv::Mat> aligned_frames;
     size_t select_amount = selected_indices.size();

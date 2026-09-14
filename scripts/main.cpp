@@ -37,15 +37,10 @@ int main()
     cv::Mat ref_frame;
     bool ret = cap.read(ref_frame);
 
-    compress(ref_frame);
-
-    cv::Mat innerMask = cv::Mat::zeros(ref_frame.size(), CV_8UC1);
+    extract_channel(ref_frame);
     cv::Mat ref_mask = get_planet_mask(ref_frame);
-    smooth_mask(ref_mask);
-
-    // removes limb from mask for quality selection
-    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(11, 11));
-    cv::erode(ref_mask, innerMask, kernel);
+    // gets mask without limb for quality selection
+    cv::Mat inner_mask = get_inner_planet_mask(ref_mask);
 
     // rect used crop aligned frames to reduce quality selection computation time
     cv::Rect rect = get_cropped_rect(ref_mask);
@@ -63,7 +58,7 @@ int main()
             break;
         }
 
-        compress(frame);
+        extract_channel(frame);
         frames.push_back(frame);
     }
 
@@ -71,7 +66,7 @@ int main()
 
     for (int i = 0; i < frame_num; i++)
     {
-        mags_vec.push_back(get_avg_gradient_mag(frames[i], innerMask, rect));
+        mags_vec.push_back(get_avg_gradient_mag(frames[i], inner_mask, rect));
     }
 
     size_t select_amount = ceil((double)(frame_num) / 4);

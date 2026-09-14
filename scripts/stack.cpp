@@ -67,6 +67,11 @@ double get_avg_gradient_mag(const cv::Mat frame, const cv::Mat inner_mask, const
             mag_y_ptr++;
         }
     }
+
+    if (used_pixels == 0)
+    {
+        return 0.0;
+    }
     double avg_mag = total_mag / (used_pixels);
     return avg_mag;
 }
@@ -107,6 +112,11 @@ cv::Mat stack_frames(std::vector<cv::Mat> frames)
 
     cv::Mat stacked;
     size_t num_frames = frames.size();
+
+    if (num_frames == 0)
+    {
+        throw std::runtime_error("stack frames called with zero frames");
+    }
     int num_rows = frames[0].rows;
     int num_cols = frames[0].cols;
 

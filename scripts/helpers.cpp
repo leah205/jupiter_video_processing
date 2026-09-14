@@ -7,7 +7,7 @@
  * @param frame
  */
 
-void get_array_info(cv::Mat frame)
+void get_array_info(const cv::Mat frame)
 {
     // 320
     std::cout << "rows: " << frame.rows << std::endl;
@@ -28,7 +28,7 @@ void get_array_info(cv::Mat frame)
  * @param mask binary mask indicating whether pixel falls on planet
  */
 
-cv::Mat get_planet_mask(cv::Mat frame)
+cv::Mat get_planet_mask(const cv::Mat frame)
 {
 
     cv::Mat mask;
@@ -44,7 +44,7 @@ cv::Mat get_planet_mask(cv::Mat frame)
  *
  * @param frame 3-channel matrix
  */
-void compress(cv::Mat &frame)
+void extract_channel(cv::Mat &frame)
 {
     cv::extractChannel(frame, frame, 0);
 }
@@ -75,9 +75,27 @@ void smooth_mask(cv::Mat &mask)
  * @return cv::Rect
  */
 
-cv::Rect get_cropped_rect(cv::Mat mask)
+cv::Rect get_cropped_rect(const cv::Mat mask)
 {
 
     cv::Rect rect = cv::boundingRect(mask);
     return rect;
+}
+
+/**
+ * @brief Get the inner planet mask object
+ *
+ * gets mask around planet and then erodes mask at the limb using a kernel
+ *
+ * @param frame  single channel matrix object
+ * @return cv::Mat
+ */
+
+cv::Mat get_inner_planet_mask(cv::Mat mask)
+{
+    smooth_mask(mask);
+    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(11, 11));
+    cv::Mat innerMask = cv::Mat::zeros(mask.size(), CV_8UC1);
+    cv::erode(mask, innerMask, kernel);
+    return innerMask;
 }
