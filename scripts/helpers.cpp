@@ -28,24 +28,6 @@ void get_array_info(cv::Mat frame)
  * @param mask binary mask indicating whether pixel falls on planet
  */
 
-void salt(cv::Mat &image, int n)
-{
-    for (int k = 0; k < n; k++)
-    {
-        int i = rand() % image.rows;
-        int j = rand() % image.cols;
-        image.at<uchar>(j, i) = 255;
-    }
-}
-void pepper(cv::Mat &image, int n)
-{
-    for (int k = 0; k < n; k++)
-    {
-        int i = rand() % image.rows;
-        int j = rand() % image.cols;
-        image.at<uchar>(j, i) = 0;
-    }
-}
 cv::Mat get_planet_mask(cv::Mat frame)
 {
 
@@ -57,6 +39,24 @@ cv::Mat get_planet_mask(cv::Mat frame)
     return mask;
 };
 
+/**
+ * @brief converts 3-channel gray frame to single channel by extracting first channel
+ *
+ * @param frame 3-channel matrix
+ */
+void compress(cv::Mat &frame)
+{
+    cv::extractChannel(frame, frame, 0);
+}
+
+/**
+ * @brief smooths mask
+ *
+ * gets rid of gaps on jupiter disc and isolated spots from space in mask
+ *
+ * @param mask one-channel matrix mask
+ */
+
 void smooth_mask(cv::Mat &mask)
 {
     cv::Mat element = cv::getStructuringElement(
@@ -65,6 +65,15 @@ void smooth_mask(cv::Mat &mask)
     cv::morphologyEx(mask, mask, cv::MORPH_OPEN, element);
     cv::morphologyEx(mask, mask, cv::MORPH_CLOSE, element);
 }
+
+/**
+ * @brief Get the cropped rect object
+ *
+ * Gets the rect object that encompasses the mask's boundaries
+ *
+ * @param mask binary matrix mask
+ * @return cv::Rect
+ */
 
 cv::Rect get_cropped_rect(cv::Mat mask)
 {

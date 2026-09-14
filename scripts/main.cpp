@@ -9,16 +9,6 @@
 
 // g++ main.cpp -pg -O0  -g -o my_program $(pkg-config --cflags --libs opencv4)
 
-/**
- * @brief converts frame to single channel
- *
- * @param frame
- */
-void compress(cv::Mat &frame)
-{
-    cv::extractChannel(frame, frame, 0);
-}
-
 int main()
 {
     double duration = static_cast<double>(cv::getTickCount());

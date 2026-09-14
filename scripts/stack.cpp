@@ -111,7 +111,6 @@ cv::Mat stack_frames(std::vector<cv::Mat> frames)
     int num_cols = frames[0].cols;
 
     cv::Mat sum_mat = cv::Mat::zeros(num_rows, num_cols, CV_32SC1);
-    double min, max;
 
     for (size_t i = 0; i < frames.size(); i++)
     {
