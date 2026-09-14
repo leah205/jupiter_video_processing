@@ -49,13 +49,16 @@ int main()
 
     compress(ref_frame);
 
+    cv::Mat innerMask = cv::Mat::zeros(ref_frame.size(), CV_8UC1);
     cv::Mat ref_mask = get_planet_mask(ref_frame);
-    cv::Mat innerMask = cv::Mat::zeros(ref_mask.size(), CV_8UC1);
-    cv::Rect rect = cv::boundingRect(ref_mask);
+    smooth_mask(ref_mask);
 
-    double radius = cv::min(rect.width, rect.height) / 2.0;
-    cv::Point cm = get_center_of_mass(ref_mask);
-    cv::circle(innerMask, cm, radius * 0.9, cv::Scalar(255), cv::FILLED);
+    // removes limb from mask for quality selection
+    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(11, 11));
+    cv::erode(ref_mask, innerMask, kernel);
+
+    // rect used crop aligned frames to reduce quality selection computation time
+    cv::Rect rect = get_cropped_rect(ref_mask);
 
     frames.push_back(ref_frame);
 

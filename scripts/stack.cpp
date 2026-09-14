@@ -10,18 +10,19 @@
 /**
  * @brief Get the avg gradient mag
  *
- * computes the average gradient magnitude of all the pixels in the frame
+ * computes the average gradient magnitude of pixels designated by a mask within a cropped region of a frame
  *
  * @param frame 8-bit single channel matrix
+ * @param inner_mask 8-bit single channel mask for pixels to be used in quality computation
+ * @param rect object for cropping frame around disc
  * @return double of average gradient magnitude of all pixels in frame
  */
-double get_avg_gradient_mag(cv::Mat frame, cv::Mat inner_mask, cv::Rect rect)
+double get_avg_gradient_mag(const cv::Mat frame, const cv::Mat inner_mask, const cv::Rect rect)
 {
 
     double total_mag = 0;
 
     // gets cropped frame around disc
-
     cv::Mat croppedFrame = frame(rect);
 
     // gets cropped mask around disc
@@ -39,7 +40,9 @@ double get_avg_gradient_mag(cv::Mat frame, cv::Mat inner_mask, cv::Rect rect)
     int nr = rows;
     int nc = cols;
 
-    if (magx_frame.isContinuous() && magy_frame.isContinuous() && croppedFrame.isContinuous() && croppedInnerMask.isContinuous())
+    int used_pixels = 0;
+
+    if (magx_frame.isContinuous() && magy_frame.isContinuous() && croppedInnerMask.isContinuous())
     {
         nc = nr * nc;
         nr = 1;
@@ -54,16 +57,17 @@ double get_avg_gradient_mag(cv::Mat frame, cv::Mat inner_mask, cv::Rect rect)
         {
             if (*mask_ptr)
             {
-                float mag_x = (float)*mag_x_ptr;
-                float mag_y = (float)*mag_y_ptr;
+                float mag_x = *mag_x_ptr;
+                float mag_y = *mag_y_ptr;
                 total_mag += (double)std::sqrt((mag_x * mag_x + mag_y * mag_y));
+                used_pixels += 1;
             }
             mask_ptr++;
             mag_x_ptr++;
             mag_y_ptr++;
         }
     }
-    double avg_mag = total_mag / (rows * cols);
+    double avg_mag = total_mag / (used_pixels);
     return avg_mag;
 }
 
