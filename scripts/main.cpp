@@ -2,6 +2,7 @@
 #include <opencv2/opencv.hpp>
 #include <numeric>
 #include <cmath>
+#include <string>
 
 #include "stack.h"
 #include "align.h"
@@ -12,7 +13,12 @@
 int main()
 {
     double duration = static_cast<double>(cv::getTickCount());
-    cv::VideoCapture cap("../data/2026-03-18-0236_9-Jupiter_656HIA.avi");
+    std::string filename = "2026-03-18-0236_9-Jupiter_656HIA.avi";
+    std::string output_dir = "../data/";
+    std::string path = output_dir + filename;
+    cv::VideoCapture cap(path);
+    // cv::VideoCapture cap("../data/2026-03-18-0241_0-Jupiter_620CH4.avi");
+    // cv::VideoCapture cap("../data/2026-03-18-0239_0-Jupiter_632OI.avi");
     int frame_num = cap.get(cv::CAP_PROP_FRAME_COUNT);
     int fps = cap.get(cv::CAP_PROP_FPS);
 
@@ -36,6 +42,8 @@ int main()
 
     cv::Mat ref_frame;
     bool ret = cap.read(ref_frame);
+
+    cv::imshow("first frame", ref_frame);
 
     extract_channel(ref_frame);
     cv::Mat ref_mask = get_planet_mask(ref_frame);
@@ -78,8 +86,10 @@ int main()
 
     std::cout << "stacking " << select_amount << " frames... " << std::endl;
     cv::Mat stacked = stack_frames(aligned_frames);
-    cv::imshow("stacked", stacked);
-    cv::waitKey(0);
+    // cv::imshow("stacked", stacked);
+    // cv::waitKey(0);
+    std::string prefix = filename.substr(0, filename.find("."));
+    save_image(prefix, stacked);
     cap.release();
 
     duration = static_cast<double>(cv::getTickCount()) - duration;

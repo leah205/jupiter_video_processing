@@ -69,13 +69,22 @@ std::vector<cv::Mat> align_selected_to_ref(std::vector<cv::Mat> frames, cv::Mat 
     cv::Point ref_cm = get_center_of_mass(ref_frame);
     std::vector<cv::Mat> aligned_frames;
     size_t select_amount = selected_indices.size();
+    cv::waitKey(0);
     for (size_t i = 0; i < select_amount; i++)
     {
+
         size_t index = selected_indices[i];
         cv::Mat frame = frames[index];
+
         cv::Point cm = get_center_of_mass(frame);
         cv::Mat aligned = align_frame(frame, cm, ref_cm);
+        // if (i == select_amount - 1)
+        // {
+        //     transform_ecc(ref_frame, aligned);
+        // }
+
         aligned_frames.push_back(aligned);
     }
+
     return aligned_frames;
 }

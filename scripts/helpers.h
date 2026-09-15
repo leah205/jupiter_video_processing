@@ -6,3 +6,4 @@ void smooth_mask(cv::Mat &mask);
 cv::Rect get_cropped_rect(const cv::Mat mask);
 void extract_channel(cv::Mat &frame);
 cv::Mat get_inner_planet_mask(cv::Mat mask);
+void save_image(std::string prefix, const cv::Mat frame);

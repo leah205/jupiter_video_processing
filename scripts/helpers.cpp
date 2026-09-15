@@ -1,5 +1,6 @@
 #include <opencv2/opencv.hpp>
 #include "helpers.h"
+#include <string>
 
 /**
  * @brief print information on cv::Mat object
@@ -31,12 +32,13 @@ void get_array_info(const cv::Mat frame)
 cv::Mat get_planet_mask(const cv::Mat frame)
 {
 
-    cv::Mat mask;
+    cv::Mat otsu_mask;
     cv::Mat blurred;
     cv::GaussianBlur(frame, blurred, cv::Size(3, 3), 0);
-    cv::threshold(blurred, mask, 10, 255, cv::THRESH_BINARY);
 
-    return mask;
+    cv::threshold(blurred, otsu_mask, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+
+    return otsu_mask;
 };
 
 /**
@@ -98,4 +100,9 @@ cv::Mat get_inner_planet_mask(cv::Mat mask)
     cv::Mat innerMask = cv::Mat::zeros(mask.size(), CV_8UC1);
     cv::erode(mask, innerMask, kernel);
     return innerMask;
+}
+
+void save_image(std::string prefix, const cv::Mat frame)
+{
+    cv::imwrite("../output/" + prefix + ".png", frame);
 }
