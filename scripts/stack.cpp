@@ -6,6 +6,7 @@
 #include "stack.h"
 #include "helpers.h"
 #include "align.h"
+#include "optimisation.h"
 
 /**
  * @brief Get the avg gradient mag
@@ -112,6 +113,12 @@ cv::Mat stack_frames(std::vector<cv::Mat> frames)
 
     cv::Mat stacked;
     size_t num_frames = frames.size();
+    std::vector<cv::Mat> frames_ecc;
+
+    double mean_corr = 0;
+    double min_corr = 0;
+    double mean_shiftmag = 0;
+    double max_shiftmag = 0;
 
     if (num_frames == 0)
     {
@@ -124,11 +131,34 @@ cv::Mat stack_frames(std::vector<cv::Mat> frames)
 
     for (size_t i = 0; i < frames.size(); i++)
     {
+        cv::Mat frame_ecc;
+        // double shift_mag = transform_ecc(frames[0], frames[i]);
+        double shift_mag = 0;
+        double corr = compute_diff(frames[0], frames[i]);
+        mean_corr += corr;
+        min_corr = std::min(min_corr, corr);
+
+        mean_shiftmag += shift_mag;
+        max_shiftmag = std::max(shift_mag, max_shiftmag);
+        if (i == 0)
+        {
+            min_corr = corr;
+        }
 
         sum_mat += frames[i];
     }
 
     sum_mat = sum_mat / cv::Scalar(num_frames);
-    sum_mat.convertTo(stacked, CV_16UC1, 65535.0 / 255.0);
+
+    mean_corr = mean_corr / frames.size();
+    mean_shiftmag = mean_shiftmag / frames.size();
+
+    // sum_mat.convertTo(stacked, CV_16UC1, 65535.0 / 255.0);
+    std::cout << "min coor: " << min_corr << std::endl;
+    std::cout << "mean coor: " << mean_corr << std::endl;
+    std::cout << "shift mag: " << mean_shiftmag << std::endl;
+    std::cout << "max shift mag: " << max_shiftmag << std::endl;
+
+    sum_mat.convertTo(stacked, CV_8UC1);
     return stacked;
 }

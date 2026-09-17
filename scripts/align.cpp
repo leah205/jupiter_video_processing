@@ -21,7 +21,10 @@ cv::Point get_center_of_mass(cv::Mat frame)
         throw std::runtime_error("Zero-area blob");
     }
 
-    cv::Point p(m.m10 / m.m00, m.m01 / m.m00);
+    double x = m.m10 / m.m00;
+    double y = m.m01 / m.m00;
+
+    cv::Point p(x, y);
     return p;
 }
 
