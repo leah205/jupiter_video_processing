@@ -79,28 +79,6 @@ double get_avg_gradient_mag(const cv::Mat frame, const cv::Mat inner_mask, const
 }
 
 /**
- * @brief Get the selected indices object
- *
- * Gets the indices of the best scoring frames according to some quality metric
- *
- * @param quality_score_vec list of computed quality scores corresponding to frames in video
- * @param select_amount number of frames to select
- * @return std::vector<size_t>
- */
-
-std::vector<size_t> get_sharpest_indices(std::vector<frameInfo> frames, int select_amount)
-{
-
-    std::vector<size_t> indices(frames.size());
-    std::vector<cv::Mat *> selected_frames;
-    std::iota(indices.begin(), indices.end(), 0);
-    std::sort(indices.begin(), indices.end(), [&](size_t a, size_t b)
-              { return frames[a].quality_score > frames[b].quality_score; });
-    std::vector<size_t> selected_indices(indices.begin(), indices.begin() + select_amount);
-    return selected_indices;
-}
-
-/**
  * @brief gets the stacked frame matrix
  *
  * Stacks all the given frames and normalizes intensity
