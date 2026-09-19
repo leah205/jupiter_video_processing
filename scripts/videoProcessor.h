@@ -1,0 +1,42 @@
+#include <opencv2/opencv.hpp>
+
+#ifndef VIDEO_H
+#define VIDEO_H
+
+typedef struct
+{
+    cv::Mat frame;
+    double quality_score;
+    cv::Point cm;
+} frameInfo;
+
+class VideoProcessor
+{
+private:
+    std::vector<frameInfo> frames;
+    std::vector<frameInfo> aligned_frames;
+    int ref_index;
+    int stacked_frames_num;
+    std::vector<size_t> selected_frames;
+    std::vector<size_t> quality_sorted_indices;
+
+public:
+    VideoProcessor()
+    {
+        ref_index = 0;
+        stacked_frames_num = 600;
+    }
+    void setRef(int index);
+
+    void addFrame(cv::Mat &frame);
+
+    void setFrameStackNum(int frame_num);
+
+    void selectFramesByGradient();
+
+    void alignSelectedFramesByCentroid();
+
+    void stackAlignedFrames();
+};
+
+#endif

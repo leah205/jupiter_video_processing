@@ -7,6 +7,7 @@
 #include "helpers.h"
 #include "align.h"
 #include "optimisation.h"
+#include "videoProcessor.h"
 
 /**
  * @brief Get the avg gradient mag
@@ -87,14 +88,14 @@ double get_avg_gradient_mag(const cv::Mat frame, const cv::Mat inner_mask, const
  * @return std::vector<size_t>
  */
 
-std::vector<size_t> get_selected_indices(std::vector<double> quality_score_vec, int select_amount)
+std::vector<size_t> get_sharpest_indices(std::vector<frameInfo> frames, int select_amount)
 {
 
-    std::vector<size_t> indices(quality_score_vec.size());
+    std::vector<size_t> indices(frames.size());
     std::vector<cv::Mat *> selected_frames;
     std::iota(indices.begin(), indices.end(), 0);
     std::sort(indices.begin(), indices.end(), [&](size_t a, size_t b)
-              { return quality_score_vec[a] > quality_score_vec[b]; });
+              { return frames[a].quality_score > frames[b].quality_score; });
     std::vector<size_t> selected_indices(indices.begin(), indices.begin() + select_amount);
     return selected_indices;
 }
@@ -108,12 +109,15 @@ std::vector<size_t> get_selected_indices(std::vector<double> quality_score_vec, 
  * @return single-channel 16-bit cv::Mat
  */
 
-cv::Mat stack_frames(std::vector<cv::Mat> frames)
+cv::Mat stack_frames(std::vector<frameInfo> frames)
 {
-
+    std::cout << "hello world" << std::endl;
     cv::Mat stacked;
     size_t num_frames = frames.size();
     std::vector<cv::Mat> frames_ecc;
+
+    double mean_new_corr = 0;
+    double min_new_corr = 0;
 
     double mean_corr = 0;
     double min_corr = 0;
@@ -124,39 +128,56 @@ cv::Mat stack_frames(std::vector<cv::Mat> frames)
     {
         throw std::runtime_error("stack frames called with zero frames");
     }
-    int num_rows = frames[0].rows;
-    int num_cols = frames[0].cols;
+    int num_rows = frames[0].frame.rows;
+    int num_cols = frames[0].frame.cols;
 
     cv::Mat sum_mat = cv::Mat::zeros(num_rows, num_cols, CV_32SC1);
 
     for (size_t i = 0; i < frames.size(); i++)
     {
         cv::Mat frame_ecc;
-        // double shift_mag = transform_ecc(frames[0], frames[i]);
-        double shift_mag = 0;
-        double corr = compute_diff(frames[0], frames[i]);
+        cv::Mat new_aligned;
+
+        double shift_mag = transform_ecc(frames[0].frame, frames[i].frame, new_aligned);
+
+        double corr = compute_diff(frames[0].frame, frames[i].frame);
+        double new_corr = compute_diff(frames[0].frame, new_aligned);
+        cv::Mat difference;
+        cv::absdiff(frames[i].frame, new_aligned, difference);
+
+        double min_val, max_val;
+        cv::minMaxLoc(difference, &min_val, &max_val);
+
         mean_corr += corr;
+        mean_new_corr += new_corr;
         min_corr = std::min(min_corr, corr);
+        min_new_corr = std::min(min_new_corr, new_corr);
 
         mean_shiftmag += shift_mag;
         max_shiftmag = std::max(shift_mag, max_shiftmag);
         if (i == 0)
         {
             min_corr = corr;
+            min_new_corr = min_corr;
         }
 
-        sum_mat += frames[i];
+        sum_mat += frames[i].frame;
     }
 
     sum_mat = sum_mat / cv::Scalar(num_frames);
 
     mean_corr = mean_corr / frames.size();
+    mean_new_corr = mean_new_corr / frames.size();
     mean_shiftmag = mean_shiftmag / frames.size();
 
     // sum_mat.convertTo(stacked, CV_16UC1, 65535.0 / 255.0);
     std::cout << "min coor: " << min_corr << std::endl;
     std::cout << "mean coor: " << mean_corr << std::endl;
-    std::cout << "shift mag: " << mean_shiftmag << std::endl;
+
+    std::cout << "min new coor: " << min_new_corr << std::endl;
+    std::cout << "mean new coor: " << mean_new_corr << std::endl;
+
+    std::cout << "mean shift mag: " << mean_shiftmag << std::endl;
     std::cout << "max shift mag: " << max_shiftmag << std::endl;
 
     sum_mat.convertTo(stacked, CV_8UC1);

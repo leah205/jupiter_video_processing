@@ -8,13 +8,18 @@ double compute_diff(const cv::Mat ref_frame, const cv::Mat aligned_frame)
     return corr;
 }
 
-double transform_ecc(const cv::Mat ref_frame, const cv::Mat aligned_frame)
+double transform_ecc(const cv::Mat ref_frame, const cv::Mat aligned_frame, cv::Mat &new_aligned)
 {
     // compute_diff(ref_frame, aligned_frame);
     // returns x y shift
-    cv::Mat warp_matrix;
-    cv::findTransformECC(ref_frame, aligned_frame, warp_matrix);
-    cv::warpAffine(aligned_frame, aligned_frame, warp_matrix, cv::Size(ref_frame.rows, ref_frame.cols));
+    cv::Mat warp_matrix = cv::Mat::eye(2, 3, CV_32F);
+    std::cout << compute_diff(ref_frame, aligned_frame);
+    double ecc = cv::findTransformECC(ref_frame, aligned_frame, warp_matrix, cv::MOTION_TRANSLATION);
+    std::cout << "ecc: " << ecc << std::endl;
+    cv::warpAffine(aligned_frame, new_aligned, warp_matrix, cv::Size(ref_frame.cols, ref_frame.rows), cv::INTER_LINEAR);
+    std::cout << warp_matrix << std::endl;
+    std::cout << compute_diff(ref_frame, new_aligned) << std::endl;
+
     double t_x = warp_matrix.at<float>(0, 2);
     double t_y = warp_matrix.at<float>(1, 2);
     double shift_mag = std::sqrt(t_x * t_x + t_y * t_y);
