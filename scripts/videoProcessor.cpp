@@ -92,5 +92,10 @@ void VideoProcessor::alignSelectedFramesByCentroid()
 
 void VideoProcessor::stackAlignedFrames()
 {
-    stacked = stack_frames(aligned_frames);
+    output = stack_frames(aligned_frames);
+}
+
+cv::Mat VideoProcessor::getOutput()
+{
+    return output.clone();
 }

@@ -16,7 +16,7 @@ private:
     std::vector<frameInfo> frames;
     std::vector<cv::Mat> aligned_frames;
     int stacked_frames_num;
-    cv::Mat stacked;
+    cv::Mat output;
     std::vector<size_t> selected_frames;
     std::vector<size_t> quality_sorted_indices;
 
@@ -35,6 +35,8 @@ public:
     void alignSelectedFramesByCentroid();
 
     void stackAlignedFrames();
+
+    cv::Mat getOutput();
 };
 
 #endif

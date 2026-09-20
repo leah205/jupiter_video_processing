@@ -57,6 +57,8 @@ int main()
     processor.selectFramesByGradient();
     processor.alignSelectedFramesByCentroid();
     processor.stackAlignedFrames();
+    cv::imshow("final", processor.getOutput());
+    cv::waitKey(0);
 
     duration = static_cast<double>(cv::getTickCount()) - duration;
     duration /= cv::getTickFrequency();
