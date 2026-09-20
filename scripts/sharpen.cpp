@@ -3,6 +3,13 @@
 // subtract laplacian from image
 // sharpened_pizel = 5 * current-left-right-up-down
 
+/**
+ * @brief apply kernel to sharpen frame
+ *
+ * @param image
+ * @param result
+ */
+
 void sharpen(const cv::Mat &image, cv::Mat &result)
 {
     // input must be 8-bit

@@ -78,12 +78,13 @@ double get_avg_gradient_mag(const cv::Mat frame, const cv::Mat inner_mask, const
     return avg_mag;
 }
 
+// NOTE: NEED TO CHANGE BACK TO 16 BIT LATER
+
 /**
  * @brief gets the stacked frame matrix
  *
- * Stacks all the given frames and normalizes intensity
  *
- * @param frames frames to stack
+ * @param frames list of frameInfo objects to stack
  * @return single-channel 16-bit cv::Mat
  */
 

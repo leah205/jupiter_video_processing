@@ -10,6 +10,12 @@
 #include "optimisation.h"
 #include "videoProcessor.h"
 
+/**
+ * @brief sets reference frame
+ *
+ * @param index of reference frame
+ */
+
 void VideoProcessor::setRef(int index)
 {
     if (index < 0 || index > frames.size())
@@ -19,6 +25,13 @@ void VideoProcessor::setRef(int index)
     ref_index = index;
 }
 
+/**
+ * @brief adds frame candidate for lucky imaging
+ *
+ * computes quality score and adds frameInfo object to frame list
+ *
+ * @param frame
+ */
 void VideoProcessor::addFrame(cv::Mat &frame)
 {
     frameInfo newFrame;
@@ -31,11 +44,26 @@ void VideoProcessor::addFrame(cv::Mat &frame)
     frames.push_back(newFrame);
 };
 
+/**
+ * @brief Sets number of frames to stack
+ *
+ * @param frame_num
+ */
+
 void VideoProcessor::setFrameStackNum(int frame_num)
 {
     stacked_frames_num = frame_num;
 };
 
+/**
+ * @brief selects sharpest frames for stacking
+ *
+ * Uses average gradient magnitude along the inner disk of jupiter to assess
+ * image sharpness and updates the list of selected indices for stacking
+ * to include the indices of the sharpest frames (sorted sharpest to least sharp)
+ * with list size determined by number of frames being stacked
+ *
+ */
 void VideoProcessor::selectFramesByGradient()
 {
     quality_sorted_indices.resize(frames.size());
@@ -49,6 +77,13 @@ void VideoProcessor::selectFramesByGradient()
     // selected_frames = get_sharpest_indices(frames, stacked_frames_num);
 };
 
+/**
+ * @brief aligns frames to reference
+ *
+ * updates aligned_frames list to contain matrices of sharpest frames
+ * with centroid aligned to reference frame
+ *
+ */
 void VideoProcessor::alignSelectedFramesByCentroid()
 {
     frameInfo &ref_frame = frames[ref_index];
@@ -60,8 +95,13 @@ void VideoProcessor::alignSelectedFramesByCentroid()
     }
 };
 
+/**
+ * @brief stacks selected aligned frames
+ *
+ * averages pixels among aligned selected frames and stores them in stacked matrix
+ */
+
 void VideoProcessor::stackAlignedFrames()
 {
-    std::cout << "yoohoo" << std::endl;
-    stack_frames(aligned_frames);
+    stacked = stack_frames(aligned_frames);
 }

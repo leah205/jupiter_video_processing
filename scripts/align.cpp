@@ -30,12 +30,11 @@ cv::Point get_center_of_mass(cv::Mat frame)
 }
 
 /**
- * @brief aligns frame
+ * @brief aligns frame by centroid
  *
  *  aligns frame so that its planet center of mass matches with that of the reference frame
  *
- * @param frame 8-bit single channel matrix
- * @param cm cv::Point center of mass
+ * @param frame FraneInfo object with 8-bit single channel matrix
  * @param ref cv::Point center of mass of reference frame
  * @return cv::Mat aligned frame
  */

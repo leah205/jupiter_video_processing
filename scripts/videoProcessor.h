@@ -17,6 +17,7 @@ private:
     std::vector<frameInfo> aligned_frames;
     int ref_index;
     int stacked_frames_num;
+    cv::Mat stacked;
     std::vector<size_t> selected_frames;
     std::vector<size_t> quality_sorted_indices;
 
