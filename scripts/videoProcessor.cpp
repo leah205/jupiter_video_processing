@@ -11,21 +11,6 @@
 #include "videoProcessor.h"
 
 /**
- * @brief sets reference frame
- *
- * @param index of reference frame
- */
-
-void VideoProcessor::setRef(int index)
-{
-    if (index < 0 || index > frames.size())
-    {
-        throw std::invalid_argument("ref index must be in correct range");
-    }
-    ref_index = index;
-}
-
-/**
  * @brief adds frame candidate for lucky imaging
  *
  * computes quality score and adds frameInfo object to frame list

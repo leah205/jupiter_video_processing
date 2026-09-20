@@ -15,7 +15,6 @@ class VideoProcessor
 private:
     std::vector<frameInfo> frames;
     std::vector<cv::Mat> aligned_frames;
-    int ref_index;
     int stacked_frames_num;
     cv::Mat stacked;
     std::vector<size_t> selected_frames;
@@ -24,10 +23,8 @@ private:
 public:
     VideoProcessor()
     {
-        ref_index = 0;
         stacked_frames_num = 600;
     }
-    void setRef(int index);
 
     void addFrame(cv::Mat &frame);
 
