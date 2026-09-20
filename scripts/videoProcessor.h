@@ -34,6 +34,8 @@ public:
 
     void alignSelectedFramesByCentroid();
 
+    void alignSelectedCentroidEcc();
+
     void stackAlignedFrames();
 
     cv::Mat getOutput();

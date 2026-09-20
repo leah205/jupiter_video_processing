@@ -84,6 +84,49 @@ void VideoProcessor::alignSelectedFramesByCentroid()
     }
 };
 
+void VideoProcessor::alignSelectedCentroidEcc()
+{
+    cv::Mat ref_frame = frames[selected_frames[0]].frame;
+    cv::Point ref_cm = get_center_of_mass(ref_frame);
+    aligned_frames.push_back(ref_frame);
+
+    double mean_corr = 0;
+    double min_corr = 0;
+    double mean_shiftmag = 0;
+    double max_shiftmag = 0;
+
+    for (int i = 1; i < selected_frames.size(); i++)
+    {
+        frameInfo frame = frames[selected_frames[i]];
+        frame.cm = get_center_of_mass(frame.frame);
+        cv::Mat aligned_mat = get_aligned_by_centroid(frame.frame, frame.cm, ref_cm);
+
+        cv::Mat new_aligned;
+        double shift_mag = transform_ecc(frames[0].frame, frame.frame, new_aligned);
+        double corr = compute_ecc(frames[0].frame, new_aligned);
+
+        aligned_frames.push_back(new_aligned);
+
+        mean_corr += corr;
+        min_corr = std::min(corr, min_corr);
+
+        mean_shiftmag += shift_mag;
+        max_shiftmag = std::max(shift_mag, max_shiftmag);
+        if (i == 0)
+        {
+            min_corr = corr;
+        }
+    }
+    mean_corr = mean_corr / frames.size();
+    mean_shiftmag = mean_shiftmag / frames.size();
+
+    std::cout << "min coor: " << min_corr << std::endl;
+    std::cout << "mean coor: " << mean_corr << std::endl;
+
+    std::cout << "mean shift mag: " << mean_shiftmag << std::endl;
+    std::cout << "max shift mag: " << max_shiftmag << std::endl;
+}
+
 /**
  * @brief stacks selected aligned frames
  *
