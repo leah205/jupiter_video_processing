@@ -94,14 +94,6 @@ cv::Mat stack_frames(std::vector<cv::Mat> frames)
     size_t num_frames = frames.size();
     std::vector<cv::Mat> frames_ecc;
 
-    double mean_new_corr = 0;
-    double min_new_corr = 0;
-
-    double mean_corr = 0;
-    double min_corr = 0;
-    double mean_shiftmag = 0;
-    double max_shiftmag = 0;
-
     if (num_frames == 0)
     {
         throw std::runtime_error("stack frames called with zero frames");
@@ -113,51 +105,13 @@ cv::Mat stack_frames(std::vector<cv::Mat> frames)
 
     for (size_t i = 0; i < frames.size(); i++)
     {
-        cv::Mat frame_ecc;
-        cv::Mat new_aligned;
-
-        double shift_mag = transform_ecc(frames[0], frames[i], new_aligned);
-
-        double corr = compute_ecc(frames[0], frames[i]);
-        double new_corr = compute_ecc(frames[0], new_aligned);
-        cv::Mat difference;
-        cv::absdiff(frames[i], new_aligned, difference);
-
-        double min_val, max_val;
-        cv::minMaxLoc(difference, &min_val, &max_val);
-
-        mean_corr += corr;
-        mean_new_corr += new_corr;
-        min_corr = std::min(min_corr, corr);
-        min_new_corr = std::min(min_new_corr, new_corr);
-
-        mean_shiftmag += shift_mag;
-        max_shiftmag = std::max(shift_mag, max_shiftmag);
-        if (i == 0)
-        {
-            min_corr = corr;
-            min_new_corr = min_corr;
-        }
 
         sum_mat += frames[i];
     }
 
     sum_mat = sum_mat / cv::Scalar(num_frames);
-
-    mean_corr = mean_corr / frames.size();
-    mean_new_corr = mean_new_corr / frames.size();
-    mean_shiftmag = mean_shiftmag / frames.size();
-
     // sum_mat.convertTo(stacked, CV_16UC1, 65535.0 / 255.0);
-    std::cout << "min coor: " << min_corr << std::endl;
-    std::cout << "mean coor: " << mean_corr << std::endl;
 
-    std::cout << "min new coor: " << min_new_corr << std::endl;
-    std::cout << "mean new coor: " << mean_new_corr << std::endl;
-
-    std::cout << "mean shift mag: " << mean_shiftmag << std::endl;
-    std::cout << "max shift mag: " << max_shiftmag << std::endl;
-
-    sum_mat.convertTo(stacked, CV_8UC1);
+        sum_mat.convertTo(stacked, CV_8UC1);
     return stacked;
 }

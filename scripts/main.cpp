@@ -5,6 +5,9 @@
 #include <string>
 
 #include "videoProcessor.h"
+#include "optimisation.h"
+#include "helpers.h"
+#include "align.h"
 
 // g++ main.cpp -pg -O0  -g -o my_program $(pkg-config --cflags --libs opencv4)
 
@@ -55,10 +58,24 @@ int main()
     int select_amount = ceil(((double)(frame_num)) / 4);
     processor.setFrameStackNum(select_amount);
     processor.selectFramesByGradient();
-    processor.alignSelectedFramesByCentroid();
+    // processor.alignSelectedFramesByCentroid();
+    processor.alignSelectedCentroidEcc();
     processor.stackAlignedFrames();
-    cv::imshow("final", processor.getOutput());
-    cv::waitKey(0);
+    cv::Mat output = processor.getOutput();
+    // cv::imshow("final", processor.getOutput());
+    // cv::waitKey(0);
+
+    cv::VideoCapture r_cap("../registax/2026-03-18-0236_9-Jupiter_656HIA_stacked.bmp");
+    cv::Mat registax;
+    ret = r_cap.read(registax);
+    extract_channel(registax);
+    cv::Point r_cm = get_center_of_mass(registax);
+    cv::Point ref_cm = get_center_of_mass(output);
+
+    cv::Mat aligned_reg = get_aligned_by_centroid(registax, r_cm, ref_cm);
+
+    std::cout
+        << "correlation to registax output: " << compute_ecc(aligned_reg, output) << std::endl;
 
     duration = static_cast<double>(cv::getTickCount()) - duration;
     duration /= cv::getTickFrequency();
