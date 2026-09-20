@@ -100,10 +100,14 @@ void VideoProcessor::alignSelectedCentroidEcc()
         frameInfo frame = frames[selected_frames[i]];
         frame.cm = get_center_of_mass(frame.frame);
         cv::Mat aligned_mat = get_aligned_by_centroid(frame.frame, frame.cm, ref_cm);
+        // cv::imshow("aligned", aligned_mat);
+        // cv::waitKey(0);
 
         cv::Mat new_aligned;
-        double shift_mag = transform_ecc(frames[0].frame, frame.frame, new_aligned);
-        double corr = compute_ecc(frames[0].frame, new_aligned);
+        double shift_mag = transform_ecc(ref_frame, aligned_mat, new_aligned);
+        // cv::imshow("new aligned", new_aligned);
+        // cv::waitKey(0);
+        double corr = compute_ecc(aligned_mat, new_aligned);
 
         aligned_frames.push_back(new_aligned);
 
@@ -112,13 +116,13 @@ void VideoProcessor::alignSelectedCentroidEcc()
 
         mean_shiftmag += shift_mag;
         max_shiftmag = std::max(shift_mag, max_shiftmag);
-        if (i == 0)
+        if (i == 1)
         {
             min_corr = corr;
         }
     }
-    mean_corr = mean_corr / frames.size();
-    mean_shiftmag = mean_shiftmag / frames.size();
+    mean_corr = mean_corr / (selected_frames.size() - 1);
+    mean_shiftmag = mean_shiftmag / (selected_frames.size() - 1);
 
     std::cout << "min coor: " << min_corr << std::endl;
     std::cout << "mean coor: " << mean_corr << std::endl;
@@ -126,6 +130,44 @@ void VideoProcessor::alignSelectedCentroidEcc()
     std::cout << "mean shift mag: " << mean_shiftmag << std::endl;
     std::cout << "max shift mag: " << max_shiftmag << std::endl;
 }
+
+// void VideoProcessor::alignEcc()
+// {
+//     cv::Mat ref_frame = frames[selected_frames[0]].frame;
+//     cv::Point ref_cm = get_center_of_mass(ref_frame);
+//     aligned_frames.push_back(ref_frame);
+
+//       for (int i = 1; i < selected_frames.size(); i++)
+//     {
+//         frameInfo frame = frames[selected_frames[i]];
+//         frame.cm = get_center_of_mass(frame.frame);
+//         cv::Mat aligned_mat = get_aligned_by_centroid(frame.frame, frame.cm, ref_cm);
+
+//         cv::Mat new_aligned;
+//         double shift_mag = transform_ecc(frames[0].frame, frame.frame, new_aligned);
+//         double corr = compute_ecc(frames[0].frame, new_aligned);
+
+//         aligned_frames.push_back(new_aligned);
+
+//         mean_corr += corr;
+//         min_corr = std::min(corr, min_corr);
+
+//         mean_shiftmag += shift_mag;
+//         max_shiftmag = std::max(shift_mag, max_shiftmag);
+//         if (i == 0)
+//         {
+//             min_corr = corr;
+//         }
+//     }
+//     mean_corr = mean_corr / frames.size();
+//     mean_shiftmag = mean_shiftmag / frames.size();
+
+//     std::cout << "min coor: " << min_corr << std::endl;
+//     std::cout << "mean coor: " << mean_corr << std::endl;
+
+//     std::cout << "mean shift mag: " << mean_shiftmag << std::endl;
+//     std::cout << "max shift mag: " << max_shiftmag << std::endl;
+// }
 
 /**
  * @brief stacks selected aligned frames
