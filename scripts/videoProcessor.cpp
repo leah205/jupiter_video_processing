@@ -1,0 +1,107 @@
+#include <opencv2/opencv.hpp>
+#include <numeric>
+#include <iostream>
+
+#include <cmath>
+
+#include "stack.h"
+#include "align.h"
+#include "helpers.h"
+#include "optimisation.h"
+#include "videoProcessor.h"
+
+/**
+ * @brief sets reference frame
+ *
+ * @param index of reference frame
+ */
+
+void VideoProcessor::setRef(int index)
+{
+    if (index < 0 || index > frames.size())
+    {
+        throw std::invalid_argument("ref index must be in correct range");
+    }
+    ref_index = index;
+}
+
+/**
+ * @brief adds frame candidate for lucky imaging
+ *
+ * computes quality score and adds frameInfo object to frame list
+ *
+ * @param frame
+ */
+void VideoProcessor::addFrame(cv::Mat &frame)
+{
+    frameInfo newFrame;
+    extract_channel(frame);
+    cv::Mat inner_mask = get_inner_planet_mask(frame);
+    cv::Rect rect = get_cropped_rect(frame);
+    double quality_score = get_avg_gradient_mag(frame, inner_mask, rect);
+    newFrame.frame = frame;
+    newFrame.quality_score = quality_score;
+    frames.push_back(newFrame);
+};
+
+/**
+ * @brief Sets number of frames to stack
+ *
+ * @param frame_num
+ */
+
+void VideoProcessor::setFrameStackNum(int frame_num)
+{
+    stacked_frames_num = frame_num;
+};
+
+/**
+ * @brief selects sharpest frames for stacking
+ *
+ * Uses average gradient magnitude along the inner disk of jupiter to assess
+ * image sharpness and updates the list of selected indices for stacking
+ * to include the indices of the sharpest frames (sorted sharpest to least sharp)
+ * with list size determined by number of frames being stacked
+ *
+ */
+void VideoProcessor::selectFramesByGradient()
+{
+    quality_sorted_indices.resize(frames.size());
+
+    std::iota(quality_sorted_indices.begin(), quality_sorted_indices.end(), 0);
+    std::sort(quality_sorted_indices.begin(), quality_sorted_indices.end(), [&](size_t a, size_t b)
+              { return frames[a].quality_score > frames[b].quality_score; });
+
+    std::vector<size_t> selected_indices(quality_sorted_indices.begin(), quality_sorted_indices.begin() + stacked_frames_num);
+    selected_frames = selected_indices;
+    // selected_frames = get_sharpest_indices(frames, stacked_frames_num);
+};
+
+/**
+ * @brief aligns frames to reference
+ *
+ * updates aligned_frames list to contain matrices of sharpest frames
+ * with centroid aligned to reference frame
+ *
+ */
+void VideoProcessor::alignSelectedFramesByCentroid()
+{
+    frameInfo &ref_frame = frames[ref_index];
+    for (int i = 0; i < selected_frames.size(); i++)
+    {
+        frameInfo frame = frames[selected_frames[i]];
+        frame.cm = get_center_of_mass(frame.frame);
+        aligned_frames.push_back(get_aligned_by_centroid(frame, ref_frame.cm));
+    }
+};
+
+/**
+ * @brief stacks selected aligned frames
+ *
+ * averages pixels among aligned selected frames and stores them in stacked matrix
+ */
+
+void VideoProcessor::stackAlignedFrames()
+{
+    stacked = stack_frames(aligned_frames);
+}

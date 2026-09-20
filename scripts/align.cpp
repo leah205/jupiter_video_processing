@@ -2,6 +2,7 @@
 
 #include "align.h"
 #include "helpers.h"
+#include "videoProcessor.h"
 
 /**
  * @brief Get the center of mass object
@@ -29,19 +30,20 @@ cv::Point get_center_of_mass(cv::Mat frame)
 }
 
 /**
- * @brief aligns frame
+ * @brief aligns frame by centroid
  *
  *  aligns frame so that its planet center of mass matches with that of the reference frame
  *
- * @param frame 8-bit single channel matrix
- * @param cm cv::Point center of mass
+ * @param frame FraneInfo object with 8-bit single channel matrix
  * @param ref cv::Point center of mass of reference frame
  * @return cv::Mat aligned frame
  */
-cv::Mat align_frame(cv::Mat frame, cv::Point cm, cv::Point ref)
+frameInfo get_aligned_by_centroid(frameInfo frame_obj, cv::Point ref)
 {
 
-    cv::Mat aligned_frame;
+    frameInfo aligned_frame = frame_obj;
+    cv::Mat frame = frame_obj.frame;
+    cv::Point cm = frame_obj.cm;
 
     double offset_x, offset_y;
     offset_x = cm.x - ref.x;
@@ -51,43 +53,6 @@ cv::Mat align_frame(cv::Mat frame, cv::Point cm, cv::Point ref)
     int height = frame.cols;
     int width = frame.rows;
 
-    cv::warpAffine(frame, aligned_frame, translation_matrix, cv::Size(width, height));
+    cv::warpAffine(frame, aligned_frame.frame, translation_matrix, cv::Size(width, height));
     return aligned_frame;
-}
-
-/**
- * @brief aligns best frames
- *
- * aligns all quality selected frames to the center of mass of reference frame
- *
- * @param frames all frames
- * @param ref_frame frame to align to
- * @param selected_indices indices of frames to align and stack
- * @return std::vector<cv::Mat>
- */
-
-std::vector<cv::Mat> align_selected_to_ref(std::vector<cv::Mat> frames, cv::Mat ref_frame, std::vector<size_t> selected_indices)
-{
-
-    cv::Point ref_cm = get_center_of_mass(ref_frame);
-    std::vector<cv::Mat> aligned_frames;
-    size_t select_amount = selected_indices.size();
-    cv::waitKey(0);
-    for (size_t i = 0; i < select_amount; i++)
-    {
-
-        size_t index = selected_indices[i];
-        cv::Mat frame = frames[index];
-
-        cv::Point cm = get_center_of_mass(frame);
-        cv::Mat aligned = align_frame(frame, cm, ref_cm);
-        // if (i == select_amount - 1)
-        // {
-        //     transform_ecc(ref_frame, aligned);
-        // }
-
-        aligned_frames.push_back(aligned);
-    }
-
-    return aligned_frames;
 }

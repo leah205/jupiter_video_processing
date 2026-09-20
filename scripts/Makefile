@@ -2,8 +2,8 @@ CXX = g++
 CXXFLAGS = -Wall -Wextra -std=c++17 -g -pg $(shell pkg-config --cflags opencv4)
 LIBS = $(shell pkg-config --libs opencv4)
 
-main: main.o stack.o align.o helpers.o sharpen.o  optimisation.o
-	$(CXX) $(CXXFLAGS) -o main main.o stack.o  align.o helpers.o sharpen.o optimisation.o $(LIBS)
+main: main.o stack.o align.o helpers.o sharpen.o  optimisation.o videoProcessor.o
+	$(CXX) $(CXXFLAGS) -o main main.o stack.o  align.o helpers.o sharpen.o optimisation.o  videoProcessor.o $(LIBS)
 
 main.o: main.cpp stack.h
 	$(CXX) $(CXXFLAGS) -c main.cpp
@@ -23,6 +23,8 @@ sharpen.o: sharpen.cpp sharpen.h
 optimisation.o: optimisation.cpp optimisation.h
 		$(CXX) $(CXXFLAGS) -c optimisation.cpp
 
+videoProcessor.o: videoProcessor.cpp videoProcessor.h
+			$(CXX) $(CXXFLAGS) -c videoProcessor.cpp
 
 
 clean:

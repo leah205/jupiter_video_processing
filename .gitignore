@@ -1,2 +1,5 @@
 data/
 env/
+gmon.out
+.vscode/
+registax/
