@@ -14,7 +14,7 @@ class VideoProcessor
 {
 private:
     std::vector<frameInfo> frames;
-    std::vector<frameInfo> aligned_frames;
+    std::vector<cv::Mat> aligned_frames;
     int ref_index;
     int stacked_frames_num;
     cv::Mat stacked;

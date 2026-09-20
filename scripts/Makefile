@@ -5,7 +5,7 @@ LIBS = $(shell pkg-config --libs opencv4)
 main: main.o stack.o align.o helpers.o sharpen.o  optimisation.o videoProcessor.o
 	$(CXX) $(CXXFLAGS) -o main main.o stack.o  align.o helpers.o sharpen.o optimisation.o  videoProcessor.o $(LIBS)
 
-main.o: main.cpp stack.h
+main.o: main.cpp
 	$(CXX) $(CXXFLAGS) -c main.cpp
 
 stack.o: stack.cpp stack.h
@@ -25,6 +25,15 @@ optimisation.o: optimisation.cpp optimisation.h
 
 videoProcessor.o: videoProcessor.cpp videoProcessor.h
 			$(CXX) $(CXXFLAGS) -c videoProcessor.cpp
+
+test: test.o test_helpers.o align.o test_helpers.o helpers.o
+		$(CXX) $(CXXFLAGS) -o test test.o test_helpers.o align.o helpers.o $(LIBS)
+
+test.o: test.cpp 
+		$(CXX) $(CXXFLAGS) -c test.cpp
+
+test_helpers.o: test_helpers.cpp test_helpers.h 
+	$(CXX) $(CXXFLAGS) -c test_helpers.cpp
 
 
 clean:

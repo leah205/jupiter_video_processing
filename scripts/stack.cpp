@@ -84,13 +84,12 @@ double get_avg_gradient_mag(const cv::Mat frame, const cv::Mat inner_mask, const
  * @brief gets the stacked frame matrix
  *
  *
- * @param frames list of frameInfo objects to stack
+ * @param frames list of matrix objects to stack
  * @return single-channel 16-bit cv::Mat
  */
 
-cv::Mat stack_frames(std::vector<frameInfo> frames)
+cv::Mat stack_frames(std::vector<cv::Mat> frames)
 {
-    std::cout << "hello world" << std::endl;
     cv::Mat stacked;
     size_t num_frames = frames.size();
     std::vector<cv::Mat> frames_ecc;
@@ -107,8 +106,8 @@ cv::Mat stack_frames(std::vector<frameInfo> frames)
     {
         throw std::runtime_error("stack frames called with zero frames");
     }
-    int num_rows = frames[0].frame.rows;
-    int num_cols = frames[0].frame.cols;
+    int num_rows = frames[0].rows;
+    int num_cols = frames[0].cols;
 
     cv::Mat sum_mat = cv::Mat::zeros(num_rows, num_cols, CV_32SC1);
 
@@ -117,12 +116,12 @@ cv::Mat stack_frames(std::vector<frameInfo> frames)
         cv::Mat frame_ecc;
         cv::Mat new_aligned;
 
-        double shift_mag = transform_ecc(frames[0].frame, frames[i].frame, new_aligned);
+        double shift_mag = transform_ecc(frames[0], frames[i], new_aligned);
 
-        double corr = compute_diff(frames[0].frame, frames[i].frame);
-        double new_corr = compute_diff(frames[0].frame, new_aligned);
+        double corr = compute_ecc(frames[0], frames[i]);
+        double new_corr = compute_ecc(frames[0], new_aligned);
         cv::Mat difference;
-        cv::absdiff(frames[i].frame, new_aligned, difference);
+        cv::absdiff(frames[i], new_aligned, difference);
 
         double min_val, max_val;
         cv::minMaxLoc(difference, &min_val, &max_val);
@@ -140,7 +139,7 @@ cv::Mat stack_frames(std::vector<frameInfo> frames)
             min_new_corr = min_corr;
         }
 
-        sum_mat += frames[i].frame;
+        sum_mat += frames[i];
     }
 
     sum_mat = sum_mat / cv::Scalar(num_frames);

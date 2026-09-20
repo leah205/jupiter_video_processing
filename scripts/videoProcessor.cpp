@@ -86,12 +86,16 @@ void VideoProcessor::selectFramesByGradient()
  */
 void VideoProcessor::alignSelectedFramesByCentroid()
 {
-    frameInfo &ref_frame = frames[ref_index];
-    for (int i = 0; i < selected_frames.size(); i++)
+    cv::Mat ref_frame = frames[selected_frames[0]].frame;
+    cv::Point ref_cm = get_center_of_mass(ref_frame);
+    aligned_frames.push_back(ref_frame);
+    for (int i = 1; i < selected_frames.size(); i++)
     {
         frameInfo frame = frames[selected_frames[i]];
         frame.cm = get_center_of_mass(frame.frame);
-        aligned_frames.push_back(get_aligned_by_centroid(frame, ref_frame.cm));
+        cv::Mat aligned_mat = get_aligned_by_centroid(frame.frame, frame.cm, ref_cm);
+
+        aligned_frames.push_back(aligned_mat);
     }
 };
 

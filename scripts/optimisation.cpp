@@ -30,6 +30,11 @@ double transform_ecc(const cv::Mat ref_frame, const cv::Mat aligned_frame, cv::M
 {
 
     cv::Mat warp_matrix = cv::Mat::eye(2, 3, CV_32F);
+    // cv::imshow("refernce", ref_frame);
+    // cv::waitKey(0);
+
+    // cv::imshow("aligned", aligned_frame);
+    // cv::waitKey(0);
     // std::cout << compute_ecc(ref_frame, aligned_frame);
     double ecc = cv::findTransformECC(ref_frame, aligned_frame, warp_matrix, cv::MOTION_TRANSLATION);
     // std::cout << "ecc: " << ecc << std::endl;
