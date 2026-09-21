@@ -26,7 +26,6 @@ double get_avg_gradient_mag(const cv::Mat frame, const cv::Mat inner_mask, const
 
     // gets cropped frame around disc
     cv::Mat croppedFrame = frame(rect);
-
     // gets cropped mask around disc
     cv::Mat croppedInnerMask = inner_mask(rect);
 
@@ -112,6 +111,6 @@ cv::Mat stack_frames(std::vector<cv::Mat> frames)
     sum_mat = sum_mat / cv::Scalar(num_frames);
     // sum_mat.convertTo(stacked, CV_16UC1, 65535.0 / 255.0);
 
-        sum_mat.convertTo(stacked, CV_8UC1);
+    sum_mat.convertTo(stacked, CV_8UC1);
     return stacked;
 }

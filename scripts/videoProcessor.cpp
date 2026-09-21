@@ -21,7 +21,7 @@ void VideoProcessor::addFrame(cv::Mat &frame)
 {
     frameInfo newFrame;
     extract_channel(frame);
-    cv::Mat inner_mask = get_inner_planet_mask(frame);
+    cv::Mat inner_mask = get_inner_planet_mask(get_planet_mask(frame));
     cv::Rect rect = get_cropped_rect(frame);
     double quality_score = get_avg_gradient_mag(frame, inner_mask, rect);
     newFrame.frame = frame;
@@ -137,7 +137,7 @@ void VideoProcessor::alignSelectedCentroidEcc()
 //     cv::Point ref_cm = get_center_of_mass(ref_frame);
 //     aligned_frames.push_back(ref_frame);
 
-//       for (int i = 1; i < selected_frames.size(); i++)
+//     for (int i = 1; i < selected_frames.size(); i++)
 //     {
 //         frameInfo frame = frames[selected_frames[i]];
 //         frame.cm = get_center_of_mass(frame.frame);

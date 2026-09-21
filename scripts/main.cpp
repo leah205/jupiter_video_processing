@@ -8,6 +8,7 @@
 #include "optimisation.h"
 #include "helpers.h"
 #include "align.h"
+#include "stack.h"
 
 // g++ main.cpp -pg -O0  -g -o my_program $(pkg-config --cflags --libs opencv4)
 
@@ -58,8 +59,8 @@ int main()
     int select_amount = ceil(((double)(frame_num)) / 4);
     processor.setFrameStackNum(select_amount);
     processor.selectFramesByGradient();
-    // processor.alignSelectedFramesByCentroid();
-    processor.alignSelectedCentroidEcc();
+    processor.alignSelectedFramesByCentroid();
+    // processor.alignSelectedCentroidEcc();
     processor.stackAlignedFrames();
     cv::Mat output = processor.getOutput();
     // cv::imshow("final", processor.getOutput());
@@ -76,6 +77,15 @@ int main()
 
     std::cout
         << "correlation to registax output: " << compute_ecc(aligned_reg, output) << std::endl;
+    cv::Mat inner_mask = get_inner_planet_mask(get_planet_mask(registax));
+    cv::Rect rect = get_cropped_rect(registax);
+
+    std::cout << "registax output magnitude: " << get_avg_gradient_mag(registax, inner_mask, rect) << std::endl;
+
+    inner_mask = get_inner_planet_mask(get_planet_mask(output));
+    rect = get_cropped_rect(output);
+
+    std::cout << "output magnitude: " << get_avg_gradient_mag(output, inner_mask, rect) << std::endl;
 
     duration = static_cast<double>(cv::getTickCount()) - duration;
     duration /= cv::getTickFrequency();
