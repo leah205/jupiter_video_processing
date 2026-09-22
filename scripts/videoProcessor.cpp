@@ -9,6 +9,7 @@
 #include "helpers.h"
 #include "optimisation.h"
 #include "videoProcessor.h"
+#include "test_helpers.h"
 
 /**
  * @brief adds frame candidate for lucky imaging
@@ -76,10 +77,10 @@ void VideoProcessor::alignSelectedFramesByCentroid()
     aligned_frames.push_back(ref_frame);
     for (int i = 1; i < selected_frames.size(); i++)
     {
+
         frameInfo frame = frames[selected_frames[i]];
         frame.cm = get_center_of_mass(frame.frame);
         cv::Mat aligned_mat = get_aligned_by_centroid(frame.frame, frame.cm, ref_cm);
-
         aligned_frames.push_back(aligned_mat);
     }
 };
@@ -116,9 +117,14 @@ void VideoProcessor::alignSelectedCentroidEcc()
 
         mean_shiftmag += shift_mag;
         max_shiftmag = std::max(shift_mag, max_shiftmag);
-        if (i == 1)
+        if (shift_mag > 1.2)
         {
             min_corr = corr;
+            cv::imshow("centroid to ref", generate_diff(ref_frame, aligned_mat));
+            cv::waitKey(0);
+
+            cv::imshow("ecc to ref", generate_diff(ref_frame, new_aligned));
+            cv::waitKey(0);
         }
     }
     mean_corr = mean_corr / (selected_frames.size() - 1);
