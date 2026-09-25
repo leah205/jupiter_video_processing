@@ -23,7 +23,8 @@ void get_array_info(const cv::Mat frame)
 /**
  * @brief Get the planet mask object
  *
- * Creates planet mask based on hard coded intensity threshold
+ * Creates planet mask based on otsu intensity threshold which dynamically finds threshold
+ * between pixel intensity peaks
  *
  * @param frame 8-bit one channel cv::Mat
  * @param mask binary mask indicating whether pixel falls on planet
@@ -38,12 +39,12 @@ cv::Mat get_planet_mask(const cv::Mat frame)
     cv::GaussianBlur(frame, blurred, cv::Size(3, 3), 0);
 
     double val = cv::threshold(blurred, otsu_mask, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
-    if (first)
-    {
-        first = 0;
-        cv::imwrite("planet_mask.png", otsu_mask);
-        std::cout << "threshold value: " << val << std::endl;
-    }
+    // if (first)
+    // {
+    //     first = 0;
+    //     cv::imwrite("planet_mask.png", otsu_mask);
+    //     std::cout << "threshold value: " << val << std::endl;
+    // }
     // std::cout << "threshold value: " << val << std::endl;
 
     return otsu_mask;
@@ -104,7 +105,6 @@ cv::Rect get_cropped_rect(const cv::Mat mask)
 cv::Mat get_inner_planet_mask(cv::Mat mask)
 {
 
-    smooth_mask(mask);
     cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(11, 11));
     cv::Mat innerMask = cv::Mat::zeros(mask.size(), CV_8UC1);
     cv::erode(mask, innerMask, kernel);

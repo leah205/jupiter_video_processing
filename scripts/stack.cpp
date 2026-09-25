@@ -21,16 +21,10 @@
  */
 double get_avg_gradient_mag(const cv::Mat frame, const cv::Mat inner_mask, const cv::Rect rect)
 {
-
-    double total_mag = 0;
-
     // gets cropped frame around disc
     cv::Mat croppedFrame = frame(rect);
     // gets cropped mask around disc
     cv::Mat croppedInnerMask = inner_mask(rect);
-
-    int rows = croppedFrame.rows;
-    int cols = croppedFrame.cols;
 
     cv::Mat magx_frame;
     cv::Mat magy_frame;
@@ -38,42 +32,10 @@ double get_avg_gradient_mag(const cv::Mat frame, const cv::Mat inner_mask, const
     cv::Sobel(croppedFrame, magx_frame, CV_32FC1, 1, 0, 3, 1, 0, cv::BORDER_DEFAULT);
     cv::Sobel(croppedFrame, magy_frame, CV_32FC1, 0, 1, 3, 1, 0, cv::BORDER_DEFAULT);
 
-    int nr = rows;
-    int nc = cols;
+    cv::Mat mag;
+    cv::magnitude(magx_frame, magy_frame, mag);
+    double avg_mag = (double)cv::mean(mag, croppedInnerMask)[0];
 
-    int used_pixels = 0;
-
-    if (magx_frame.isContinuous() && magy_frame.isContinuous() && croppedInnerMask.isContinuous())
-    {
-        nc = nr * nc;
-        nr = 1;
-    }
-    for (int r = 0; r < nr; r++)
-    {
-        float *mag_x_ptr = magx_frame.ptr<float>(r);
-        float *mag_y_ptr = magy_frame.ptr<float>(r);
-        uchar *mask_ptr = croppedInnerMask.ptr<uchar>(r);
-
-        for (int c = 0; c < nc; c++)
-        {
-            if (*mask_ptr)
-            {
-                float mag_x = *mag_x_ptr;
-                float mag_y = *mag_y_ptr;
-                total_mag += (double)std::sqrt((mag_x * mag_x + mag_y * mag_y));
-                used_pixels += 1;
-            }
-            mask_ptr++;
-            mag_x_ptr++;
-            mag_y_ptr++;
-        }
-    }
-
-    if (used_pixels == 0)
-    {
-        return 0.0;
-    }
-    double avg_mag = total_mag / (used_pixels);
     return avg_mag;
 }
 

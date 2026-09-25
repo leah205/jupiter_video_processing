@@ -60,11 +60,11 @@ int main()
     int select_amount = ceil(((double)(frame_num)) / 4);
     processor.setFrameStackNum(select_amount);
     processor.selectFramesByGradient();
-    // processor.alignSelectedFramesByCentroid();
-    processor.alignSelectedCentroidEcc();
+    processor.alignSelectedFramesByCentroid();
+    // processor.alignSelectedCentroidEcc();
     processor.stackAlignedFrames();
     cv::Mat output = processor.getOutput();
-    processor.getMaskAreas();
+    // processor.getMaskAreas();
     // cv::imshow("final", processor.getOutput());
     // cv::waitKey(0);
 

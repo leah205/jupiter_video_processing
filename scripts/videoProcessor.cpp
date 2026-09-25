@@ -221,8 +221,8 @@ void VideoProcessor::getMaskAreas()
             max = area;
             last_area = area;
         }
-        min = std::min(min, area);
-        max = std::max(max, area);
+        // min = std::min(min, area);
+        // max = std::max(max, area);
         // std::cout << "area: " << area << std::endl;
         // std::cout << "cx: " << centroid.x << std::endl;
         // std::cout << "cy: " << centroid.y << std::endl;
