@@ -23,6 +23,7 @@ void VideoProcessor::addFrame(cv::Mat &frame)
     frameInfo newFrame;
     extract_channel(frame);
     cv::Mat planet_mask = get_planet_mask(frame);
+    smooth_mask(planet_mask);
 
     cv::Mat inner_mask = get_inner_planet_mask(planet_mask);
     cv::Rect rect = get_cropped_rect(frame);
@@ -90,9 +91,9 @@ void VideoProcessor::alignSelectedFramesByCentroid()
 
 void VideoProcessor::alignSelectedCentroidEcc()
 {
-    cv::Mat ref_frame = frames[selected_frames[0]].frame;
-    cv::Point ref_cm = get_center_of_mass(ref_frame);
-    aligned_frames.push_back(ref_frame);
+    frameInfo ref_frame = frames[selected_frames[0]];
+    cv::Point ref_cm = get_center_of_mass(ref_frame.planet_mask);
+    aligned_frames.push_back(ref_frame.frame);
 
     double mean_corr = 0;
     double min_corr = 0;
@@ -104,13 +105,13 @@ void VideoProcessor::alignSelectedCentroidEcc()
     for (int i = 1; i < selected_frames.size(); i++)
     {
         frameInfo frame = frames[selected_frames[i]];
-        frame.cm = get_center_of_mass(frame.frame);
+        frame.cm = get_center_of_mass(frame.planet_mask);
         cv::Mat aligned_mat = get_aligned_by_centroid(frame.frame, frame.cm, ref_cm);
         // cv::imshow("aligned", aligned_mat);
         // cv::waitKey(0);
 
         cv::Mat new_aligned;
-        double shift_mag = transform_ecc(ref_frame, aligned_mat, new_aligned);
+        double shift_mag = transform_ecc(ref_frame.frame, aligned_mat, new_aligned);
         // cv::imshow("new aligned", new_aligned);
         // cv::waitKey(0);
         double corr = compute_ecc(aligned_mat, new_aligned);

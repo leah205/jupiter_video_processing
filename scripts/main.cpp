@@ -68,26 +68,26 @@ int main()
     // cv::imshow("final", processor.getOutput());
     // cv::waitKey(0);
 
-    cv::VideoCapture r_cap("../registax/2026-03-18-0236_9-Jupiter_656HIA_stacked.bmp");
-    cv::Mat registax;
-    ret = r_cap.read(registax);
-    extract_channel(registax);
-    cv::Point r_cm = get_center_of_mass(registax);
-    cv::Point ref_cm = get_center_of_mass(output);
+    // cv::VideoCapture r_cap("../registax/2026-03-18-0236_9-Jupiter_656HIA_stacked.bmp");
+    // cv::Mat registax;
+    // ret = r_cap.read(registax);
+    // extract_channel(registax);
+    // cv::Point r_cm = get_center_of_mass(registax);
+    // cv::Point ref_cm = get_center_of_mass(output);
 
-    cv::Mat aligned_reg = get_aligned_by_centroid(registax, r_cm, ref_cm);
+    // cv::Mat aligned_reg = get_aligned_by_centroid(registax, r_cm, ref_cm);
 
-    std::cout
-        << "correlation to registax output: " << compute_ecc(aligned_reg, output) << std::endl;
-    cv::Mat inner_mask = get_inner_planet_mask(get_planet_mask(registax));
-    cv::Rect rect = get_cropped_rect(registax);
+    // std::cout
+    //     << "correlation to registax output: " << compute_ecc(aligned_reg, output) << std::endl;
+    // cv::Mat inner_mask = get_inner_planet_mask(get_planet_mask(registax));
+    // cv::Rect rect = get_cropped_rect(registax);
 
-    std::cout << "registax output magnitude: " << get_avg_gradient_mag(registax, inner_mask, rect) << std::endl;
+    // std::cout << "registax output magnitude: " << get_avg_gradient_mag(registax, inner_mask, rect) << std::endl;
 
-    inner_mask = get_inner_planet_mask(get_planet_mask(output));
-    rect = get_cropped_rect(output);
+    // inner_mask = get_inner_planet_mask(get_planet_mask(output));
+    // rect = get_cropped_rect(output);
 
-    std::cout << "output magnitude: " << get_avg_gradient_mag(output, inner_mask, rect) << std::endl;
+    // std::cout << "output magnitude: " << get_avg_gradient_mag(output, inner_mask, rect) << std::endl;
 
     duration = static_cast<double>(cv::getTickCount()) - duration;
     duration /= cv::getTickFrequency();
