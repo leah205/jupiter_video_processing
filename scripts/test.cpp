@@ -28,4 +28,5 @@ int main()
     cv::Point ref_cm = get_center_of_mass(frame);
     cv::Point cm = get_center_of_mass(shifted);
     get_aligned_by_centroid(frame, cm, ref_cm);
+    // generate_diff(ref_frame, frame);
 }

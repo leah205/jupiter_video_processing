@@ -8,6 +8,7 @@ typedef struct
     cv::Mat frame;
     double quality_score;
     cv::Point cm;
+    cv::Mat planet_mask;
 } frameInfo;
 
 class VideoProcessor
@@ -36,7 +37,9 @@ public:
 
     void alignSelectedCentroidEcc();
 
-    void alignEcc();
+    void getMaskAreas();
+
+    // void alignEcc();
 
     void stackAlignedFrames();
 

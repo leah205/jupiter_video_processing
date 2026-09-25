@@ -7,14 +7,13 @@
 /**
  * @brief Get the center of mass object
  *
- * @param frame single channel 8-bit matrix
+ * @param mask single channel 8-bit binary bit mask of pixels on disc
  * @return cv::Point, center of mass of planet
  */
 
-cv::Point get_center_of_mass(cv::Mat frame)
+cv::Point get_center_of_mass(const cv::Mat mask)
 {
 
-    cv::Mat mask = get_planet_mask(frame);
     cv::Moments m = cv::moments(mask, true);
 
     if (std::abs(m.m00) < 1e-8)

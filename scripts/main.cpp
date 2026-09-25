@@ -7,6 +7,7 @@
 #include "videoProcessor.h"
 #include "optimisation.h"
 #include "helpers.h"
+#include "test_helpers.h"
 #include "align.h"
 #include "stack.h"
 
@@ -63,6 +64,7 @@ int main()
     processor.alignSelectedCentroidEcc();
     processor.stackAlignedFrames();
     cv::Mat output = processor.getOutput();
+    processor.getMaskAreas();
     // cv::imshow("final", processor.getOutput());
     // cv::waitKey(0);
 
@@ -90,4 +92,6 @@ int main()
     duration = static_cast<double>(cv::getTickCount()) - duration;
     duration /= cv::getTickFrequency();
     std::cout << "duration of program: " << duration << " s" << std::endl;
+
+    cv::imwrite("ouput.png", output);
 }

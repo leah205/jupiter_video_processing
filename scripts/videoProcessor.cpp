@@ -22,11 +22,14 @@ void VideoProcessor::addFrame(cv::Mat &frame)
 {
     frameInfo newFrame;
     extract_channel(frame);
-    cv::Mat inner_mask = get_inner_planet_mask(get_planet_mask(frame));
+    cv::Mat planet_mask = get_planet_mask(frame);
+
+    cv::Mat inner_mask = get_inner_planet_mask(planet_mask);
     cv::Rect rect = get_cropped_rect(frame);
     double quality_score = get_avg_gradient_mag(frame, inner_mask, rect);
     newFrame.frame = frame;
     newFrame.quality_score = quality_score;
+    newFrame.planet_mask = planet_mask;
     frames.push_back(newFrame);
 };
 
@@ -72,14 +75,14 @@ void VideoProcessor::selectFramesByGradient()
  */
 void VideoProcessor::alignSelectedFramesByCentroid()
 {
-    cv::Mat ref_frame = frames[selected_frames[0]].frame;
-    cv::Point ref_cm = get_center_of_mass(ref_frame);
-    aligned_frames.push_back(ref_frame);
+    frameInfo ref_frame = frames[selected_frames[0]];
+    cv::Point ref_cm = get_center_of_mass(ref_frame.planet_mask);
+    aligned_frames.push_back(ref_frame.frame);
     for (int i = 1; i < selected_frames.size(); i++)
     {
 
         frameInfo frame = frames[selected_frames[i]];
-        frame.cm = get_center_of_mass(frame.frame);
+        frame.cm = get_center_of_mass(frame.planet_mask);
         cv::Mat aligned_mat = get_aligned_by_centroid(frame.frame, frame.cm, ref_cm);
         aligned_frames.push_back(aligned_mat);
     }
@@ -95,6 +98,8 @@ void VideoProcessor::alignSelectedCentroidEcc()
     double min_corr = 0;
     double mean_shiftmag = 0;
     double max_shiftmag = 0;
+
+    int flag = 1;
 
     for (int i = 1; i < selected_frames.size(); i++)
     {
@@ -117,14 +122,23 @@ void VideoProcessor::alignSelectedCentroidEcc()
 
         mean_shiftmag += shift_mag;
         max_shiftmag = std::max(shift_mag, max_shiftmag);
-        if (shift_mag > 1.2)
+        // std::cout << shift_mag << std::endl;
+        if (shift_mag > 1.1 && flag)
         {
+            flag = 0;
             min_corr = corr;
-            cv::imshow("centroid to ref", generate_diff(ref_frame, aligned_mat));
-            cv::waitKey(0);
 
-            cv::imshow("ecc to ref", generate_diff(ref_frame, new_aligned));
-            cv::waitKey(0);
+            Histogram1D h;
+            cv::imwrite("histogram.png", h.getHistogramImage(frame.frame));
+
+            // cv::imwrite("centroid_gradient_diff.png", generate_diff(ref_frame, aligned_mat));
+            // cv::imwrite("ecc_gradient_diff.png", generate_diff(ref_frame, new_aligned));
+
+            // cv::imshow("centroid to ref", generate_diff(ref_frame, aligned_mat));
+            // cv::waitKey(0);
+
+            // cv::imshow("ecc to ref", generate_diff(ref_frame, new_aligned));
+            // cv::waitKey(0);
         }
     }
     mean_corr = mean_corr / (selected_frames.size() - 1);
@@ -189,4 +203,39 @@ void VideoProcessor::stackAlignedFrames()
 cv::Mat VideoProcessor::getOutput()
 {
     return output.clone();
+}
+
+void VideoProcessor::getMaskAreas()
+{
+    int min, max, mean;
+    int last_area;
+    cv::Point last_centroid;
+    for (int i = 0; i < frames.size(); i++)
+    {
+        int area = cv::countNonZero(frames[i].planet_mask);
+        cv::Point centroid = get_center_of_mass(frames[i].frame);
+        if (i == 0)
+        {
+            min = area;
+            max = area;
+            last_area = area;
+        }
+        min = std::min(min, area);
+        max = std::max(max, area);
+        // std::cout << "area: " << area << std::endl;
+        // std::cout << "cx: " << centroid.x << std::endl;
+        // std::cout << "cy: " << centroid.y << std::endl;
+
+        // if (last_area - area > 200)
+        // {
+        //     printf("")
+        // }
+
+        mean += area;
+    }
+    mean = mean / frames.size();
+    std::cout << "area min: " << min << std::endl;
+    std::cout << "area max: " << max << std::endl;
+
+    std::cout << "area mean: " << mean << std::endl;
 }

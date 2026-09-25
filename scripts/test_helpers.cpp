@@ -1,4 +1,5 @@
 #include <opencv2/opencv.hpp>
+#include "test_helpers.h"
 
 /**
  * @brief adds white pixels throughout image randomly
@@ -59,4 +60,36 @@ cv::Mat generate_diff(const cv::Mat ref_frame, const cv::Mat frame)
     // cv::normalize(diff, diff, 0, 255, cv::NORM_MINMAX);
     diff.convertTo(diff, CV_8UC1, scale, 128);
     return diff;
+};
+
+cv::MatND Histogram1D::getHistogram(const cv::Mat &image)
+{
+    // returns 2d hue saturation histogram
+    cv::Mat hist;
+
+    cv::calcHist(&image, 1, channels, cv::Mat(), hist, 1, histSize, ranges);
+    return hist;
+};
+
+cv::Mat Histogram1D::getHistogramImage(const cv::Mat &image)
+{
+    cv::MatND hist = getHistogram(image);
+    // for (int i = 0; i < 130; i++)
+    // {
+    //     std::cout << "value " << i << "=" << hist.at<float>(i) << std::endl;
+    // }
+
+    double maxVal = 0;
+    double minVal = 0;
+    cv::minMaxLoc(hist, &minVal, &maxVal, 0, 0);
+    cv::Mat histImg(histSize[0], histSize[0], CV_8U, cv::Scalar(255));
+    int hpt = static_cast<int>(0.9 * histSize[0]);
+    std::cout << "hist size" << histSize[0] << std::endl;
+    for (int h = 0; h < histSize[0]; h++)
+    {
+        float binVal = hist.at<float>(h);
+        int intensity = static_cast<int>(binVal * hpt / maxVal);
+        cv::line(histImg, cv::Point(h, histSize[0]), cv::Point(h, histSize[0] - intensity), cv::Scalar::all(0));
+    }
+    return histImg;
 }
