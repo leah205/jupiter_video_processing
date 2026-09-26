@@ -9,6 +9,16 @@
 #include "optimisation.h"
 #include "videoProcessor.h"
 
+double get_laplacian_variance(const cv::Mat frame, const cv::Mat inner_mask, const cv::Rect rect)
+{
+    cv::Mat croppedFrame = frame(rect);
+    cv::Mat croppedInnerMask = inner_mask(rect);
+    cv::Mat lap_frame;
+    cv::Scalar mean, stddev;
+    cv::meanStdDev(lap_frame, mean, stddev, inner_mask);
+    return stddev[0] * stddev[0];
+}
+
 /**
  * @brief Get the avg gradient mag
  *

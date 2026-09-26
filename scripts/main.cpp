@@ -73,7 +73,8 @@ int main()
 
     int select_amount = ceil(((double)(frame_num)) / 4);
     processor.setFrameStackNum(select_amount);
-    processor.selectFramesByGradient();
+    processor.setQualityMetricToLaplacian();
+    processor.selectFrames();
     processor.alignSelectedFramesByCentroid();
     // processor.alignSelectedCentroidEcc();
     processor.stackAlignedFrames();

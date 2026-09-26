@@ -21,18 +21,24 @@ private:
     cv::Mat sharpened_output;
     std::vector<size_t> selected_frames;
     std::vector<size_t> quality_sorted_indices;
+    enum Quality_metric
+    {
+        GRADIENT,
+        LAPLACIAN
+    };
+
+    enum Quality_metric quality_metric;
 
 public:
     VideoProcessor()
     {
         stacked_frames_num = 600;
+        quality_metric = GRADIENT;
     }
 
     void addFrame(cv::Mat &frame);
 
     void setFrameStackNum(int frame_num);
-
-    void selectFramesByGradient();
 
     void alignSelectedFramesByCentroid();
 
@@ -46,9 +52,19 @@ public:
 
     void generateSharpenedOutput();
 
+    void assessFramesQuality();
+
+    void selectFrames();
+
+    void setQualityMetricToGradient();
+
+    void setQualityMetricToLaplacian();
+
     void stackAlignedFrames();
 
     cv::Mat getOutput();
+
+    void saveOutput(std::string output_dir);
 };
 
 #endif

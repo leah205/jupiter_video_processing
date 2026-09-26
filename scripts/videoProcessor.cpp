@@ -25,12 +25,7 @@ void VideoProcessor::addFrame(cv::Mat &frame)
     extract_channel(frame);
     cv::Mat planet_mask = get_planet_mask(frame);
     smooth_mask(planet_mask);
-
-    cv::Mat inner_mask = get_inner_planet_mask(planet_mask);
-    cv::Rect rect = get_cropped_rect(frame);
-    double quality_score = get_avg_gradient_mag(frame, inner_mask, rect);
     newFrame.frame = frame;
-    newFrame.quality_score = quality_score;
     newFrame.planet_mask = planet_mask;
     frames.push_back(newFrame);
 };
@@ -46,18 +41,41 @@ void VideoProcessor::setFrameStackNum(int frame_num)
     stacked_frames_num = frame_num;
 };
 
-/**
- * @brief selects sharpest frames for stacking
- *
- * Uses average gradient magnitude along the inner disk of jupiter to assess
- * image sharpness and updates the list of selected indices for stacking
- * to include the indices of the sharpest frames (sorted sharpest to least sharp)
- * with list size determined by number of frames being stacked
- *
- */
-void VideoProcessor::selectFramesByGradient()
+void VideoProcessor::assessFramesQuality()
 {
-    std::cout << "selecting frames to stack..." << std::endl;
+    for (int i = 0; i < frames.size(); i++)
+    {
+        frameInfo frame = frames[i];
+        cv::Mat inner_mask = get_inner_planet_mask(frame.planet_mask);
+        cv::Rect rect = get_cropped_rect(frame.frame);
+        if (quality_metric == GRADIENT)
+        {
+            frame.quality_score = get_avg_gradient_mag(frame.frame, inner_mask, rect);
+        }
+        else if (quality_metric == LAPLACIAN)
+        {
+            frame.quality_score = get_laplacian_variance(frame.frame, inner_mask, rect);
+        }
+        else
+        {
+            std::runtime_error("quality metric not found");
+        }
+    }
+}
+
+void VideoProcessor::setQualityMetricToGradient()
+{
+    quality_metric = GRADIENT;
+}
+
+void VideoProcessor::setQualityMetricToLaplacian()
+{
+    quality_metric = LAPLACIAN;
+}
+
+void VideoProcessor::selectFrames()
+{
+
     quality_sorted_indices.resize(frames.size());
 
     std::iota(quality_sorted_indices.begin(), quality_sorted_indices.end(), 0);
@@ -66,8 +84,7 @@ void VideoProcessor::selectFramesByGradient()
 
     std::vector<size_t> selected_indices(quality_sorted_indices.begin(), quality_sorted_indices.begin() + stacked_frames_num);
     selected_frames = selected_indices;
-    // selected_frames = get_sharpest_indices(frames, stacked_frames_num);
-};
+}
 
 /**
  * @brief aligns frames to reference
