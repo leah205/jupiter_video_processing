@@ -165,6 +165,11 @@ void VideoProcessor::stackAlignedFrames()
     std::cout << "stacking " << aligned_frames.size() << " frames..." << std::endl;
 
     output = stack_frames(aligned_frames);
+    std::cout << cv::mean(output, cv::Mat())
+              << std::endl;
+    subtract_background_signal(output);
+    std::cout << cv::mean(output, cv::Mat())
+              << std::endl;
 }
 
 cv::Mat VideoProcessor::getOutput()

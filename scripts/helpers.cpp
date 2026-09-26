@@ -116,3 +116,23 @@ void save_image(std::string prefix, const cv::Mat frame)
 {
     cv::imwrite("../output/" + prefix + ".png", frame);
 }
+
+/**
+ * @brief subtract background signal from frame
+ *
+ * uses mask to find the average background pixel intensity, and subtracts this value from all of the pixels in the frame
+ *
+ * @param frame frame to be modified in-place
+ */
+void subtract_background_signal(cv::Mat &frame)
+{
+    cv::Mat planet_mask = get_planet_mask(frame);
+    cv::Mat background_mask;
+    cv::bitwise_not(planet_mask, background_mask);
+    cv::imshow("background mask", background_mask);
+    cv::waitKey(0);
+
+    double background_signal = cv::mean(frame, background_mask)[0];
+    std::cout << "correcting for detected background signal of " << background_signal << std::endl;
+    cv::subtract(frame, background_signal, frame);
+}
