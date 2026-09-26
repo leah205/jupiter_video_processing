@@ -21,13 +21,27 @@ int main()
     bool ret;
     cv::Mat frame;
 
-    std::string filename = "2026-03-18-0236_9-Jupiter_656HIA.avi";
-    std::string output_dir = "../data/";
-    std::string path = output_dir + filename;
+    // std::string filename = "2026-03-18-0236_9-Jupiter_656HIA.avi";
+    // std::string filename = "2026-03-18-0241_0-Jupiter_620CH4.avi";
+
+    // std::string filename = "2026-03-18-0239_0-Jupiter_632OI.avi";
+
+    std::string filename = "2026-03-18-0704_1-Jupiter_685NIR.avi";
+
+    // std::string filename = "2026-03-18-0706_3-Jupiter_450BLU.avi";
+
+    std::string input_dir = "../data/";
+    std::string path = input_dir + filename;
+
+    std::string output_dir = "../output/";
 
     cv::VideoCapture cap(path);
     // cv::VideoCapture cap("../data/2026-03-18-0241_0-Jupiter_620CH4.avi");
+
     // cv::VideoCapture cap("../data/2026-03-18-0239_0-Jupiter_632OI.avi");
+    // cv::VideoCapture cap("../data/2026-03-18-0704_1-Jupiter_685NIR.avi");
+    // cv::VideoCapture cap("../data/2026-03-18-0706_3-Jupiter_450BLU.avi");
+
     int frame_num = cap.get(cv::CAP_PROP_FRAME_COUNT);
     int fps = cap.get(cv::CAP_PROP_FPS);
 
@@ -64,6 +78,9 @@ int main()
     // processor.alignSelectedCentroidEcc();
     processor.stackAlignedFrames();
     cv::Mat output = processor.getOutput();
+    std::string output_file = filename.substr(0, filename.size() - 3) + "png";
+    std::cout << output_file << std::endl;
+    cv::imwrite(output_dir + output_file, output);
     // processor.getMaskAreas();
     // cv::imshow("final", processor.getOutput());
     // cv::waitKey(0);
@@ -93,5 +110,5 @@ int main()
     duration /= cv::getTickFrequency();
     std::cout << "duration of program: " << duration << " s" << std::endl;
 
-    cv::imwrite("ouput.png", output);
+    // cv::imwrite("ouput.png", output);
 }
