@@ -78,9 +78,12 @@ int main()
     // processor.alignSelectedCentroidEcc();
     processor.stackAlignedFrames();
     cv::Mat output = processor.getOutput();
-    std::string output_file = filename.substr(0, filename.size() - 3) + "png";
-    std::cout << output_file << std::endl;
+    processor.generateSharpenedOutput();
+    cv::Mat sharpened_output = processor.getSharpenedOutput();
+    std::string output_file = filename.substr(0, filename.size() - 4) + ".png";
+    std::string sharpened_file = filename.substr(0, filename.size() - 4) + "_sharpened.png";
     cv::imwrite(output_dir + output_file, output);
+    cv::imwrite(output_dir + sharpened_file, sharpened_output);
     // processor.getMaskAreas();
     // cv::imshow("final", processor.getOutput());
     // cv::waitKey(0);

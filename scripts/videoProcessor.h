@@ -18,6 +18,7 @@ private:
     std::vector<cv::Mat> aligned_frames;
     int stacked_frames_num;
     cv::Mat output;
+    cv::Mat sharpened_output;
     std::vector<size_t> selected_frames;
     std::vector<size_t> quality_sorted_indices;
 
@@ -39,7 +40,11 @@ public:
 
     void getMaskAreas();
 
+    cv::Mat getSharpenedOutput();
+
     // void alignEcc();
+
+    void generateSharpenedOutput();
 
     void stackAlignedFrames();
 

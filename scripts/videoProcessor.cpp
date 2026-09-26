@@ -10,6 +10,7 @@
 #include "optimisation.h"
 #include "videoProcessor.h"
 #include "test_helpers.h"
+#include "sharpen.h"
 
 /**
  * @brief adds frame candidate for lucky imaging
@@ -172,9 +173,23 @@ void VideoProcessor::stackAlignedFrames()
               << std::endl;
 }
 
+void VideoProcessor::generateSharpenedOutput()
+{
+    if (output.empty())
+    {
+        throw std::runtime_error("no output matrix exists to sharpen");
+    }
+    sharpen(output, sharpened_output);
+}
+
 cv::Mat VideoProcessor::getOutput()
 {
     return output.clone();
+}
+
+cv::Mat VideoProcessor::getSharpenedOutput()
+{
+    return sharpened_output.clone();
 }
 
 void VideoProcessor::getMaskAreas()
