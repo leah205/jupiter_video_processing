@@ -62,6 +62,8 @@ public:
 
     void stackAlignedFrames();
 
+    void alignSelectedFramesByCentroidCircle();
+
     cv::Mat getOutput();
 
     void saveOutput(std::string output_dir);

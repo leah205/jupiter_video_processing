@@ -22,11 +22,11 @@ int main()
     cv::Mat frame;
 
     // std::string filename = "2026-03-18-0236_9-Jupiter_656HIA.avi";
-    // std::string filename = "2026-03-18-0241_0-Jupiter_620CH4.avi";
+    std::string filename = "2026-03-18-0241_0-Jupiter_620CH4.avi";
 
     // std::string filename = "2026-03-18-0239_0-Jupiter_632OI.avi";
 
-    std::string filename = "2026-03-18-0704_1-Jupiter_685NIR.avi";
+    // std::string filename = "2026-03-18-0704_1-Jupiter_685NIR.avi";
 
     // std::string filename = "2026-03-18-0706_3-Jupiter_450BLU.avi";
 
@@ -75,8 +75,8 @@ int main()
     processor.setFrameStackNum(select_amount);
     processor.setQualityMetricToLaplacian();
     processor.selectFrames();
-    processor.alignSelectedFramesByCentroid();
-    // processor.alignSelectedCentroidEcc();
+    // processor.alignSelectedFramesByCentroid();
+    processor.alignSelectedCentroidEcc();
     processor.stackAlignedFrames();
     cv::Mat output = processor.getOutput();
     processor.generateSharpenedOutput();
@@ -89,18 +89,18 @@ int main()
     // cv::imshow("final", processor.getOutput());
     // cv::waitKey(0);
 
-    // cv::VideoCapture r_cap("../registax/2026-03-18-0236_9-Jupiter_656HIA_stacked.bmp");
-    // cv::Mat registax;
-    // ret = r_cap.read(registax);
-    // extract_channel(registax);
-    // cv::Point r_cm = get_center_of_mass(registax);
-    // cv::Point ref_cm = get_center_of_mass(output);
+    cv::VideoCapture r_cap("../registax/2026-03-18-0241_0-Jupiter_620CH4.png");
+    cv::Mat registax;
+    ret = r_cap.read(registax);
+    extract_channel(registax);
+    cv::Point r_cm = get_center_of_mass(registax);
+    cv::Point ref_cm = get_center_of_mass(output);
 
-    // cv::Mat aligned_reg = get_aligned_by_centroid(registax, r_cm, ref_cm);
+    cv::Mat aligned_reg = get_aligned_by_centroid(registax, r_cm, ref_cm);
 
-    // std::cout
-    //     << "correlation to registax output: " << compute_ecc(aligned_reg, output) << std::endl;
-    // cv::Mat inner_mask = get_inner_planet_mask(get_planet_mask(registax));
+    std::cout
+        << "correlation to registax output: " << compute_ecc(aligned_reg, output) << std::endl;
+    cv::Mat inner_mask = get_inner_planet_mask(get_planet_mask(registax));
     // cv::Rect rect = get_cropped_rect(registax);
 
     // std::cout << "registax output magnitude: " << get_avg_gradient_mag(registax, inner_mask, rect) << std::endl;

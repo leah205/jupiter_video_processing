@@ -23,6 +23,7 @@ void VideoProcessor::addFrame(cv::Mat &frame)
 {
     frameInfo newFrame;
     extract_channel(frame);
+    // subtract_background_signal(frame);
     cv::Mat planet_mask = get_planet_mask(frame);
     smooth_mask(planet_mask);
     newFrame.frame = frame;
@@ -84,6 +85,22 @@ void VideoProcessor::selectFrames()
 
     std::vector<size_t> selected_indices(quality_sorted_indices.begin(), quality_sorted_indices.begin() + stacked_frames_num);
     selected_frames = selected_indices;
+}
+
+void VideoProcessor::alignSelectedFramesByCentroidCircle()
+{
+    std::cout << "aligning frames..." << std::endl;
+    frameInfo ref_frame = frames[selected_frames[0]];
+    cv::Point ref_cm = get_circle_centroid(ref_frame.planet_mask);
+    aligned_frames.push_back(ref_frame.frame);
+    for (int i = 1; i < selected_frames.size(); i++)
+    {
+
+        frameInfo frame = frames[selected_frames[i]];
+        frame.cm = get_circle_centroid(frame.planet_mask);
+        cv::Mat aligned_mat = get_aligned_by_centroid(frame.frame, frame.cm, ref_cm);
+        aligned_frames.push_back(aligned_mat);
+    }
 }
 
 /**
@@ -242,4 +259,8 @@ void VideoProcessor::getMaskAreas()
     std::cout << "area max: " << max << std::endl;
 
     std::cout << "area mean: " << mean << std::endl;
+}
+
+void saveOutput(std::string output_dir)
+{
 }

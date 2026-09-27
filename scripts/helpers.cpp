@@ -2,6 +2,15 @@
 #include "helpers.h"
 #include <string>
 
+// double getPixelValAtPercentile(cv::Mat frame)
+// {
+//     std::vector<float> pixels;
+//     pixels.assign(frame.begin<float>(), frame.end<float>());
+//     size_t index = static_cast<size_t>(0.2 * pixels.size());
+//     std::nth_element(pixels.begin(), pixels.begin() + index, pixels.end());
+//     return pixels[index];
+// }
+
 /**
  * @brief print information on cv::Mat object
  *
@@ -38,7 +47,9 @@ cv::Mat get_planet_mask(const cv::Mat frame)
     cv::Mat blurred;
     cv::GaussianBlur(frame, blurred, cv::Size(3, 3), 0);
 
-    double val = cv::threshold(blurred, otsu_mask, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+    // double val = cv::threshold(blurred, otsu_mask, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+    double val = cv::threshold(blurred, otsu_mask, 20, 255, cv::THRESH_BINARY);
+
     // if (first)
     // {
     //     first = 0;
