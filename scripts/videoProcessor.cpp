@@ -44,11 +44,13 @@ void VideoProcessor::setFrameStackNum(int frame_num)
 
 void VideoProcessor::assessFramesQuality()
 {
+    std::cout << "quality metric: " << quality_metric << std::endl;
     for (int i = 0; i < frames.size(); i++)
     {
-        frameInfo frame = frames[i];
+        frameInfo &frame = frames[i];
         cv::Mat inner_mask = get_inner_planet_mask(frame.planet_mask);
         cv::Rect rect = get_cropped_rect(frame.frame);
+
         if (quality_metric == GRADIENT)
         {
             frame.quality_score = get_avg_gradient_mag(frame.frame, inner_mask, rect);
@@ -60,6 +62,11 @@ void VideoProcessor::assessFramesQuality()
         else
         {
             std::runtime_error("quality metric not found");
+        }
+        if (i == 0)
+        {
+            std::cout << frame.quality_score << std::endl;
+            ;
         }
     }
 }
@@ -78,6 +85,7 @@ void VideoProcessor::selectFrames()
 {
 
     quality_sorted_indices.resize(frames.size());
+    // std::cout << "frame quality score" << frames[0].quality_score << std::endl;
 
     std::iota(quality_sorted_indices.begin(), quality_sorted_indices.end(), 0);
     std::sort(quality_sorted_indices.begin(), quality_sorted_indices.end(), [&](size_t a, size_t b)
@@ -86,6 +94,11 @@ void VideoProcessor::selectFrames()
     std::vector<size_t> selected_indices(quality_sorted_indices.begin(), quality_sorted_indices.begin() + stacked_frames_num);
     selected_frames = selected_indices;
 }
+
+std::vector<size_t> VideoProcessor::getSelected()
+{
+    return selected_frames;
+};
 
 void VideoProcessor::alignSelectedFramesByCentroidCircle()
 {
@@ -143,7 +156,7 @@ void VideoProcessor::alignSelectedCentroidEcc()
     {
         frameInfo frame = frames[selected_frames[i]];
         frame.cm = get_center_of_mass(frame.planet_mask);
-        cv::Mat aligned_mat = get_aligned_by_centroid(frame.frame, frame.cm, ref_cm);
+        cv::Mat aligned_mat = get_aligned_by_centroid(aligned_mat, frame.cm, ref_cm);
         // cv::imshow("aligned", aligned_mat);
         // cv::waitKey(0);
 
@@ -151,7 +164,7 @@ void VideoProcessor::alignSelectedCentroidEcc()
         double shift_mag = transform_ecc(ref_frame.frame, aligned_mat, new_aligned);
         // cv::imshow("new aligned", new_aligned);
         // cv::waitKey(0);
-        double corr = compute_ecc(aligned_mat, new_aligned);
+        double corr = compute_ecc(frame.frame, new_aligned);
 
         aligned_frames.push_back(new_aligned);
 
@@ -202,7 +215,7 @@ void VideoProcessor::stackAlignedFrames()
     output = stack_frames(aligned_frames);
     std::cout << cv::mean(output, cv::Mat())
               << std::endl;
-    subtract_background_signal(output);
+    // subtract_background_signal(output);
     std::cout << cv::mean(output, cv::Mat())
               << std::endl;
 }

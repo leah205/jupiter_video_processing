@@ -46,6 +46,10 @@ public:
 
     void getMaskAreas();
 
+    void compareStacks();
+
+    std::vector<size_t> getSelected();
+
     cv::Mat getSharpenedOutput();
 
     // void alignEcc();
@@ -66,7 +70,7 @@ public:
 
     cv::Mat getOutput();
 
-    void saveOutput(std::string output_dir);
+    // void saveOutput(std::string output_dir);
 };
 
 #endif
