@@ -15,7 +15,10 @@ double get_laplacian_variance(const cv::Mat frame, const cv::Mat inner_mask, con
     cv::Mat croppedInnerMask = inner_mask(rect);
     cv::Mat lap_frame;
     cv::Scalar mean, stddev;
-    cv::meanStdDev(lap_frame, mean, stddev, inner_mask);
+    // cv::imshow("cropped inner mask", croppedInnerMask);
+    // cv::waitKey(0);
+    cv::Laplacian(frame, lap_frame, CV_8UC1);
+    cv::meanStdDev(lap_frame, mean, stddev, croppedInnerMask);
     return stddev[0] * stddev[0];
 }
 

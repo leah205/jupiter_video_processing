@@ -21,8 +21,8 @@ int main()
     bool ret;
     cv::Mat frame;
 
-    // std::string filename = "2026-03-18-0236_9-Jupiter_656HIA.avi";
-    std::string filename = "2026-03-18-0241_0-Jupiter_620CH4.avi";
+    std::string filename = "2026-03-18-0236_9-Jupiter_656HIA.avi";
+    // std::string filename = "2026-03-18-0241_0-Jupiter_620CH4.avi";
 
     // std::string filename = "2026-03-18-0239_0-Jupiter_632OI.avi";
 
@@ -74,7 +74,15 @@ int main()
     int select_amount = ceil(((double)(frame_num)) / 4);
     processor.setFrameStackNum(select_amount);
     processor.setQualityMetricToLaplacian();
+    processor.assessFramesQuality();
     processor.selectFrames();
+    std::vector laplacianIndices = processor.getSelected();
+    processor.setQualityMetricToGradient();
+    processor.assessFramesQuality();
+    processor.selectFrames();
+    std::vector<size_t> gradientIndices = processor.getSelected();
+    getStackSame(gradientIndices, laplacianIndices);
+    return 1;
     // processor.alignSelectedFramesByCentroid();
     processor.alignSelectedCentroidEcc();
     processor.stackAlignedFrames();
@@ -89,7 +97,9 @@ int main()
     // cv::imshow("final", processor.getOutput());
     // cv::waitKey(0);
 
-    cv::VideoCapture r_cap("../registax/2026-03-18-0241_0-Jupiter_620CH4.png");
+    cv::VideoCapture r_cap("../registax/2026-03-18-0236_9-Jupiter_656HIAStack600.png");
+    // cv::VideoCapture r_cap("../registax/2026-03-18-0239_0-Jupiter_632OIStack600.png");
+
     cv::Mat registax;
     ret = r_cap.read(registax);
     extract_channel(registax);

@@ -4,6 +4,8 @@ void synthetic_shift(const cv::Mat input, cv::Mat &result);
 
 cv::Mat generate_diff(const cv::Mat ref_frame, const cv::Mat frame);
 
+void getStackSame(std::vector<size_t> stack1, std::vector<size_t> stack2);
+
 class Histogram1D
 {
 private:
