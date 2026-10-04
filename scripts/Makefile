@@ -1,6 +1,8 @@
 CXX = g++
-CXXFLAGS = -Wall -Wextra -std=c++17 -g -pg $(shell pkg-config --cflags opencv4)
-LIBS = $(shell pkg-config --libs opencv4)
+CXXFLAGS = -Wall -Wextra -std=c++17 -g -pg $(shell pkg-config --cflags opencv4) -I../wavelib/header
+LDFLAGS = -L../wavelib/Bin
+LIBS = $(shell pkg-config --libs opencv4) 
+LDLIBS = -lwavelib -lwauxlib
 
 main: main.o stack.o align.o helpers.o sharpen.o  optimisation.o videoProcessor.o test_helpers.o limit.o
 	$(CXX) $(CXXFLAGS) -o main main.o stack.o  align.o limit.o helpers.o sharpen.o optimisation.o  videoProcessor.o test_helpers.o $(LIBS)
@@ -37,6 +39,7 @@ test_helpers.o: test_helpers.cpp test_helpers.h
 
 limit.o: limit.cpp frameInfo.h
 		$(CXX) $(CXXFLAGS) -c limit.cpp
+
 
 
 

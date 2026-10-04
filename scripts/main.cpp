@@ -21,12 +21,12 @@ int main()
     bool ret;
     cv::Mat frame;
 
-    std::string filename = "2026-03-18-0236_9-Jupiter_656HIA.avi";
+    // std::string filename = "2026-03-18-0236_9-Jupiter_656HIA.avi";
     // std::string filename = "2026-03-18-0241_0-Jupiter_620CH4.avi";
 
     // std::string filename = "2026-03-18-0239_0-Jupiter_632OI.avi";
 
-    // std::string filename = "2026-03-18-0704_1-Jupiter_685NIR.avi";
+    std::string filename = "2026-03-18-0704_1-Jupiter_685NIR.avi";
 
     // std::string filename = "2026-03-18-0706_3-Jupiter_450BLU.avi";
 
