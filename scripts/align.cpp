@@ -2,7 +2,7 @@
 
 #include "align.h"
 #include "helpers.h"
-#include "videoProcessor.h"
+#include "frameInfo.h"
 
 /**
  * @brief Get the center of mass object
@@ -77,4 +77,30 @@ cv::Point get_circle_centroid(const cv::Mat mask)
 
     // cv::Point p(x, y);
     // return p;
+}
+
+std::vector<frameInfo> Aligner::alignFramesToRef(std::vector<frameInfo> input_frames)
+{
+    cv::Point ref_frame_cm = get_center_of_mass(ref_frame.frame);
+    for (int i = 0; i < input_frames.size(); i++)
+    {
+
+        frameInfo frame = input_frames[i];
+        cv::Point cm = get_center_of_mass(frame.planet_mask);
+        frameInfo aligned_frame = frame;
+        cv::Mat aligned_mat = get_aligned_by_centroid(frame.frame, cm, ref_frame_cm);
+        aligned_frame.frame = aligned_mat;
+        aligned_frames.push_back(aligned_frame);
+    }
+    return aligned_frames;
+}
+
+void Aligner::setRefFrame(frameInfo frame)
+{
+    ref_frame = frame;
+};
+
+std::vector<frameInfo> Aligner::getAligned()
+{
+    return aligned_frames;
 }
