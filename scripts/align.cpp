@@ -2,7 +2,7 @@
 
 #include "align.h"
 #include "helpers.h"
-#include "videoProcessor.h"
+#include "frameInfo.h"
 
 /**
  * @brief Get the center of mass object
@@ -45,10 +45,6 @@ cv::Mat get_aligned_by_centroid(cv::Mat frame, cv::Point cm, cv::Point ref)
     double offset_x, offset_y;
     offset_x = cm.x - ref.x;
     offset_y = cm.y - ref.y;
-
-    // std::cout << "x-shift: " << offset_x << std::endl;
-    // std::cout << "y-shift: " << offset_y << std::endl;
-
     cv::Mat translation_matrix = (cv::Mat_<double>(2, 3) << 1, 0, -1 * offset_x, 0, 1, -1 * offset_y);
     int height = frame.cols;
     int width = frame.rows;
@@ -57,24 +53,28 @@ cv::Mat get_aligned_by_centroid(cv::Mat frame, cv::Point cm, cv::Point ref)
     return aligned_frame;
 }
 
-cv::Point get_circle_centroid(const cv::Mat mask)
+std::vector<frameInfo> Aligner::alignFramesToRef(std::vector<frameInfo> input_frames)
 {
-    cv::Point2f center;
-    std::vector<cv::Point> points;
-    findNonZero(mask, points);
-    float radius;
-    cv::minEnclosingCircle(points, center, radius);
-    return center;
-    // cv::Moments m = cv::moments(mask, true);
+    cv::Point ref_frame_cm = get_center_of_mass(ref_frame.frame);
+    for (int i = 0; i < input_frames.size(); i++)
+    {
 
-    // if (std::abs(m.m00) < 1e-8)
-    // {
-    //     throw std::runtime_error("Zero-area blob");
-    // }
+        frameInfo frame = input_frames[i];
+        cv::Point cm = get_center_of_mass(frame.planet_mask);
+        frameInfo aligned_frame = frame;
+        cv::Mat aligned_mat = get_aligned_by_centroid(frame.frame, cm, ref_frame_cm);
+        aligned_frame.frame = aligned_mat;
+        aligned_frames.push_back(aligned_frame);
+    }
+    return aligned_frames;
+}
 
-    // double x = m.m10 / m.m00;
-    // double y = m.m01 / m.m00;
+void Aligner::setRefFrame(frameInfo frame)
+{
+    ref_frame = frame;
+};
 
-    // cv::Point p(x, y);
-    // return p;
+std::vector<frameInfo> Aligner::getAligned()
+{
+    return aligned_frames;
 }

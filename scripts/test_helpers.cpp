@@ -94,25 +94,25 @@ cv::Mat Histogram1D::getHistogramImage(const cv::Mat &image)
     return histImg;
 }
 
-void getStackSame(std::vector<size_t> stack1, std::vector<size_t> stack2)
+void getStackSame(std::vector<size_t> stack1, std::vector<size_t> stack2, int frame_num)
 {
     int in_both = 0;
-    for (int i = 0; i < stack1.size(); i++)
+    for (int i = 0; i < frame_num; i++)
     {
-        for (int j = 0; j < stack2.size(); j++)
+        for (int j = 0; j < frame_num; j++)
         {
             if (stack1[i] == stack2[j])
             {
-                // std::cout << "g: " << i << std::endl;
+                std::cout << "g: " << i << std::endl;
 
-                // std::cout << "l: " << j << std::endl;
+                std::cout << "l: " << j << std::endl;
                 in_both++;
                 break;
             }
         }
     }
     std::cout << in_both << std::endl;
-    std::cout << stack1.size() << std::endl;
-    double perc = ((double)in_both) / stack1.size();
-    std::cout << "percentage in both" << perc << std::endl;
+    std::cout << frame_num << std::endl;
+    double perc = ((double)in_both) / frame_num;
+    std::cout << "percentage in both: " << perc << std::endl;
 }

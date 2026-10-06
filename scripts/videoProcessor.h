@@ -1,26 +1,23 @@
 #include <opencv2/opencv.hpp>
+#include "align.h"
+#include "limit.h"
+#include "frameInfo.h"
 
 #ifndef VIDEO_H
 #define VIDEO_H
 
-typedef struct
-{
-    cv::Mat frame;
-    double quality_score;
-    cv::Point cm;
-    cv::Mat planet_mask;
-} frameInfo;
-
 class VideoProcessor
 {
 private:
+    Aligner aligner;
+    Limiter limiter;
     std::vector<frameInfo> frames;
-    std::vector<cv::Mat> aligned_frames;
+    std::vector<frameInfo> aligned_frames;
     int stacked_frames_num;
     cv::Mat output;
     cv::Mat sharpened_output;
-    std::vector<size_t> selected_frames;
-    std::vector<size_t> quality_sorted_indices;
+    std::vector<frameInfo> selected_frames;
+    // std::vector<size_t> quality_sorted_indices;
     enum Quality_metric
     {
         GRADIENT,
@@ -34,25 +31,27 @@ public:
     {
         stacked_frames_num = 600;
         quality_metric = GRADIENT;
+        // Limiter limiter = new Limiter();
+        // Aligner aligner = new Aligner();
     }
 
     void addFrame(cv::Mat &frame);
 
+    void processFrames(cv::Mat frame);
+
     void setFrameStackNum(int frame_num);
 
-    void alignSelectedFramesByCentroid();
+    // void alignSelectedFramesByCentroid();
 
-    void alignSelectedCentroidEcc();
+    // void alignSelectedCentroidEcc();
 
-    void getMaskAreas();
+    // void getMaskAreas();
 
-    void compareStacks();
+    // void compareStacks();
 
-    std::vector<size_t> getSelected();
+    std::vector<frameInfo> getSelected();
 
     cv::Mat getSharpenedOutput();
-
-    // void alignEcc();
 
     void generateSharpenedOutput();
 
@@ -66,11 +65,11 @@ public:
 
     void stackAlignedFrames();
 
-    void alignSelectedFramesByCentroidCircle();
+    void alignFrames();
+
+    // void alignSelectedFramesByCentroidCircle();
 
     cv::Mat getOutput();
-
-    // void saveOutput(std::string output_dir);
 };
 
 #endif

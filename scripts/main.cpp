@@ -73,56 +73,49 @@ int main()
 
     int select_amount = ceil(((double)(frame_num)) / 4);
     processor.setFrameStackNum(select_amount);
-    processor.setQualityMetricToLaplacian();
-    processor.assessFramesQuality();
     processor.selectFrames();
-    std::vector laplacianIndices = processor.getSelected();
-    processor.setQualityMetricToGradient();
-    processor.assessFramesQuality();
-    processor.selectFrames();
-    std::vector<size_t> gradientIndices = processor.getSelected();
-    getStackSame(gradientIndices, laplacianIndices);
-    return 1;
-    // processor.alignSelectedFramesByCentroid();
-    processor.alignSelectedCentroidEcc();
+    processor.alignFrames();
     processor.stackAlignedFrames();
     cv::Mat output = processor.getOutput();
     processor.generateSharpenedOutput();
+
     cv::Mat sharpened_output = processor.getSharpenedOutput();
-    std::string output_file = filename.substr(0, filename.size() - 4) + ".png";
-    std::string sharpened_file = filename.substr(0, filename.size() - 4) + "_sharpened.png";
-    cv::imwrite(output_dir + output_file, output);
-    cv::imwrite(output_dir + sharpened_file, sharpened_output);
-    // processor.getMaskAreas();
-    // cv::imshow("final", processor.getOutput());
-    // cv::waitKey(0);
+    cv::imshow("sharpened output", sharpened_output);
+    cv::waitKey(0);
+    // std::string output_file = filename.substr(0, filename.size() - 4) + ".png";
+    // std::string sharpened_file = filename.substr(0, filename.size() - 4) + "_sharpened.png";
+    // cv::imwrite(output_dir + output_file, output);
+    // cv::imwrite(output_dir + sharpened_file, sharpened_output);
+    // // processor.getMaskAreas();
+    // // cv::imshow("final", processor.getOutput());
+    // // cv::waitKey(0);
 
-    cv::VideoCapture r_cap("../registax/2026-03-18-0236_9-Jupiter_656HIAStack600.png");
-    // cv::VideoCapture r_cap("../registax/2026-03-18-0239_0-Jupiter_632OIStack600.png");
+    // cv::VideoCapture r_cap("../registax/2026-03-18-0236_9-Jupiter_656HIAStack600.png");
+    // // cv::VideoCapture r_cap("../registax/2026-03-18-0239_0-Jupiter_632OIStack600.png");
 
-    cv::Mat registax;
-    ret = r_cap.read(registax);
-    extract_channel(registax);
-    cv::Point r_cm = get_center_of_mass(registax);
-    cv::Point ref_cm = get_center_of_mass(output);
+    // cv::Mat registax;
+    // ret = r_cap.read(registax);
+    // extract_channel(registax);
+    // cv::Point r_cm = get_center_of_mass(registax);
+    // cv::Point ref_cm = get_center_of_mass(output);
 
-    cv::Mat aligned_reg = get_aligned_by_centroid(registax, r_cm, ref_cm);
+    // cv::Mat aligned_reg = get_aligned_by_centroid(registax, r_cm, ref_cm);
 
-    std::cout
-        << "correlation to registax output: " << compute_ecc(aligned_reg, output) << std::endl;
-    cv::Mat inner_mask = get_inner_planet_mask(get_planet_mask(registax));
-    // cv::Rect rect = get_cropped_rect(registax);
+    // std::cout
+    //     << "correlation to registax output: " << compute_ecc(aligned_reg, output) << std::endl;
+    // cv::Mat inner_mask = get_inner_planet_mask(get_planet_mask(registax));
+    // // cv::Rect rect = get_cropped_rect(registax);
 
-    // std::cout << "registax output magnitude: " << get_avg_gradient_mag(registax, inner_mask, rect) << std::endl;
+    // // std::cout << "registax output magnitude: " << get_avg_gradient_mag(registax, inner_mask, rect) << std::endl;
 
-    // inner_mask = get_inner_planet_mask(get_planet_mask(output));
-    // rect = get_cropped_rect(output);
+    // // inner_mask = get_inner_planet_mask(get_planet_mask(output));
+    // // rect = get_cropped_rect(output);
 
-    // std::cout << "output magnitude: " << get_avg_gradient_mag(output, inner_mask, rect) << std::endl;
+    // // std::cout << "output magnitude: " << get_avg_gradient_mag(output, inner_mask, rect) << std::endl;
 
-    duration = static_cast<double>(cv::getTickCount()) - duration;
-    duration /= cv::getTickFrequency();
-    std::cout << "duration of program: " << duration << " s" << std::endl;
+    // duration = static_cast<double>(cv::getTickCount()) - duration;
+    // duration /= cv::getTickFrequency();
+    // std::cout << "duration of program: " << duration << " s" << std::endl;
 
-    // cv::imwrite("ouput.png", output);
+    // // cv::imwrite("ouput.png", output);
 }
