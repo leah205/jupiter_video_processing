@@ -36,6 +36,7 @@ public:
     std::vector<frameInfo> limitFrames(std::vector<frameInfo>);
 
     void setLimitFrameNum(int num);
+    void compare_methods(std::vector<frameInfo> frames);
 };
 
 #endif

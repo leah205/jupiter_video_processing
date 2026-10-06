@@ -73,21 +73,8 @@ int main()
 
     int select_amount = ceil(((double)(frame_num)) / 4);
     processor.setFrameStackNum(select_amount);
-    // processor.setQualityMetricToLaplacian();
-    // processor.assessFramesQuality();
     processor.selectFrames();
     processor.alignFrames();
-    // processor.stackAlignedFrames();
-
-    // std::vector laplacianIndices = processor.getSelected();
-    // processor.setQualityMetricToGradient();
-    // processor.assessFramesQuality();
-    // processor.selectFrames();
-    // std::vector<size_t> gradientIndices = processor.getSelected();
-    // getStackSame(gradientIndices, laplacianIndices);
-
-    // processor.alignSelectedFramesByCentroid();
-    // processor.alignSelectedCentroidEcc();
     processor.stackAlignedFrames();
     cv::Mat output = processor.getOutput();
     processor.generateSharpenedOutput();

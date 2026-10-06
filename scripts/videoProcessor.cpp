@@ -58,6 +58,7 @@ void VideoProcessor::selectFrames()
 {
     limiter.setLimitFrameNum(stacked_frames_num);
     selected_frames = limiter.limitFrames(frames);
+    limiter.compare_methods(frames);
     std::cout << selected_frames.size() << std::endl;
 }
 
@@ -81,6 +82,42 @@ void VideoProcessor::alignFrames()
     // should first frame be in here?
     aligned_frames = aligner.alignFramesToRef(selected_frames);
 };
+
+/**
+ * @brief stacks selected aligned frames
+ *
+ * averages pixels among aligned selected frames and stores them in stacked matrix
+ */
+
+void VideoProcessor::stackAlignedFrames()
+{
+    std::cout << "stacking " << aligned_frames.size() << " frames..." << std::endl;
+    output = stack_frames(aligned_frames);
+    subtract_background_signal(output);
+}
+
+void VideoProcessor::generateSharpenedOutput()
+{
+    if (output.empty())
+    {
+        throw std::runtime_error("no output matrix exists to sharpen");
+    }
+    sharpen(output, sharpened_output);
+}
+
+cv::Mat VideoProcessor::getOutput()
+{
+    return output.clone();
+}
+
+cv::Mat VideoProcessor::getSharpenedOutput()
+{
+    return sharpened_output.clone();
+}
+
+void saveOutput(std::string output_dir)
+{
+}
 
 // void VideoProcessor::alignSelectedCentroidEcc()
 // {
@@ -144,79 +181,3 @@ void VideoProcessor::alignFrames()
 //     std::cout << "mean shift mag: " << mean_shiftmag << std::endl;
 //     std::cout << "max shift mag: " << max_shiftmag << std::endl;
 // }
-
-/**
- * @brief stacks selected aligned frames
- *
- * averages pixels among aligned selected frames and stores them in stacked matrix
- */
-
-void VideoProcessor::stackAlignedFrames()
-{
-    std::cout << "stacking " << aligned_frames.size() << " frames..." << std::endl;
-
-    output = stack_frames(aligned_frames);
-    std::cout << cv::mean(output, cv::Mat())
-              << std::endl;
-    // subtract_background_signal(output);
-    std::cout << cv::mean(output, cv::Mat())
-              << std::endl;
-}
-
-void VideoProcessor::generateSharpenedOutput()
-{
-    if (output.empty())
-    {
-        throw std::runtime_error("no output matrix exists to sharpen");
-    }
-    sharpen(output, sharpened_output);
-}
-
-cv::Mat VideoProcessor::getOutput()
-{
-    return output.clone();
-}
-
-cv::Mat VideoProcessor::getSharpenedOutput()
-{
-    return sharpened_output.clone();
-}
-
-// void VideoProcessor::getMaskAreas()
-// {
-//     int min, max, mean;
-//     int last_area;
-//     cv::Point last_centroid;
-//     for (int i = 0; i < frames.size(); i++)
-//     {
-//         int area = cv::countNonZero(frames[i].planet_mask);
-//         cv::Point centroid = get_center_of_mass(frames[i].frame);
-//         if (i == 0)
-//         {
-//             min = area;
-//             max = area;
-//             last_area = area;
-//         }
-//         // min = std::min(min, area);
-//         // max = std::max(max, area);
-//         // std::cout << "area: " << area << std::endl;
-//         // std::cout << "cx: " << centroid.x << std::endl;
-//         // std::cout << "cy: " << centroid.y << std::endl;
-
-//         // if (last_area - area > 200)
-//         // {
-//         //     printf("")
-//         // }
-
-//         mean += area;
-//     }
-//     mean = mean / frames.size();
-//     std::cout << "area min: " << min << std::endl;
-//     std::cout << "area max: " << max << std::endl;
-
-//     std::cout << "area mean: " << mean << std::endl;
-// }
-
-void saveOutput(std::string output_dir)
-{
-}

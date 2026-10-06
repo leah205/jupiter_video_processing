@@ -45,38 +45,12 @@ cv::Mat get_aligned_by_centroid(cv::Mat frame, cv::Point cm, cv::Point ref)
     double offset_x, offset_y;
     offset_x = cm.x - ref.x;
     offset_y = cm.y - ref.y;
-
-    // std::cout << "x-shift: " << offset_x << std::endl;
-    // std::cout << "y-shift: " << offset_y << std::endl;
-
     cv::Mat translation_matrix = (cv::Mat_<double>(2, 3) << 1, 0, -1 * offset_x, 0, 1, -1 * offset_y);
     int height = frame.cols;
     int width = frame.rows;
 
     cv::warpAffine(frame, aligned_frame, translation_matrix, cv::Size(width, height));
     return aligned_frame;
-}
-
-cv::Point get_circle_centroid(const cv::Mat mask)
-{
-    cv::Point2f center;
-    std::vector<cv::Point> points;
-    findNonZero(mask, points);
-    float radius;
-    cv::minEnclosingCircle(points, center, radius);
-    return center;
-    // cv::Moments m = cv::moments(mask, true);
-
-    // if (std::abs(m.m00) < 1e-8)
-    // {
-    //     throw std::runtime_error("Zero-area blob");
-    // }
-
-    // double x = m.m10 / m.m00;
-    // double y = m.m01 / m.m00;
-
-    // cv::Point p(x, y);
-    // return p;
 }
 
 std::vector<frameInfo> Aligner::alignFramesToRef(std::vector<frameInfo> input_frames)
