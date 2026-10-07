@@ -5,7 +5,7 @@ LIBS = $(shell pkg-config --libs opencv4)
 LDLIBS = -lwavelib -lwauxlib
 
 main: main.o stack.o align.o helpers.o sharpen.o  optimisation.o videoProcessor.o test_helpers.o limit.o quality.o
-	$(CXX) $(CXXFLAGS) -o main main.o stack.o quality.o align.o limit.o helpers.o sharpen.o optimisation.o  videoProcessor.o test_helpers.o $(LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o main main.o stack.o quality.o align.o limit.o helpers.o sharpen.o optimisation.o  videoProcessor.o test_helpers.o $(LIBS) $(LDLIBS)
 
 main.o: main.cpp
 	$(CXX) $(CXXFLAGS) -c main.cpp
