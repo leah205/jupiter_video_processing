@@ -18,7 +18,6 @@ private:
 
 public:
     void setRefFrame(frameInfo frame);
-
     frameInfo alignFrame(frameInfo frame);
 };
 

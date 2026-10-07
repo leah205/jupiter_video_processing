@@ -4,7 +4,7 @@
 #include "test_helpers.h"
 #include "helpers.h"
 
-double FrameQuality::score(const frameInfo &frame)
+double FrameQuality::score(const frameInfo &frame) const
 {
     cv::Mat inner_mask = get_inner_planet_mask(frame.planet_mask);
     cv::Rect rect = get_cropped_rect(frame.frame);
@@ -19,7 +19,7 @@ double FrameQuality::score(const frameInfo &frame)
     return score;
 }
 
-double FrameQuality::get_laplacian_variance(const cv::Mat frame, const cv::Mat inner_mask, const cv::Rect rect)
+double get_laplacian_variance(const cv::Mat frame, const cv::Mat inner_mask, const cv::Rect rect)
 {
     cv::Mat croppedFrame = frame(rect);
     cv::Mat croppedInnerMask = inner_mask(rect);
@@ -42,7 +42,7 @@ double FrameQuality::get_laplacian_variance(const cv::Mat frame, const cv::Mat i
  * @param rect object for cropping frame around disc
  * @return double of average gradient magnitude of all pixels in frame
  */
-double FrameQuality::get_avg_gradient_mag(const cv::Mat frame, const cv::Mat inner_mask, const cv::Rect rect)
+double get_avg_gradient_mag(const cv::Mat frame, const cv::Mat inner_mask, const cv::Rect rect)
 {
     // gets cropped frame around disc
     cv::Mat croppedFrame = frame(rect);

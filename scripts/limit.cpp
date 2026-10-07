@@ -8,26 +8,6 @@
 #include "test_helpers.h"
 #include "helpers.h"
 
-// double Limiter::assess_frame_quality(frameInfo frame)
-// {
-//     double score;
-//     cv::Mat inner_mask = get_inner_planet_mask(frame.planet_mask);
-//     cv::Rect rect = get_cropped_rect(frame.frame);
-//     switch (metric)
-//     {
-//     case GRADIENT:
-
-//         score = get_avg_gradient_mag(frame.frame, inner_mask, rect);
-//         break;
-//     case LAPLACIAN:
-//         score = get_laplacian_variance(frame.frame, inner_mask, rect);
-//         break;
-//     default:
-//         score = get_avg_gradient_mag(frame.frame, inner_mask, rect);
-//     }
-//     return score;
-// }
-
 std::vector<frameInfo> Limiter::limitFrames(std::vector<frameInfo> frames)
 {
     size_t num_frames = frames.size();
@@ -37,7 +17,7 @@ std::vector<frameInfo> Limiter::limitFrames(std::vector<frameInfo> frames)
 
     for (int i = 0; i < frames.size(); i++)
     {
-        scoredFrame new_frame{frames[i], assess_frame_quality(frames[i])};
+        scoredFrame new_frame{frames[i], quality_scorer.score(frames[i])};
         scoredFrames.push_back(new_frame);
     }
     // sorted_l.resize(frames.size());
@@ -66,21 +46,16 @@ void Limiter::compare_methods(std::vector<frameInfo> frames)
     std::vector<size_t> sorted_l(num_frames), sorted_g(num_frames);
     std::vector<scoredFrame> scoredFramesL;
     std::vector<scoredFrame> scoredFramesG;
-    metric = GRADIENT;
+
+    FrameQuality gradient = FrameQuality(QualityMetric::GRADIENT);
+    FrameQuality laplacian = FrameQuality(QualityMetric::LAPLACIAN);
     for (int i = 0; i < frames.size(); i++)
     {
-        scoredFrame new_frame{frames[i], assess_frame_quality(frames[i])};
+        scoredFrame new_frame{frames[i], gradient.score(frames[i])};
         scoredFramesG.push_back(new_frame);
-    }
-    metric = LAPLACIAN;
-    for (int i = 0; i < frames.size(); i++)
-    {
-        scoredFrame new_frame{frames[i], assess_frame_quality(frames[i])};
+        new_frame = {frames[i], laplacian.score(frames[i])};
         scoredFramesL.push_back(new_frame);
     }
-    // sorted_l.resize(frames.size());
-    // std::cout << "frame quality score" << frames[0].quality_score << std::endl;
-
     std::iota(sorted_l.begin(), sorted_l.end(), 0);
     std::sort(sorted_l.begin(), sorted_l.end(), [&](size_t a, size_t b)
               { return scoredFramesL[a].score > scoredFramesL[b].score; });

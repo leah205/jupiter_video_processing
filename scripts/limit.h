@@ -14,15 +14,12 @@ typedef struct scoredFrame : frameInfo
 class Limiter
 {
 private:
-    const FrameQuality &quality;
+    const FrameQuality &quality_scorer;
     int limit_frames_num;
     std::vector<frameInfo> limitedFrames;
 
 public:
-    Limiter(const FrameQuality &q)
-    {
-        quality = q;
-    };
+    Limiter(const FrameQuality &q) : quality_scorer(q) {};
 
     std::vector<frameInfo> limitFrames(std::vector<frameInfo>);
 

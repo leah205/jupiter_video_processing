@@ -3,6 +3,9 @@
 
 #include "frameInfo.h"
 
+double get_avg_gradient_mag(cv::Mat frame, cv::Mat inner_mask, cv::Rect rect);
+double get_laplacian_variance(const cv::Mat frame, const cv::Mat inner_mask, const cv::Rect rect);
+
 enum class QualityMetric
 {
     GRADIENT,
@@ -13,14 +16,11 @@ class FrameQuality
 {
 private:
     QualityMetric m_metric;
-    double get_avg_gradient_mag(cv::Mat frame, cv::Mat inner_mask, cv::Rect rect);
-    double get_laplacian_variance(const cv::Mat frame, const cv::Mat inner_mask, const cv::Rect rect);
 
 public:
-    FrameQuality(QualityMetric metric)
+    FrameQuality(QualityMetric metric) : m_metric(metric)
     {
-        m_metric = metric;
     }
 
-    double score(const frameInfo &frame);
+    double score(const frameInfo &frame) const;
 };
