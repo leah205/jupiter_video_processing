@@ -13,8 +13,6 @@ cv::Point get_circle_centroid(const cv::Mat mask);
 class Aligner
 {
 private:
-    std::vector<frameInfo> input_frames;
-    std::vector<frameInfo> aligned_frames;
     frameInfo ref_frame;
     cv::Point ref_cm;
 
