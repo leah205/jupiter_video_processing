@@ -13,6 +13,7 @@ double FrameQuality::score(const frameInfo &frame) const
     {
     case QualityMetric::GRADIENT:
         score = get_avg_gradient_mag(frame.frame, inner_mask, rect);
+        break;
     case QualityMetric::LAPLACIAN:
         score = get_laplacian_variance(frame.frame, inner_mask, rect);
     }

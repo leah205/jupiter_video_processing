@@ -1,6 +1,7 @@
 
 #include <opencv2/opencv.hpp>
-
+#ifndef QUALITY_H
+#define QUALITY_H
 #include "frameInfo.h"
 
 double get_avg_gradient_mag(cv::Mat frame, cv::Mat inner_mask, cv::Rect rect);
@@ -24,3 +25,4 @@ public:
 
     double score(const frameInfo &frame) const;
 };
+#endif

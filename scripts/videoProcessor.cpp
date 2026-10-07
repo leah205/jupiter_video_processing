@@ -44,16 +44,6 @@ void VideoProcessor::setFrameStackNum(int frame_num)
     stacked_frames_num = frame_num;
 };
 
-void VideoProcessor::setQualityMetricToGradient()
-{
-    quality_metric = GRADIENT;
-}
-
-void VideoProcessor::setQualityMetricToLaplacian()
-{
-    quality_metric = LAPLACIAN;
-}
-
 void VideoProcessor::selectFrames()
 {
     limiter.setLimitFrameNum(stacked_frames_num);
@@ -81,7 +71,7 @@ void VideoProcessor::alignFrames()
     aligner.setRefFrame(ref_frame);
     for (int i = 1; i < selected_frames.size(); i++)
     {
-        aligner.alignFrame(selected_frames[i]);
+        aligned_frames.push_back(aligner.alignFrame(selected_frames[i]));
     }
 };
 

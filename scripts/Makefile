@@ -4,8 +4,8 @@ LDFLAGS = -L../wavelib/Bin
 LIBS = $(shell pkg-config --libs opencv4) 
 LDLIBS = -lwavelib -lwauxlib
 
-main: main.o stack.o align.o helpers.o sharpen.o  optimisation.o videoProcessor.o test_helpers.o limit.o
-	$(CXX) $(CXXFLAGS) -o main main.o stack.o  align.o limit.o helpers.o sharpen.o optimisation.o  videoProcessor.o test_helpers.o $(LIBS)
+main: main.o stack.o align.o helpers.o sharpen.o  optimisation.o videoProcessor.o test_helpers.o limit.o quality.o
+	$(CXX) $(CXXFLAGS) -o main main.o stack.o quality.o align.o limit.o helpers.o sharpen.o optimisation.o  videoProcessor.o test_helpers.o $(LIBS)
 
 main.o: main.cpp
 	$(CXX) $(CXXFLAGS) -c main.cpp
@@ -39,6 +39,9 @@ test_helpers.o: test_helpers.cpp test_helpers.h
 
 limit.o: limit.cpp frameInfo.h
 		$(CXX) $(CXXFLAGS) -c limit.cpp
+
+quality.o: quality.cpp frameInfo.h quality.h
+		$(CXX) $(CXXFLAGS) -c quality.cpp
 
 
 

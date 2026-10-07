@@ -10,14 +10,15 @@
 #include "test_helpers.h"
 #include "align.h"
 #include "stack.h"
+#include "quality.h"
 
 // g++ main.cpp -pg -O0  -g -o my_program $(pkg-config --cflags --libs opencv4)
 
 int main()
 {
     double duration = static_cast<double>(cv::getTickCount());
-
-    VideoProcessor processor;
+    FrameQuality quality_scorer = FrameQuality(QualityMetric::GRADIENT);
+    VideoProcessor processor(quality_scorer);
     bool ret;
     cv::Mat frame;
 

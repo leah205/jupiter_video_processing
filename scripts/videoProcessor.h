@@ -2,6 +2,7 @@
 #include "align.h"
 #include "limit.h"
 #include "frameInfo.h"
+#include "quality.h"
 
 #ifndef VIDEO_H
 #define VIDEO_H
@@ -18,21 +19,11 @@ private:
     cv::Mat sharpened_output;
     std::vector<frameInfo> selected_frames;
     // std::vector<size_t> quality_sorted_indices;
-    enum Quality_metric
-    {
-        GRADIENT,
-        LAPLACIAN
-    };
-
-    enum Quality_metric quality_metric;
 
 public:
-    VideoProcessor()
+    VideoProcessor(const FrameQuality &q_s) : limiter(q_s), aligner()
     {
         stacked_frames_num = 600;
-        quality_metric = GRADIENT;
-        // Limiter limiter = new Limiter();
-        // Aligner aligner = new Aligner();
     }
 
     void addFrame(cv::Mat &frame);
