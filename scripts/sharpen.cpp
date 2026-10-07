@@ -62,7 +62,7 @@ void WaveletSharpener::sharpenImage(const cv::Mat &image, cv::Mat &result)
     result.create(input.rows, input.cols, CV_64F);
     // is this actually what i want here?
 
-    std::memcpy(result.data, output_v, size * sizeof(double));
+    std::memcpy(result.data, (void *)&output_v, size * sizeof(double));
 
     wt2_summary(wt);
 

@@ -1,0 +1,26 @@
+
+#include <opencv2/opencv.hpp>
+
+#include "frameInfo.h"
+
+enum class QualityMetric
+{
+    GRADIENT,
+    LAPLACIAN
+};
+
+class FrameQuality
+{
+private:
+    QualityMetric m_metric;
+    double get_avg_gradient_mag(cv::Mat frame, cv::Mat inner_mask, cv::Rect rect);
+    double get_laplacian_variance(const cv::Mat frame, const cv::Mat inner_mask, const cv::Rect rect);
+
+public:
+    FrameQuality(QualityMetric metric)
+    {
+        m_metric = metric;
+    }
+
+    double score(const frameInfo &frame);
+};

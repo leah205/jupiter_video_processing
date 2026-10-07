@@ -4,6 +4,7 @@
 #define LIMIT_H
 
 #include "frameInfo.h"
+#include "quality.h"
 
 typedef struct scoredFrame : frameInfo
 {
@@ -13,26 +14,16 @@ typedef struct scoredFrame : frameInfo
 class Limiter
 {
 private:
-    enum metric
-    {
-        GRADIENT,
-        LAPLACIAN
-    } metric;
+    const FrameQuality &quality;
     int limit_frames_num;
     std::vector<frameInfo> limitedFrames;
-    double get_avg_gradient_mag(cv::Mat frame, cv::Mat inner_mask, cv::Rect rect);
-    double get_laplacian_variance(const cv::Mat frame, const cv::Mat inner_mask, const cv::Rect rect);
-    double assess_frame_quality(frameInfo frame);
 
 public:
-    Limiter()
+    Limiter(const FrameQuality &q)
     {
-        metric = GRADIENT;
+        quality = q;
     };
-    Limiter(enum metric)
-    {
-        metric = metric;
-    }
+
     std::vector<frameInfo> limitFrames(std::vector<frameInfo>);
 
     void setLimitFrameNum(int num);

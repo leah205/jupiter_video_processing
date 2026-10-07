@@ -53,28 +53,16 @@ cv::Mat get_aligned_by_centroid(cv::Mat frame, cv::Point cm, cv::Point ref)
     return aligned_frame;
 }
 
-std::vector<frameInfo> Aligner::alignFramesToRef(std::vector<frameInfo> input_frames)
-{
-    cv::Point ref_frame_cm = get_center_of_mass(ref_frame.frame);
-    for (int i = 0; i < input_frames.size(); i++)
-    {
-
-        frameInfo frame = input_frames[i];
-        cv::Point cm = get_center_of_mass(frame.planet_mask);
-        frameInfo aligned_frame = frame;
-        cv::Mat aligned_mat = get_aligned_by_centroid(frame.frame, cm, ref_frame_cm);
-        aligned_frame.frame = aligned_mat;
-        aligned_frames.push_back(aligned_frame);
-    }
-    return aligned_frames;
-}
-
 void Aligner::setRefFrame(frameInfo frame)
 {
     ref_frame = frame;
+    ref_cm = get_center_of_mass(ref_frame.planet_mask);
 };
 
-std::vector<frameInfo> Aligner::getAligned()
+frameInfo Aligner::alignFrame(frameInfo frame)
 {
-    return aligned_frames;
+    cv::Point cm = get_center_of_mass(frame.planet_mask);
+    frameInfo aligned_frame;
+    aligned_frame.frame = get_aligned_by_centroid(frame.frame, cm, ref_cm);
+    return aligned_frame;
 }

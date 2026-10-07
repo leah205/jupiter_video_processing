@@ -79,8 +79,10 @@ void VideoProcessor::alignFrames()
     std::cout << "aligning frames..." << std::endl;
     frameInfo ref_frame = selected_frames[0];
     aligner.setRefFrame(ref_frame);
-    // should first frame be in here?
-    aligned_frames = aligner.alignFramesToRef(selected_frames);
+    for (int i = 1; i < selected_frames.size(); i++)
+    {
+        aligner.alignFrame(selected_frames[i]);
+    }
 };
 
 /**

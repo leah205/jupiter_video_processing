@@ -16,17 +16,12 @@ private:
     std::vector<frameInfo> input_frames;
     std::vector<frameInfo> aligned_frames;
     frameInfo ref_frame;
+    cv::Point ref_cm;
 
 public:
     void setRefFrame(frameInfo frame);
 
-    std::vector<frameInfo> alignFramesToRef(std::vector<frameInfo>);
-
-    std::vector<frameInfo> getAligned();
-
-    // Aligner()
-    // {
-    // }
+    frameInfo alignFrame(frameInfo frame);
 };
 
 #endif
