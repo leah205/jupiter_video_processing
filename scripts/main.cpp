@@ -79,10 +79,11 @@ int main()
     processor.stackAlignedFrames();
     cv::Mat output = processor.getOutput();
     processor.generateSharpenedOutput();
-
+    // cv::imshow("output", output);
+    // cv::waitKey(0);
     cv::Mat sharpened_output = processor.getSharpenedOutput();
-    cv::imshow("sharpened output", sharpened_output);
-    cv::waitKey(0);
+    // cv::imshow("sharpened output", sharpened_output);
+    // cv::waitKey(0);
     // std::string output_file = filename.substr(0, filename.size() - 4) + ".png";
     // std::string sharpened_file = filename.substr(0, filename.size() - 4) + "_sharpened.png";
     // cv::imwrite(output_dir + output_file, output);

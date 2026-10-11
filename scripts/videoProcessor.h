@@ -3,6 +3,7 @@
 #include "limit.h"
 #include "frameInfo.h"
 #include "quality.h"
+#include "sharpen.h"
 
 #ifndef VIDEO_H
 #define VIDEO_H
@@ -18,6 +19,7 @@ private:
     cv::Mat output;
     cv::Mat sharpened_output;
     std::vector<frameInfo> selected_frames;
+    WaveletSharpener sharpener;
     // std::vector<size_t> quality_sorted_indices;
 
 public:
@@ -27,8 +29,6 @@ public:
     }
 
     void addFrame(cv::Mat &frame);
-
-    void processFrames(cv::Mat frame);
 
     void setFrameStackNum(int frame_num);
 
@@ -46,19 +46,11 @@ public:
 
     void generateSharpenedOutput();
 
-    void assessFramesQuality();
-
     void selectFrames();
-
-    void setQualityMetricToGradient();
-
-    void setQualityMetricToLaplacian();
 
     void stackAlignedFrames();
 
     void alignFrames();
-
-    // void alignSelectedFramesByCentroidCircle();
 
     cv::Mat getOutput();
 };

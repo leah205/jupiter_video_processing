@@ -94,7 +94,8 @@ void VideoProcessor::generateSharpenedOutput()
     {
         throw std::runtime_error("no output matrix exists to sharpen");
     }
-    sharpen(output, sharpened_output);
+    // sharpen(output, sharpened_output);
+    sharpener.sharpenImage(output, sharpened_output);
 }
 
 cv::Mat VideoProcessor::getOutput()

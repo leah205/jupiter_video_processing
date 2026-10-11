@@ -103,16 +103,12 @@ void getStackSame(std::vector<size_t> stack1, std::vector<size_t> stack2, int fr
         {
             if (stack1[i] == stack2[j])
             {
-                std::cout << "g: " << i << std::endl;
-
-                std::cout << "l: " << j << std::endl;
                 in_both++;
                 break;
             }
         }
     }
-    std::cout << in_both << std::endl;
-    std::cout << frame_num << std::endl;
+
     double perc = ((double)in_both) / frame_num;
     std::cout << "percentage in both: " << perc << std::endl;
 }

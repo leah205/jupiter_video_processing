@@ -1,5 +1,8 @@
 #include <opencv2/opencv.hpp>
 
+#ifndef SHARPEN_H
+#define SHARPEN_H
+
 extern "C"
 {
 #include "wavelib.h"
@@ -21,3 +24,5 @@ public:
 
     void sharpenImage(const cv::Mat &image, cv::Mat &result);
 };
+
+#endif

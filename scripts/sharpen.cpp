@@ -33,39 +33,43 @@ void sharpen(const cv::Mat &image, cv::Mat &result)
 
 void WaveletSharpener::sharpenImage(const cv::Mat &image, cv::Mat &result)
 {
-    // cv::Mat input;
-    // // double *input_ptr, *output_ptr, *diff_ptr;
-    // std::vector<double> input_v, diff_v;
-    // double *output_p, diff_p;
-    // double *cLL;
-    // int ir, ic;
-    // int size = input.rows * input.cols;
-    // image.convertTo(input, CV_64F);
-    // // input_v = input.data;
-    // input_v.assign(input.datastart, input.dataend);
+    cv::Mat input;
+    int size = image.rows * image.cols;
+    // double *input_ptr, *output_ptr, *diff_ptr;
+    std::vector<double> input_v(size * sizeof(double)), diff_v(size * sizeof(double)), output_v(size * sizeof(double));
+    double *cLH, *cHL, *cHH;
+    int ir, ic;
+    image.convertTo(input, CV_64F);
 
-    // // input_ptr = reinterpret_cast<double *>(input.data);
-    // obj = wave_init("wavelet");
-    // wt = wt2_init(obj, "swt", input.rows, input.cols, 2);
-    // // setWTConv(wt, "direct");
+    input_v.assign(input.datastart, input.dataend);
+    obj = wave_init("db4");
+    wt = wt2_init(obj, "swt", input.rows, input.cols, 3);
+    // setWTConv(wt, "direct");
+    double *wavecoeffs = swt2(wt, input.ptr<double>(0));
     // double *wavecoeffs = swt2(wt, input_v.data());
-    // cLL = getWT2Coeffs(wt, wavecoeffs, 2, "A", &ir, &ic);
+
+    cLH = getWT2Coeffs(wt, wavecoeffs, 2, "H", &ir, &ic);
+    cHL = getWT2Coeffs(wt, wavecoeffs, 2, "V", &ir, &ic);
+    cHH = getWT2Coeffs(wt, wavecoeffs, 2, "D", &ir, &ic);
+    // causing white specks
+    for (int i = 0; i < ir; i++)
+    {
+        for (int j = 0; j < ic; j++)
+        {
+            *(cLH++) *= 20;
+            *(cHL++) *= 20;
+            *(cHH++) *= 20;
+        }
+    }
+
     // dispWT2Coeffs(cLL, ir, ic);
-    // iswt2(wt, wavecoeffs, output_p);
-    // std::vector<double> output_v(output_p, output_p + size);
+    iswt2(wt, wavecoeffs, output_v.data());
+    result = cv::Mat(input.rows, input.cols, CV_64F, &output_v.front());
+    result.convertTo(result, CV_8UC1);
 
-    // for (int i = 0; i < size; i++)
-    // {
-    //     diff_v[i] = output_v[i] - input_v[i];
-    // };
-
-    // result.create(input.rows, input.cols, CV_64F);
-    // // is this actually what i want here?
-
-    // std::memcpy(result.data, (void *)&output_v, size * sizeof(double));
-
-    // wt2_summary(wt);
-
-    // wave_free(obj);
-    // wt2_free(wt);
+    wt2_summary(wt);
+    free(wavecoeffs);
+    wave_free(obj);
+    wt2_free(wt);
+    // free wavelet coefficients
 }
