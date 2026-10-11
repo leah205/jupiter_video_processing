@@ -2,15 +2,6 @@
 #include "helpers.h"
 #include <string>
 
-// double getPixelValAtPercentile(cv::Mat frame)
-// {
-//     std::vector<float> pixels;
-//     pixels.assign(frame.begin<float>(), frame.end<float>());
-//     size_t index = static_cast<size_t>(0.2 * pixels.size());
-//     std::nth_element(pixels.begin(), pixels.begin() + index, pixels.end());
-//     return pixels[index];
-// }
-
 /**
  * @brief print information on cv::Mat object
  *

@@ -44,14 +44,27 @@ void VideoProcessor::setFrameStackNum(int frame_num)
     stacked_frames_num = frame_num;
 };
 
+/**
+ * @brief gets sharpest frames
+ *
+ */
 void VideoProcessor::selectFrames()
 {
     limiter.setLimitFrameNum(stacked_frames_num);
     selected_frames = limiter.limitFrames(frames);
+    // cv::imshow("sharpest", selected_frames[0].frame);
+    // cv::waitKey(0);
+    // cv::imshow("least sharp", selected_frames[selected_frames.size() - 1].frame);
+    // cv::waitKey(0);
     limiter.compare_methods(frames);
     std::cout << selected_frames.size() << std::endl;
 }
 
+/**
+ * @brief
+ *
+ * @return std::vector<frameInfo>
+ */
 std::vector<frameInfo> VideoProcessor::getSelected()
 {
     return selected_frames;
@@ -88,6 +101,10 @@ void VideoProcessor::stackAlignedFrames()
     subtract_background_signal(output);
 }
 
+/**
+ * @brief generates and stores sharpened output in class
+ *
+ */
 void VideoProcessor::generateSharpenedOutput()
 {
     if (output.empty())
@@ -98,11 +115,22 @@ void VideoProcessor::generateSharpenedOutput()
     sharpener.sharpenImage(output, sharpened_output);
 }
 
+/**
+ * @brief gets copy of output
+ *
+ * @return cv::Mat
+ */
+
 cv::Mat VideoProcessor::getOutput()
 {
     return output.clone();
 }
 
+/**
+ * @brief gets copy of sharpened output
+ *
+ * @return cv::Mat
+ */
 cv::Mat VideoProcessor::getSharpenedOutput()
 {
     return sharpened_output.clone();

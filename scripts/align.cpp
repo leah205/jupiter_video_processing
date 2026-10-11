@@ -34,6 +34,7 @@ cv::Point get_center_of_mass(const cv::Mat mask)
  *  aligns frame so that its planet center of mass matches with that of the reference frame
  *
  * @param frame ,atrox object with 8-bit single channel matrix
+ * @param cm cv::Point center of mass of frame to align
  * @param ref cv::Point center of mass of reference frame
  * @return cv::Mat aligned frame
  */
@@ -53,11 +54,24 @@ cv::Mat get_aligned_by_centroid(cv::Mat frame, cv::Point cm, cv::Point ref)
     return aligned_frame;
 }
 
+/**
+ * @brief sets member variables with reference frame information
+ *
+ * @param frame
+ */
+
 void Aligner::setRefFrame(frameInfo frame)
 {
     ref_frame = frame;
     ref_cm = get_center_of_mass(ref_frame.planet_mask);
 };
+
+/**
+ * @brief aligns frame to center of mass of reference
+ *
+ * @param frame
+ * @return frameInfo
+ */
 
 frameInfo Aligner::alignFrame(frameInfo frame)
 {

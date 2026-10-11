@@ -4,6 +4,13 @@
 #include "test_helpers.h"
 #include "helpers.h"
 
+/**
+ * @brief generates a quality score for frame
+ *
+ * @param frame
+ * @return double
+ */
+
 double FrameQuality::score(const frameInfo &frame) const
 {
     cv::Mat inner_mask = get_inner_planet_mask(frame.planet_mask);
@@ -20,6 +27,15 @@ double FrameQuality::score(const frameInfo &frame) const
     return score;
 }
 
+/**
+ * @brief calculates the laplacian variance on disk in frame
+ *
+ * @param frame
+ * @param inner_mask
+ * @param rect
+ * @return double
+ */
+
 double get_laplacian_variance(const cv::Mat frame, const cv::Mat inner_mask, const cv::Rect rect)
 {
     cv::Mat croppedFrame = frame(rect);
@@ -28,7 +44,9 @@ double get_laplacian_variance(const cv::Mat frame, const cv::Mat inner_mask, con
     cv::Scalar mean, stddev;
     // cv::imshow("cropped inner mask", croppedInnerMask);
     // cv::waitKey(0);
-    cv::Laplacian(frame, lap_frame, CV_8UC1);
+    // cv::Laplacian(frame, lap_frame, CV_8UC1);
+    cv::Laplacian(frame, lap_frame, CV_32F);
+
     cv::meanStdDev(lap_frame, mean, stddev, croppedInnerMask);
     return stddev[0] * stddev[0];
 }

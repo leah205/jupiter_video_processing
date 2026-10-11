@@ -31,11 +31,17 @@ void sharpen(const cv::Mat &image, cv::Mat &result)
     cv::filter2D(image, result, image.depth(), kernel);
 };
 
+/**
+ * @brief performs wavelet sharpening
+ *
+ *
+ * @param image
+ * @param result
+ */
 void WaveletSharpener::sharpenImage(const cv::Mat &image, cv::Mat &result)
 {
     cv::Mat input;
     int size = image.rows * image.cols;
-    // double *input_ptr, *output_ptr, *diff_ptr;
     std::vector<double> input_v(size * sizeof(double)), diff_v(size * sizeof(double)), output_v(size * sizeof(double));
     double *cLH, *cHL, *cHH;
     int ir, ic;
@@ -46,12 +52,10 @@ void WaveletSharpener::sharpenImage(const cv::Mat &image, cv::Mat &result)
     wt = wt2_init(obj, "swt", input.rows, input.cols, 3);
     // setWTConv(wt, "direct");
     double *wavecoeffs = swt2(wt, input.ptr<double>(0));
-    // double *wavecoeffs = swt2(wt, input_v.data());
 
     cLH = getWT2Coeffs(wt, wavecoeffs, 2, "H", &ir, &ic);
     cHL = getWT2Coeffs(wt, wavecoeffs, 2, "V", &ir, &ic);
     cHH = getWT2Coeffs(wt, wavecoeffs, 2, "D", &ir, &ic);
-    // causing white specks
     for (int i = 0; i < ir; i++)
     {
         for (int j = 0; j < ic; j++)

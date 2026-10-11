@@ -16,13 +16,16 @@ private:
     wave_object obj;
     wt2_object wt;
     double *input;
+    int decomp_levels;
 
 public:
-    WaveletSharpener() {
+    WaveletSharpener(int levels) : decomp_levels(levels) {
 
-    };
+                                   };
 
     void sharpenImage(const cv::Mat &image, cv::Mat &result);
+
+    void setLevelSharpening(const int level, const int amplification);
 };
 
 #endif

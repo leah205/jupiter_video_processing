@@ -8,6 +8,15 @@
 #include "test_helpers.h"
 #include "helpers.h"
 
+/**
+ * @brief gets the highest quality frames
+ *
+ * computes a score for each frame and gets the limit_frames_num best frames
+ *
+ * @param frames
+ * @return std::vector<frameInfo>
+ */
+
 std::vector<frameInfo> Limiter::limitFrames(std::vector<frameInfo> frames)
 {
     size_t num_frames = frames.size();
@@ -35,10 +44,24 @@ std::vector<frameInfo> Limiter::limitFrames(std::vector<frameInfo> frames)
     return selected_frames;
 }
 
+/**
+ * @brief
+ *
+ * @param num
+ */
+
 void Limiter::setLimitFrameNum(int num)
 {
     limit_frames_num = num;
 }
+
+/**
+ * @brief testing function to compare quality selection methods
+ *
+ * compares percentage of frames in stack for  laplacian vs gradient magnitude method  are the same
+ *
+ * @param frames
+ */
 
 void Limiter::compare_methods(std::vector<frameInfo> frames)
 {
@@ -63,8 +86,6 @@ void Limiter::compare_methods(std::vector<frameInfo> frames)
     std::iota(sorted_g.begin(), sorted_g.end(), 0);
     std::sort(sorted_g.begin(), sorted_g.end(), [&](size_t a, size_t b)
               { return scoredFramesG[a].score > scoredFramesG[b].score; });
-    std::cout << "frame quality score" << sorted_g[10] << std::endl;
-    std::cout << "frame quality score" << sorted_l[10] << std::endl;
 
     getStackSame(sorted_g, sorted_l, limit_frames_num);
 }
