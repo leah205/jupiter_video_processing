@@ -31,6 +31,10 @@ void sharpen(const cv::Mat &image, cv::Mat &result)
     cv::filter2D(image, result, image.depth(), kernel);
 };
 
+void sharpenAtLevel(double *cLH, double *cHL, double *cHH, int rows, int cols)
+{
+}
+
 /**
  * @brief performs wavelet sharpening
  *
@@ -38,7 +42,7 @@ void sharpen(const cv::Mat &image, cv::Mat &result)
  * @param image
  * @param result
  */
-void WaveletSharpener::sharpenImage(const cv::Mat &image, cv::Mat &result)
+void WaveletSharpener::runSharpening(const cv::Mat &image, cv::Mat &result)
 {
     cv::Mat input;
     int size = image.rows * image.cols;
@@ -53,16 +57,21 @@ void WaveletSharpener::sharpenImage(const cv::Mat &image, cv::Mat &result)
     // setWTConv(wt, "direct");
     double *wavecoeffs = swt2(wt, input.ptr<double>(0));
 
-    cLH = getWT2Coeffs(wt, wavecoeffs, 2, "H", &ir, &ic);
-    cHL = getWT2Coeffs(wt, wavecoeffs, 2, "V", &ir, &ic);
-    cHH = getWT2Coeffs(wt, wavecoeffs, 2, "D", &ir, &ic);
-    for (int i = 0; i < ir; i++)
+    for (int l = 0; l < level_sharpenings.size(); l++)
     {
-        for (int j = 0; j < ic; j++)
+        double amp = level_sharpenings[l].second;
+        int level = level_sharpenings[l].first;
+        cLH = getWT2Coeffs(wt, wavecoeffs, level, "H", &ir, &ic);
+        cHL = getWT2Coeffs(wt, wavecoeffs, level, "V", &ir, &ic);
+        cHH = getWT2Coeffs(wt, wavecoeffs, level, "D", &ir, &ic);
+        for (int i = 0; i < ir; i++)
         {
-            *(cLH++) *= 20;
-            *(cHL++) *= 20;
-            *(cHH++) *= 20;
+            for (int j = 0; j < ic; j++)
+            {
+                *(cLH++) *= amp;
+                *(cHL++) *= amp;
+                *(cHH++) *= amp;
+            }
         }
     }
 
@@ -77,3 +86,9 @@ void WaveletSharpener::sharpenImage(const cv::Mat &image, cv::Mat &result)
     wt2_free(wt);
     // free wavelet coefficients
 }
+
+void WaveletSharpener::setLevelSharpening(const int level, const double amplification)
+{
+    LevelSharpening new_sharpen = std::make_pair(level, amplification);
+    level_sharpenings.push_back(new_sharpen);
+};

@@ -23,7 +23,9 @@ private:
     // std::vector<size_t> quality_sorted_indices;
 
 public:
-    VideoProcessor(const FrameQuality &q_s) : limiter(q_s), aligner()
+    VideoProcessor(const FrameQuality &q_s, int wavelet_levels = 5) : limiter(q_s),
+                                                                      aligner(),
+                                                                      sharpener(wavelet_levels)
     {
         stacked_frames_num = 600;
     }
@@ -45,6 +47,8 @@ public:
     cv::Mat getSharpenedOutput();
 
     void generateSharpenedOutput();
+
+    void setSharpeningLevel(int level, double amplification);
 
     void selectFrames();
 

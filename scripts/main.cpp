@@ -18,7 +18,7 @@ int main()
 {
     double duration = static_cast<double>(cv::getTickCount());
     FrameQuality quality_scorer = FrameQuality(QualityMetric::GRADIENT);
-    VideoProcessor processor(quality_scorer);
+    VideoProcessor processor(quality_scorer, 5);
     bool ret;
     cv::Mat frame;
 
@@ -78,6 +78,7 @@ int main()
     processor.alignFrames();
     processor.stackAlignedFrames();
     cv::Mat output = processor.getOutput();
+    processor.setSharpeningLevel(2, 20.0);
     processor.generateSharpenedOutput();
     // cv::imshow("output", output);
     // cv::waitKey(0);

@@ -1,5 +1,7 @@
 CXX = g++
 CXXFLAGS = -Wall -Wextra -std=c++17 -g -pg $(shell pkg-config --cflags opencv4) -I../wavelib/header
+CXXFLAGS += -MMD -MP
+-include $(wildcard *.d)
 LDFLAGS = -L../wavelib/Bin
 LIBS = $(shell pkg-config --libs opencv4) 
 LDLIBS = -lwavelib -lwauxlib
@@ -20,7 +22,7 @@ helpers.o: helpers.cpp helpers.h frameInfo.h
 	$(CXX) $(CXXFLAGS) -c helpers.cpp
 
 sharpen.o: sharpen.cpp sharpen.h frameInfo.h
-	$(CXX) $(CXXFLAGS) -c sharpen.cpp
+	$(CXX) $(CXXFLAGS) -c sharpen.cpp -o sharpen.o
 
 optimisation.o: optimisation.cpp optimisation.h frameInfo.h
 		$(CXX) $(CXXFLAGS) -c optimisation.cpp
@@ -42,9 +44,5 @@ limit.o: limit.cpp frameInfo.h
 
 quality.o: quality.cpp frameInfo.h quality.h
 		$(CXX) $(CXXFLAGS) -c quality.cpp
-
-
-
-
 clean:
 	rm -f program *.o

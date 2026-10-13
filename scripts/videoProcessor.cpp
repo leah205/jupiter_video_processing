@@ -112,7 +112,8 @@ void VideoProcessor::generateSharpenedOutput()
         throw std::runtime_error("no output matrix exists to sharpen");
     }
     // sharpen(output, sharpened_output);
-    sharpener.sharpenImage(output, sharpened_output);
+    sharpener.setLevelSharpening(2, 20);
+    sharpener.runSharpening(output, sharpened_output);
 }
 
 /**
@@ -138,6 +139,20 @@ cv::Mat VideoProcessor::getSharpenedOutput()
 
 void saveOutput(std::string output_dir)
 {
+}
+
+/**
+ * @brief Set the Sharpening Level object
+ *
+ * configure a spatial scale (decomposition level)
+ * to enhance the contrast of(sharpen)
+ *
+ * @param level
+ * @param amplification
+ */
+void VideoProcessor::setSharpeningLevel(int level, double amplification)
+{
+    sharpener.setLevelSharpening(level, amplification);
 }
 
 // void VideoProcessor::alignSelectedCentroidEcc()
