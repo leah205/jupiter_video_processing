@@ -8,3 +8,5 @@ void extract_channel(cv::Mat &frame);
 cv::Mat get_inner_planet_mask(cv::Mat mask);
 void save_image(std::string prefix, const cv::Mat frame);
 void subtract_background_signal(cv::Mat &frame);
+void save_sharpened_output(std::string prefix, const cv::Mat frame, int sharpen_level, double sharpen_amp);
+void save_output(std::string prefix, const cv::Mat frame);

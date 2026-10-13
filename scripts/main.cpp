@@ -8,6 +8,7 @@
 #include "optimisation.h"
 #include "helpers.h"
 #include "test_helpers.h"
+#include "helpers.h"
 #include "align.h"
 #include "stack.h"
 #include "quality.h"
@@ -73,22 +74,24 @@ int main()
     }
 
     int select_amount = ceil(((double)(frame_num)) / 4);
+    int sharpen_level = 2;
+    double sharpen_amp = 20.0;
     processor.setFrameStackNum(select_amount);
     processor.selectFrames();
     processor.alignFrames();
     processor.stackAlignedFrames();
     cv::Mat output = processor.getOutput();
-    processor.setSharpeningLevel(2, 20.0);
+    processor.setSharpeningLevel(sharpen_level, sharpen_amp);
     processor.generateSharpenedOutput();
     // cv::imshow("output", output);
     // cv::waitKey(0);
     cv::Mat sharpened_output = processor.getSharpenedOutput();
     // cv::imshow("sharpened output", sharpened_output);
     // cv::waitKey(0);
-    // std::string output_file = filename.substr(0, filename.size() - 4) + ".png";
-    // std::string sharpened_file = filename.substr(0, filename.size() - 4) + "_sharpened.png";
+    save_output(filename.substr(0, filename.size() - 4), output);
+    std::cout << "hello world" << std::endl;
+    save_sharpened_output(filename.substr(0, filename.size() - 4), sharpened_output, sharpen_level, sharpen_amp);
     // cv::imwrite(output_dir + output_file, output);
-    // cv::imwrite(output_dir + sharpened_file, sharpened_output);
     // // processor.getMaskAreas();
     // // cv::imshow("final", processor.getOutput());
     // // cv::waitKey(0);

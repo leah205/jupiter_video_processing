@@ -57,13 +57,15 @@ void WaveletSharpener::runSharpening(const cv::Mat &image, cv::Mat &result)
     // setWTConv(wt, "direct");
     double *wavecoeffs = swt2(wt, input.ptr<double>(0));
 
-    for (int l = 0; l < level_sharpenings.size(); l++)
+    for (const auto &[level, amp] : level_sharpenings)
     {
-        double amp = level_sharpenings[l].second;
-        int level = level_sharpenings[l].first;
+
         cLH = getWT2Coeffs(wt, wavecoeffs, level, "H", &ir, &ic);
         cHL = getWT2Coeffs(wt, wavecoeffs, level, "V", &ir, &ic);
         cHH = getWT2Coeffs(wt, wavecoeffs, level, "D", &ir, &ic);
+        std::cout << "level: " << level << std::endl;
+        std::cout << "amp: " << amp << std::endl;
+
         for (int i = 0; i < ir; i++)
         {
             for (int j = 0; j < ic; j++)
@@ -79,6 +81,8 @@ void WaveletSharpener::runSharpening(const cv::Mat &image, cv::Mat &result)
     iswt2(wt, wavecoeffs, output_v.data());
     result = cv::Mat(input.rows, input.cols, CV_64F, &output_v.front());
     result.convertTo(result, CV_8UC1);
+    cv::imshow("result", result);
+    cv::waitKey(0);
 
     wt2_summary(wt);
     free(wavecoeffs);
@@ -89,6 +93,5 @@ void WaveletSharpener::runSharpening(const cv::Mat &image, cv::Mat &result)
 
 void WaveletSharpener::setLevelSharpening(const int level, const double amplification)
 {
-    LevelSharpening new_sharpen = std::make_pair(level, amplification);
-    level_sharpenings.push_back(new_sharpen);
+    level_sharpenings[level] = (int)amplification;
 };

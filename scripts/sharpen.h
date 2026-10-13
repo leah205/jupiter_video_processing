@@ -8,7 +8,7 @@ extern "C"
 #include "wavelib.h"
 }
 
-using LevelSharpening = std::pair<int, double>;
+using SharpeningMap = std::map<int, int>;
 
 void sharpen(const cv::Mat &image, cv::Mat &result);
 
@@ -20,7 +20,7 @@ private:
     double *input;
     double *wavecoeffs;
     int decomp_levels;
-    std::vector<LevelSharpening> level_sharpenings;
+    SharpeningMap level_sharpenings;
 
 public:
     WaveletSharpener(int levels) : decomp_levels(levels) {
