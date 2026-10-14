@@ -2,6 +2,9 @@
 #include <numeric>
 #include <iostream>
 #include <optional>
+#include <string>
+#include <sstream>
+#include <iomanip>
 
 #include <cmath>
 
@@ -184,9 +187,14 @@ void VideoProcessor::saveSharpenedOutput(std::string_view output_path, std::stri
         std::string levels_str;
         for (const auto &[level, amp] : config.level_sharpenings)
         {
-            levels_str += "_" + std::to_string(level) + "X" + std::to_string(amp);
+            std::ostringstream oss;
+            oss << std::fixed << std::setprecision(2) << amp;
+            std::string rounded_amp = oss.str();
+
+            levels_str += "_" + std::to_string(level) + "X" + rounded_amp;
         }
-        cv::imwrite("../output/" + std::string{prefix} + "WV" + levels_str + "_" + config.method + ".png", frame);
+
+        cv::imwrite(std::string{output_path} + std::string{prefix} + "WV" + levels_str + "_" + config.method + ".png", frame);
     }
 }
 

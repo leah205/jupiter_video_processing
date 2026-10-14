@@ -44,6 +44,7 @@ void sharpenAtLevel(double *cLH, double *cHL, double *cHH, int rows, int cols)
  */
 void WaveletSharpener::runSharpening(const cv::Mat &image, cv::Mat &result) const
 {
+    std::cout << "sharpening..." << std::endl;
     cv::Mat input;
     int size = image.rows * image.cols;
     std::vector<double> input_v(size * sizeof(double)), diff_v(size * sizeof(double)), output_v(size * sizeof(double));
@@ -92,7 +93,7 @@ void WaveletSharpener::runSharpening(const cv::Mat &image, cv::Mat &result) cons
 
 void WaveletSharpener::setLevelSharpening(const int level, const double amplification)
 {
-    config.level_sharpenings[level] = (int)amplification;
+    config.level_sharpenings[level] = amplification;
 };
 
 const SharpeningConfig &WaveletSharpener::getSharpenConfig() const

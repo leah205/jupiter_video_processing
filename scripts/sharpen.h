@@ -8,13 +8,12 @@ extern "C"
 #include "wavelib.h"
 }
 
-using SharpeningMap = std::map<int, int>;
+using SharpeningMap = std::map<int, double>;
 
 struct SharpeningConfig
 {
     int decomp_levels;
     std::string method;
-
     SharpeningMap level_sharpenings;
 };
 
@@ -33,11 +32,8 @@ public:
     {
         obj = wave_init(method.c_str());
     };
-    void decomposeImage();
 
     void runSharpening(const cv::Mat &image, cv::Mat &result) const;
-
-    void sharpenLevel();
 
     const SharpeningConfig &getSharpenConfig() const;
 

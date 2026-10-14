@@ -36,7 +36,7 @@ int main()
     std::string output_path = "../output/";
 
     int sharpen_level = 2;
-    double sharpen_amp = 20.0;
+    double sharpen_amp = 1.3;
     processor.setSharpeningLevel(sharpen_level, sharpen_amp);
     processor.processVideo(input_path, output_path);
 
