@@ -24,7 +24,6 @@ cv::Mat stack_frames(std::vector<frameInfo> frames)
 {
     cv::Mat stacked;
     size_t num_frames = frames.size();
-    std::vector<cv::Mat> frames_ecc;
 
     if (num_frames == 0)
     {

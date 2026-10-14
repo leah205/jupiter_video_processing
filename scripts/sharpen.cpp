@@ -42,7 +42,7 @@ void sharpenAtLevel(double *cLH, double *cHL, double *cHH, int rows, int cols)
  * @param image
  * @param result
  */
-void WaveletSharpener::runSharpening(const cv::Mat &image, cv::Mat &result)
+void WaveletSharpener::runSharpening(const cv::Mat &image, cv::Mat &result) const
 {
     cv::Mat input;
     int size = image.rows * image.cols;
@@ -52,12 +52,11 @@ void WaveletSharpener::runSharpening(const cv::Mat &image, cv::Mat &result)
     image.convertTo(input, CV_64F);
 
     input_v.assign(input.datastart, input.dataend);
-    obj = wave_init("db4");
-    wt = wt2_init(obj, "swt", input.rows, input.cols, 3);
+    wt2_object wt = wt2_init(obj, "swt", input.rows, input.cols, config.decomp_levels);
     // setWTConv(wt, "direct");
     double *wavecoeffs = swt2(wt, input.ptr<double>(0));
 
-    for (const auto &[level, amp] : level_sharpenings)
+    for (const auto &[level, amp] : config.level_sharpenings)
     {
 
         cLH = getWT2Coeffs(wt, wavecoeffs, level, "H", &ir, &ic);
@@ -93,5 +92,10 @@ void WaveletSharpener::runSharpening(const cv::Mat &image, cv::Mat &result)
 
 void WaveletSharpener::setLevelSharpening(const int level, const double amplification)
 {
-    level_sharpenings[level] = (int)amplification;
+    config.level_sharpenings[level] = (int)amplification;
+};
+
+const SharpeningConfig &WaveletSharpener::getSharpenConfig() const
+{
+    return config;
 };

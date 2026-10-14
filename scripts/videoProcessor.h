@@ -12,27 +12,25 @@ class VideoProcessor
 {
 private:
     Aligner aligner;
+    static constexpr int wavelet_levels = 5;
+    FrameQuality quality_scorer = FrameQuality(QualityMetric::GRADIENT);
     Limiter limiter;
     std::vector<frameInfo> frames;
-    std::vector<frameInfo> aligned_frames;
-    int stacked_frames_num;
-    cv::Mat output;
-    cv::Mat sharpened_output;
-    std::vector<frameInfo> selected_frames;
+    std::string input_dir;
+    std::string output_dir;
+    bool run_sharpening = true;
     WaveletSharpener sharpener;
-    // std::vector<size_t> quality_sorted_indices;
 
 public:
-    VideoProcessor(const FrameQuality &q_s, int wavelet_levels = 5) : limiter(q_s),
-                                                                      aligner(),
-                                                                      sharpener(wavelet_levels)
+    VideoProcessor()
+        : limiter(quality_scorer),
+          aligner(),
+          sharpener(wavelet_levels)
+
     {
-        stacked_frames_num = 600;
-    }
+    };
 
-    void addFrame(cv::Mat &frame);
-
-    void setFrameStackNum(int frame_num);
+    frameInfo processFrame(cv::Mat frame) const;
 
     // void alignSelectedFramesByCentroid();
 
@@ -42,21 +40,27 @@ public:
 
     // void compareStacks();
 
-    std::vector<frameInfo> getSelected();
+    // std::vector<frameInfo> getSelected();
 
-    cv::Mat getSharpenedOutput();
+    // cv::Mat getSharpenedOutput();
 
-    void generateSharpenedOutput();
+    cv::Mat sharpenFrame(const cv::Mat &frame) const;
 
     void setSharpeningLevel(int level, double amplification);
 
-    void selectFrames();
+    std::vector<frameInfo> selectFrames(std::vector<frameInfo> frames);
 
-    void stackAlignedFrames();
+    std::vector<frameInfo> readFrames(const std::string input_path) const;
 
-    void alignFrames();
+    void processVideo(const std::string_view input_path, const std::string_view output_path);
 
-    cv::Mat getOutput();
+    cv::Mat stackFrames(std::vector<frameInfo> frames) const;
+
+    std::vector<frameInfo> alignFrames(std::vector<frameInfo> frames);
+
+    void saveSharpenedOutput(std::string_view output_path, std::string_view output_prefix, cv::Mat frame) const;
+
+    void setRunSharpening(const bool run);
 };
 
 #endif

@@ -10,26 +10,36 @@ extern "C"
 
 using SharpeningMap = std::map<int, int>;
 
+struct SharpeningConfig
+{
+    int decomp_levels;
+    std::string method;
+
+    SharpeningMap level_sharpenings;
+};
+
 void sharpen(const cv::Mat &image, cv::Mat &result);
 
 class WaveletSharpener
 {
 private:
     wave_object obj;
-    wt2_object wt;
     double *input;
     double *wavecoeffs;
-    int decomp_levels;
-    SharpeningMap level_sharpenings;
+    SharpeningConfig config;
 
 public:
-    WaveletSharpener(int levels) : decomp_levels(levels) {
-                                   };
+    WaveletSharpener(int levels = 6, std::string method = "db4") : config{.decomp_levels = levels, .method = method}
+    {
+        obj = wave_init(method.c_str());
+    };
     void decomposeImage();
 
-    void runSharpening(const cv::Mat &image, cv::Mat &result);
+    void runSharpening(const cv::Mat &image, cv::Mat &result) const;
 
     void sharpenLevel();
+
+    const SharpeningConfig &getSharpenConfig() const;
 
     void setLevelSharpening(const int level, const double amplification);
 };

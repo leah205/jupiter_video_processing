@@ -1,6 +1,7 @@
 #include <opencv2/opencv.hpp>
 #include <numeric>
 #include <iostream>
+#include <optional>
 
 #include <cmath>
 
@@ -21,7 +22,7 @@
  *
  * @param frame
  */
-void VideoProcessor::addFrame(cv::Mat &frame)
+frameInfo VideoProcessor::processFrame(cv::Mat frame) const
 {
     frameInfo newFrame;
     extract_channel(frame);
@@ -30,7 +31,8 @@ void VideoProcessor::addFrame(cv::Mat &frame)
     smooth_mask(planet_mask);
     newFrame.frame = frame;
     newFrame.planet_mask = planet_mask;
-    frames.push_back(newFrame);
+    return newFrame;
+    // frames.push_back(newFrame);
 };
 
 /**
@@ -39,36 +41,29 @@ void VideoProcessor::addFrame(cv::Mat &frame)
  * @param frame_num
  */
 
-void VideoProcessor::setFrameStackNum(int frame_num)
-{
-    stacked_frames_num = frame_num;
-};
-
 /**
  * @brief gets sharpest frames
  *
  */
-void VideoProcessor::selectFrames()
+std::vector<frameInfo> VideoProcessor::selectFrames(std::vector<frameInfo> frames)
 {
+    const int stacked_frames_num = ceil(((double)(frames.size())) / 4);
     limiter.setLimitFrameNum(stacked_frames_num);
-    selected_frames = limiter.limitFrames(frames);
-    // cv::imshow("sharpest", selected_frames[0].frame);
-    // cv::waitKey(0);
-    // cv::imshow("least sharp", selected_frames[selected_frames.size() - 1].frame);
-    // cv::waitKey(0);
+    std::vector<frameInfo> selected_frames = limiter.limitFrames(frames);
     limiter.compare_methods(frames);
-    std::cout << selected_frames.size() << std::endl;
+    return selected_frames;
+    // std::cout << selected_frames.size() << std::endl;
 }
 
-/**
- * @brief
- *
- * @return std::vector<frameInfo>
- */
-std::vector<frameInfo> VideoProcessor::getSelected()
-{
-    return selected_frames;
-};
+// /**
+//  * @brief
+//  *
+//  * @return std::vector<frameInfo>
+//  */
+// std::vector<frameInfo> VideoProcessor::getSelected()
+// {
+//     return selected_frames;
+// };
 
 /**
  * @brief aligns frames to reference
@@ -77,15 +72,18 @@ std::vector<frameInfo> VideoProcessor::getSelected()
  * with centroid aligned to reference frame
  *
  */
-void VideoProcessor::alignFrames()
+std::vector<frameInfo> VideoProcessor::alignFrames(std::vector<frameInfo> frames)
 {
     std::cout << "aligning frames..." << std::endl;
-    frameInfo ref_frame = selected_frames[0];
+    std::vector<frameInfo> aligned_frames{};
+    frameInfo ref_frame = frames[0];
+    // change this
     aligner.setRefFrame(ref_frame);
-    for (int i = 1; i < selected_frames.size(); i++)
+    for (int i = 1; i < frames.size(); i++)
     {
-        aligned_frames.push_back(aligner.alignFrame(selected_frames[i]));
+        aligned_frames.push_back(aligner.alignFrame(frames[i]));
     }
+    return aligned_frames;
 };
 
 /**
@@ -94,51 +92,102 @@ void VideoProcessor::alignFrames()
  * averages pixels among aligned selected frames and stores them in stacked matrix
  */
 
-void VideoProcessor::stackAlignedFrames()
+cv::Mat VideoProcessor::stackFrames(std::vector<frameInfo> frames) const
 {
-    std::cout << "stacking " << aligned_frames.size() << " frames..." << std::endl;
-    output = stack_frames(aligned_frames);
+    cv::Mat output;
+    std::cout << "stacking " << frames.size() << " frames..." << std::endl;
+    output = stack_frames(frames);
     subtract_background_signal(output);
+    return output;
 }
 
 /**
  * @brief generates and stores sharpened output in class
  *
  */
-void VideoProcessor::generateSharpenedOutput()
+cv::Mat VideoProcessor::sharpenFrame(const cv::Mat &frame) const
 {
-    if (output.empty())
+    cv::Mat sharpened_frame;
+    if (frame.empty())
     {
         throw std::runtime_error("no output matrix exists to sharpen");
     }
-    // sharpen(output, sharpened_output);
-    sharpener.setLevelSharpening(2, 20);
-    sharpener.runSharpening(output, sharpened_output);
+    sharpener.runSharpening(frame, sharpened_frame);
+    return sharpened_frame;
 }
 
-/**
- * @brief gets copy of output
- *
- * @return cv::Mat
- */
-
-cv::Mat VideoProcessor::getOutput()
+std::vector<frameInfo> VideoProcessor::readFrames(const std::string input_path) const
 {
-    return output.clone();
+    bool ret;
+    cv::Mat frame;
+    std::vector<frameInfo> frames;
+    cv::VideoCapture cap(input_path);
+    int frame_num = cap.get(cv::CAP_PROP_FRAME_COUNT);
+    int fps = cap.get(cv::CAP_PROP_FPS);
+
+    std::cout << "number of frames: " << frame_num << std::endl;
+    std::cout << "frames per second: " << fps << std::endl;
+
+    if (!cap.isOpened())
+    {
+        std::cout << "Error: video object was not opened successfully" << std::endl;
+        throw -1;
+    }
+    else
+    {
+        std::cout << "Video opened successfully" << std::endl;
+    }
+
+    while (true)
+    {
+
+        ret = cap.read(frame);
+
+        if (!ret)
+        {
+            break;
+        }
+
+        frames.push_back(processFrame(frame));
+    }
+    return frames;
 }
 
-/**
- * @brief gets copy of sharpened output
- *
- * @return cv::Mat
- */
-cv::Mat VideoProcessor::getSharpenedOutput()
-{
-    return sharpened_output.clone();
+void VideoProcessor::processVideo(const std::string_view input_path, const std::string_view output_path)
+{ // make these return values
+    std::vector<frameInfo> frames = readFrames(std::string{input_path});
+    std::vector<frameInfo> selected_frames = selectFrames(frames);
+    std::vector<frameInfo> aligned_frames = alignFrames(selected_frames);
+    cv::Mat stacked_frame = stackFrames(aligned_frames);
+    std::size_t pos = input_path.find_last_of('/');
+    std::string_view filename = input_path.substr(pos + 1);
+    std::string_view prefix = filename.substr(0, filename.size() - 4);
+    save_output(output_path, prefix, stacked_frame);
+
+    if (run_sharpening)
+    {
+        cv::Mat sharpened_frame = sharpenFrame(stacked_frame);
+        saveSharpenedOutput(output_path, prefix, sharpened_frame);
+    }
 }
 
-void saveOutput(std::string output_dir)
+void VideoProcessor::setRunSharpening(const bool run)
 {
+    run_sharpening = run;
+}
+
+void VideoProcessor::saveSharpenedOutput(std::string_view output_path, std::string_view prefix, cv::Mat frame) const
+{
+    if (run_sharpening == true)
+    {
+        auto &config = sharpener.getSharpenConfig();
+        std::string levels_str;
+        for (const auto &[level, amp] : config.level_sharpenings)
+        {
+            levels_str += "_" + std::to_string(level) + "X" + std::to_string(amp);
+        }
+        cv::imwrite("../output/" + std::string{prefix} + "WV" + levels_str + "_" + config.method + ".png", frame);
+    }
 }
 
 /**

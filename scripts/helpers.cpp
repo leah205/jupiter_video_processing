@@ -114,16 +114,11 @@ cv::Mat get_inner_planet_mask(cv::Mat mask)
     return innerMask;
 }
 
-void save_output(std::string prefix, const cv::Mat frame)
+void save_output(std::string_view output, std::string_view prefix, const cv::Mat &frame)
 {
-    cv::imwrite("../output/" + prefix + ".png", frame);
-}
-
-void save_sharpened_output(std::string prefix, const cv::Mat frame, int sharpen_level, double sharpen_amp)
-{
-    std::string str_level = std::to_string(sharpen_level);
-    std::string str_amp = std::to_string((int)sharpen_amp);
-    cv::imwrite("../output/" + prefix + "WV" + str_level + "X" + str_amp + ".png", frame);
+    std::string output_file{output};
+    output_file += std::string{prefix} + ".png";
+    cv::imwrite(output_file, frame);
 }
 
 /**

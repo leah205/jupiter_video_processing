@@ -18,12 +18,10 @@
 int main()
 {
     double duration = static_cast<double>(cv::getTickCount());
-    FrameQuality quality_scorer = FrameQuality(QualityMetric::GRADIENT);
-    VideoProcessor processor(quality_scorer, 5);
-    bool ret;
-    cv::Mat frame;
+    // FrameQuality quality_scorer = FrameQuality(QualityMetric::GRADIENT);
+    VideoProcessor processor;
 
-    std::string filename = "2026-03-18-0236_9-Jupiter_656HIA.avi";
+    std::string input_path = "../data/2026-03-18-0236_9-Jupiter_656HIA.avi";
     // std::string filename = "2026-03-18-0241_0-Jupiter_620CH4.avi";
 
     // std::string filename = "2026-03-18-0239_0-Jupiter_632OI.avi";
@@ -32,65 +30,16 @@ int main()
 
     // std::string filename = "2026-03-18-0706_3-Jupiter_450BLU.avi";
 
-    std::string input_dir = "../data/";
-    std::string path = input_dir + filename;
+    // std::string input_dir = "../data/";
+    // std::string path = input_dir + filename;
 
-    std::string output_dir = "../output/";
+    std::string output_path = "../output/";
 
-    cv::VideoCapture cap(path);
-    // cv::VideoCapture cap("../data/2026-03-18-0241_0-Jupiter_620CH4.avi");
-
-    // cv::VideoCapture cap("../data/2026-03-18-0239_0-Jupiter_632OI.avi");
-    // cv::VideoCapture cap("../data/2026-03-18-0704_1-Jupiter_685NIR.avi");
-    // cv::VideoCapture cap("../data/2026-03-18-0706_3-Jupiter_450BLU.avi");
-
-    int frame_num = cap.get(cv::CAP_PROP_FRAME_COUNT);
-    int fps = cap.get(cv::CAP_PROP_FPS);
-
-    std::cout << "number of frames: " << frame_num << std::endl;
-    std::cout << "frames per second: " << fps << std::endl;
-
-    if (!cap.isOpened())
-    {
-        std::cout << "Error: video object was not opened successfully" << std::endl;
-        return -1;
-    }
-    else
-    {
-        std::cout << "Video opened successfully" << std::endl;
-    }
-
-    while (true)
-    {
-
-        ret = cap.read(frame);
-
-        if (!ret)
-        {
-            break;
-        }
-
-        processor.addFrame(frame);
-    }
-
-    int select_amount = ceil(((double)(frame_num)) / 4);
     int sharpen_level = 2;
     double sharpen_amp = 20.0;
-    processor.setFrameStackNum(select_amount);
-    processor.selectFrames();
-    processor.alignFrames();
-    processor.stackAlignedFrames();
-    cv::Mat output = processor.getOutput();
     processor.setSharpeningLevel(sharpen_level, sharpen_amp);
-    processor.generateSharpenedOutput();
-    // cv::imshow("output", output);
-    // cv::waitKey(0);
-    cv::Mat sharpened_output = processor.getSharpenedOutput();
-    // cv::imshow("sharpened output", sharpened_output);
-    // cv::waitKey(0);
-    save_output(filename.substr(0, filename.size() - 4), output);
-    std::cout << "hello world" << std::endl;
-    save_sharpened_output(filename.substr(0, filename.size() - 4), sharpened_output, sharpen_level, sharpen_amp);
+    processor.processVideo(input_path, output_path);
+
     // cv::imwrite(output_dir + output_file, output);
     // // processor.getMaskAreas();
     // // cv::imshow("final", processor.getOutput());
