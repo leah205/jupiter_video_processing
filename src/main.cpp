@@ -68,9 +68,9 @@ int main()
 
     // // std::cout << "output magnitude: " << get_avg_gradient_mag(output, inner_mask, rect) << std::endl;
 
-    // duration = static_cast<double>(cv::getTickCount()) - duration;
-    // duration /= cv::getTickFrequency();
-    // std::cout << "duration of program: " << duration << " s" << std::endl;
+    duration = static_cast<double>(cv::getTickCount()) - duration;
+    duration /= cv::getTickFrequency();
+    std::cout << "duration of program: " << duration << " s" << std::endl;
 
     // // cv::imwrite("ouput.png", output);
 }

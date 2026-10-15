@@ -31,9 +31,9 @@ void sharpen(const cv::Mat &image, cv::Mat &result)
     cv::filter2D(image, result, image.depth(), kernel);
 };
 
-void sharpenAtLevel(double *cLH, double *cHL, double *cHH, int rows, int cols)
-{
-}
+// void sharpenAtLevel(double *cLH, double *cHL, double *cHH, int rows, int cols)
+// {
+// }
 
 /**
  * @brief performs wavelet sharpening
@@ -59,10 +59,13 @@ void WaveletSharpener::runSharpening(const cv::Mat &image, cv::Mat &result) cons
 
     for (const auto &[level, amp] : config.level_sharpenings)
     {
+        char H[] = "H";
+        char V[] = "V";
+        char D[] = "D";
 
-        cLH = getWT2Coeffs(wt, wavecoeffs, level, "H", &ir, &ic);
-        cHL = getWT2Coeffs(wt, wavecoeffs, level, "V", &ir, &ic);
-        cHH = getWT2Coeffs(wt, wavecoeffs, level, "D", &ir, &ic);
+        cLH = getWT2Coeffs(wt, wavecoeffs, level, H, &ir, &ic);
+        cHL = getWT2Coeffs(wt, wavecoeffs, level, V, &ir, &ic);
+        cHH = getWT2Coeffs(wt, wavecoeffs, level, D, &ir, &ic);
         std::cout << "sharpening layer: " << level << std::endl;
         std::cout << "sharpening factr: " << amp << std::endl;
 

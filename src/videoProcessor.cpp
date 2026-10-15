@@ -81,7 +81,7 @@ std::vector<frameInfo> VideoProcessor::alignFrames(std::vector<frameInfo> frames
     std::vector<frameInfo> aligned_frames{};
     frameInfo ref_frame = frames[0];
     aligner.setRefFrame(ref_frame);
-    for (int i = 1; i < frames.size(); i++)
+    for (size_t i = 1; i < frames.size(); i++)
     {
         aligned_frames.push_back(aligner.alignFrame(frames[i]));
     }

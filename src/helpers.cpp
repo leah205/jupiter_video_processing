@@ -38,7 +38,7 @@ cv::Mat get_planet_mask(const cv::Mat frame)
     cv::Mat blurred;
     cv::GaussianBlur(frame, blurred, cv::Size(3, 3), 0);
 
-    double val = cv::threshold(blurred, otsu_mask, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+    cv::threshold(blurred, otsu_mask, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
 
     return otsu_mask;
 };

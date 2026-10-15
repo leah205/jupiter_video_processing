@@ -24,7 +24,7 @@ std::vector<frameInfo> Limiter::limitFrames(std::vector<frameInfo> frames)
     std::vector<size_t> sorted_i(num_frames);
     std::vector<scoredFrame> scoredFrames;
 
-    for (int i = 0; i < frames.size(); i++)
+    for (size_t i = 0; i < num_frames; i++)
     {
         scoredFrame new_frame{frames[i], quality_scorer.score(frames[i])};
         scoredFrames.push_back(new_frame);
@@ -72,7 +72,7 @@ void Limiter::compare_methods(std::vector<frameInfo> frames)
 
     FrameQuality gradient = FrameQuality(QualityMetric::GRADIENT);
     FrameQuality laplacian = FrameQuality(QualityMetric::LAPLACIAN);
-    for (int i = 0; i < frames.size(); i++)
+    for (size_t i = 0; i < num_frames; i++)
     {
         scoredFrame new_frame{frames[i], gradient.score(frames[i])};
         scoredFramesG.push_back(new_frame);
