@@ -50,7 +50,7 @@ void WaveletSharpener::runSharpening(const cv::Mat &image, cv::Mat &result) cons
     std::vector<double> input_v(size * sizeof(double)), diff_v(size * sizeof(double)), output_v(size * sizeof(double));
     double *cLH, *cHL, *cHH;
     int ir, ic;
-    image.convertTo(input, CV_64F);
+    image.convertTo(input, CV_64F, 255.0 / 65535.0);
 
     input_v.assign(input.datastart, input.dataend);
     wt2_object wt = wt2_init(obj, "swt", input.rows, input.cols, config.decomp_levels);
