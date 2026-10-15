@@ -63,8 +63,8 @@ void WaveletSharpener::runSharpening(const cv::Mat &image, cv::Mat &result) cons
         cLH = getWT2Coeffs(wt, wavecoeffs, level, "H", &ir, &ic);
         cHL = getWT2Coeffs(wt, wavecoeffs, level, "V", &ir, &ic);
         cHH = getWT2Coeffs(wt, wavecoeffs, level, "D", &ir, &ic);
-        std::cout << "level: " << level << std::endl;
-        std::cout << "amp: " << amp << std::endl;
+        std::cout << "sharpening layer: " << level << std::endl;
+        std::cout << "sharpening factr: " << amp << std::endl;
 
         for (int i = 0; i < ir; i++)
         {
@@ -80,7 +80,7 @@ void WaveletSharpener::runSharpening(const cv::Mat &image, cv::Mat &result) cons
     // dispWT2Coeffs(cLL, ir, ic);
     iswt2(wt, wavecoeffs, output_v.data());
     result = cv::Mat(input.rows, input.cols, CV_64F, &output_v.front());
-    result.convertTo(result, CV_8UC1);
+    result.convertTo(result, CV_16UC1, 65535.0 / 255.0);
 
     // wt2_summary(wt);
     free(wavecoeffs);

@@ -41,7 +41,6 @@ cv::Mat stack_frames(std::vector<frameInfo> frames)
     }
 
     sum_mat = sum_mat / cv::Scalar(num_frames);
-    // sum_mat.convertTo(stacked, CV_16UC1, 65535.0 / 255.0);
 
     sum_mat.convertTo(stacked, CV_8UC1);
     return stacked;

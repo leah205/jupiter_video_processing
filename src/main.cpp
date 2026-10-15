@@ -21,7 +21,7 @@ int main()
     // FrameQuality quality_scorer = FrameQuality(QualityMetric::GRADIENT);
     VideoProcessor processor;
 
-    std::string input_path = "../data/2026-03-18-0236_9-Jupiter_656HIA.avi";
+    std::string input_path = "data/2026-03-18-0236_9-Jupiter_656HIA.avi";
     // std::string filename = "2026-03-18-0241_0-Jupiter_620CH4.avi";
 
     // std::string filename = "2026-03-18-0239_0-Jupiter_632OI.avi";
@@ -33,7 +33,7 @@ int main()
     // std::string input_dir = "../data/";
     // std::string path = input_dir + filename;
 
-    std::string output_path = "../output/";
+    std::string output_path = "output/";
 
     int sharpen_level = 2;
     double sharpen_amp = 1.3;

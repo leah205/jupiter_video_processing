@@ -38,16 +38,7 @@ cv::Mat get_planet_mask(const cv::Mat frame)
     cv::Mat blurred;
     cv::GaussianBlur(frame, blurred, cv::Size(3, 3), 0);
 
-    // double val = cv::threshold(blurred, otsu_mask, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
-    double val = cv::threshold(blurred, otsu_mask, 20, 255, cv::THRESH_BINARY);
-
-    // if (first)
-    // {
-    //     first = 0;
-    //     cv::imwrite("planet_mask.png", otsu_mask);
-    //     std::cout << "threshold value: " << val << std::endl;
-    // }
-    // std::cout << "threshold value: " << val << std::endl;
+    double val = cv::threshold(blurred, otsu_mask, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
 
     return otsu_mask;
 };
@@ -130,6 +121,8 @@ void save_output(std::string_view output, std::string_view prefix, const cv::Mat
  */
 void subtract_background_signal(cv::Mat &frame)
 {
+    cv::imshow("frame", frame);
+    cv::waitKey(0);
     cv::Mat planet_mask = get_planet_mask(frame);
     cv::Mat background_mask;
     cv::bitwise_not(planet_mask, background_mask);

@@ -29,7 +29,6 @@ frameInfo VideoProcessor::processFrame(cv::Mat frame) const
 {
     frameInfo newFrame;
     extract_channel(frame);
-    // subtract_background_signal(frame);
     cv::Mat planet_mask = get_planet_mask(frame);
     smooth_mask(planet_mask);
     newFrame.frame = frame;
@@ -100,7 +99,7 @@ cv::Mat VideoProcessor::stackFrames(std::vector<frameInfo> frames) const
     cv::Mat output;
     std::cout << "stacking " << frames.size() << " frames..." << std::endl;
     output = stack_frames(frames);
-    subtract_background_signal(output);
+
     return output;
 }
 
@@ -162,6 +161,8 @@ void VideoProcessor::processVideo(const std::string_view input_path, const std::
     std::vector<frameInfo> selected_frames = selectFrames(frames);
     std::vector<frameInfo> aligned_frames = alignFrames(selected_frames);
     cv::Mat stacked_frame = stackFrames(aligned_frames);
+    subtract_background_signal(stacked_frame);
+    stacked_frame.convertTo(stacked_frame, CV_16UC1, 65535.0 / 255.0);
     std::size_t pos = input_path.find_last_of('/');
     std::string_view filename = input_path.substr(pos + 1);
     std::string_view prefix = filename.substr(0, filename.size() - 4);
