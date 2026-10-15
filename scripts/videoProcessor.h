@@ -11,10 +11,8 @@
 class VideoProcessor
 {
 private:
-    Aligner aligner;
     static constexpr int wavelet_levels = 5;
     FrameQuality quality_scorer = FrameQuality(QualityMetric::GRADIENT);
-    Limiter limiter;
     std::vector<frameInfo> frames;
     std::string input_dir;
     std::string output_dir;
@@ -22,10 +20,7 @@ private:
     WaveletSharpener sharpener;
 
 public:
-    VideoProcessor()
-        : limiter(quality_scorer),
-          aligner(),
-          sharpener(wavelet_levels)
+    VideoProcessor() : sharpener(wavelet_levels)
 
     {
     };

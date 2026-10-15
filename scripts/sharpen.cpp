@@ -81,10 +81,8 @@ void WaveletSharpener::runSharpening(const cv::Mat &image, cv::Mat &result) cons
     iswt2(wt, wavecoeffs, output_v.data());
     result = cv::Mat(input.rows, input.cols, CV_64F, &output_v.front());
     result.convertTo(result, CV_8UC1);
-    cv::imshow("result", result);
-    cv::waitKey(0);
 
-    wt2_summary(wt);
+    // wt2_summary(wt);
     free(wavecoeffs);
     wave_free(obj);
     wt2_free(wt);

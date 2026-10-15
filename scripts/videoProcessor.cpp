@@ -50,12 +50,12 @@ frameInfo VideoProcessor::processFrame(cv::Mat frame) const
  */
 std::vector<frameInfo> VideoProcessor::selectFrames(std::vector<frameInfo> frames)
 {
+    Limiter limiter(quality_scorer);
     const int stacked_frames_num = ceil(((double)(frames.size())) / 4);
     limiter.setLimitFrameNum(stacked_frames_num);
     std::vector<frameInfo> selected_frames = limiter.limitFrames(frames);
     limiter.compare_methods(frames);
     return selected_frames;
-    // std::cout << selected_frames.size() << std::endl;
 }
 
 // /**
@@ -77,10 +77,10 @@ std::vector<frameInfo> VideoProcessor::selectFrames(std::vector<frameInfo> frame
  */
 std::vector<frameInfo> VideoProcessor::alignFrames(std::vector<frameInfo> frames)
 {
+    Aligner aligner{};
     std::cout << "aligning frames..." << std::endl;
     std::vector<frameInfo> aligned_frames{};
     frameInfo ref_frame = frames[0];
-    // change this
     aligner.setRefFrame(ref_frame);
     for (int i = 1; i < frames.size(); i++)
     {
