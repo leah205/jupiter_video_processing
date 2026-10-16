@@ -1,0 +1,76 @@
+#include <opencv2/opencv.hpp>
+#include "sharpen.h"
+
+extern "C"
+{
+#include "wavelib.h"
+}
+
+/**
+ * @brief performs wavelet sharpening
+ *
+ * Performs swt wavelet decomposition and uses sharpening config to sharpen at each decomposition level
+ * by specified amplitude factor. Performs inverse transform to reconstruct image and store in result.
+ *
+ * @param image
+ * @param result
+ */
+void WaveletSharpener::runSharpening(const cv::Mat &image, cv::Mat &result) const
+{
+    std::cout << "sharpening..." << std::endl;
+    cv::Mat input;
+    int size = image.rows * image.cols;
+    std::vector<double> input_v(size * sizeof(double)), diff_v(size * sizeof(double)), output_v(size * sizeof(double));
+    double *cLH, *cHL, *cHH;
+    int ir, ic;
+    image.convertTo(input, CV_64F, 255.0 / 65535.0);
+
+    input_v.assign(input.datastart, input.dataend);
+    wt2_object wt = wt2_init(obj, "swt", input.rows, input.cols, config.decomp_levels);
+    // setWTConv(wt, "direct");
+    double *wavecoeffs = swt2(wt, input.ptr<double>(0));
+
+    for (const auto &[level, amp] : config.level_sharpenings)
+    {
+        char H[] = "H";
+        char V[] = "V";
+        char D[] = "D";
+
+        cLH = getWT2Coeffs(wt, wavecoeffs, level, H, &ir, &ic);
+        cHL = getWT2Coeffs(wt, wavecoeffs, level, V, &ir, &ic);
+        cHH = getWT2Coeffs(wt, wavecoeffs, level, D, &ir, &ic);
+        std::cout << "sharpening layer: " << level << std::endl;
+        std::cout << "sharpening factr: " << amp << std::endl;
+
+        for (int i = 0; i < ir; i++)
+        {
+            for (int j = 0; j < ic; j++)
+            {
+                *(cLH++) *= amp;
+                *(cHL++) *= amp;
+                *(cHH++) *= amp;
+            }
+        }
+    }
+
+    // dispWT2Coeffs(cLL, ir, ic);
+    iswt2(wt, wavecoeffs, output_v.data());
+    result = cv::Mat(input.rows, input.cols, CV_64F, &output_v.front());
+    result.convertTo(result, CV_16UC1, 65535.0 / 255.0);
+
+    // wt2_summary(wt);
+    free(wavecoeffs);
+    wave_free(obj);
+    wt2_free(wt);
+    // free wavelet coefficients
+}
+
+void WaveletSharpener::setLevelSharpening(const int level, const double amplification)
+{
+    config.level_sharpenings[level] = amplification;
+};
+
+const SharpeningConfig &WaveletSharpener::getSharpenConfig() const
+{
+    return config;
+};
