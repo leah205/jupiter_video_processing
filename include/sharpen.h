@@ -28,7 +28,11 @@ private:
     SharpeningConfig config;
 
 public:
+<<<<<<< HEAD
     WaveletSharpener(int levels = 6, std::string method = "db4") : config{.decomp_levels = levels, .method = method, .level_sharpenings = {}}
+=======
+    WaveletSharpener(int levels = 6, std::string method = "db4") : config{.decomp_levels = levels, .method = method}
+>>>>>>> c9400f3d70e0425a88a1e40c960fb0144108d831
     {
         obj = wave_init(method.c_str());
     };

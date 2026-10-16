@@ -31,9 +31,15 @@ void sharpen(const cv::Mat &image, cv::Mat &result)
     cv::filter2D(image, result, image.depth(), kernel);
 };
 
+<<<<<<< HEAD
 // void sharpenAtLevel(double *cLH, double *cHL, double *cHH, int rows, int cols)
 // {
 // }
+=======
+void sharpenAtLevel(double *cLH, double *cHL, double *cHH, int rows, int cols)
+{
+}
+>>>>>>> c9400f3d70e0425a88a1e40c960fb0144108d831
 
 /**
  * @brief performs wavelet sharpening
