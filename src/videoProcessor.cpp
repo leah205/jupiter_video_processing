@@ -19,9 +19,9 @@
 #include "sharpen.h"
 
 /**
- * @brief adds frame candidate for lucky imaging
+ * @brief processes frame and returns frameInfo object
  *
- * computes quality score and adds frameInfo object to frame list
+ * changes frame data type to be one channel. Returns binary planet mask and frame in struct object
  *
  * @param frame
  */
@@ -38,14 +38,9 @@ frameInfo VideoProcessor::processFrame(cv::Mat frame) const
 };
 
 /**
- * @brief Sets number of frames to stack
+ * @brief gets top 25% sharpest frames
  *
- * @param frame_num
- */
-
-/**
- * @brief gets sharpest frames
- *
+ * @param frames
  */
 std::vector<frameInfo> VideoProcessor::selectFrames(std::vector<frameInfo> frames)
 {
@@ -57,22 +52,13 @@ std::vector<frameInfo> VideoProcessor::selectFrames(std::vector<frameInfo> frame
     return selected_frames;
 }
 
-// /**
-//  * @brief
-//  *
-//  * @return std::vector<frameInfo>
-//  */
-// std::vector<frameInfo> VideoProcessor::getSelected()
-// {
-//     return selected_frames;
-// };
-
 /**
  * @brief aligns frames to reference
  *
- * updates aligned_frames list to contain matrices of sharpest frames
- * with centroid aligned to reference frame
+ * returns aligned_frames vector to contain matrices of sharpest frames
+ * with centroid aligned to first frame
  *
+ * @param frames
  */
 std::vector<frameInfo> VideoProcessor::alignFrames(std::vector<frameInfo> frames)
 {
@@ -91,7 +77,9 @@ std::vector<frameInfo> VideoProcessor::alignFrames(std::vector<frameInfo> frames
 /**
  * @brief stacks selected aligned frames
  *
- * averages pixels among aligned selected frames and stores them in stacked matrix
+ * returns 16-bit stacked frame with pixel intensities averaged among aligned selected frames
+ *
+ * @param frames
  */
 
 cv::Mat VideoProcessor::stackFrames(std::vector<frameInfo> frames) const
@@ -104,8 +92,12 @@ cv::Mat VideoProcessor::stackFrames(std::vector<frameInfo> frames) const
 }
 
 /**
- * @brief generates and stores sharpened output in class
+ * @brief sharpens frame
  *
+ *
+ * runs wavelet sharpening on frame and returns sharpened output
+ *
+ * @param frame
  */
 cv::Mat VideoProcessor::sharpenFrame(const cv::Mat &frame) const
 {
@@ -117,6 +109,13 @@ cv::Mat VideoProcessor::sharpenFrame(const cv::Mat &frame) const
     sharpener.runSharpening(frame, sharpened_frame);
     return sharpened_frame;
 }
+
+/**
+ * @brief reads frames from .avi file into vector of processed frameInfo objects
+ *
+ * @param input_path
+ * @return std::vector<frameInfo>
+ */
 
 std::vector<frameInfo> VideoProcessor::readFrames(const std::string input_path) const
 {
@@ -155,6 +154,17 @@ std::vector<frameInfo> VideoProcessor::readFrames(const std::string input_path) 
     return frames;
 }
 
+/**
+ * @brief Runs pipeline lucky imaging pipeline
+ *
+ * reads video, selects 25% highest quality frames, aligns them to highest quality frame, stacks them,
+ * corrects for background noise, applies wavelet sharpening to frame, and saves sharpened and unsharpened frame
+ *
+ *
+ * @param input_path
+ * @param output_path
+ */
+
 void VideoProcessor::processVideo(const std::string_view input_path, const std::string_view output_path)
 { // make these return values
     std::vector<frameInfo> frames = readFrames(std::string{input_path});
@@ -174,6 +184,12 @@ void VideoProcessor::processVideo(const std::string_view input_path, const std::
         saveSharpenedOutput(output_path, prefix, sharpened_frame);
     }
 }
+
+/**
+ * @brief sets variable to determine whether pipeline sharpens image
+ *
+ * @param run
+ */
 
 void VideoProcessor::setRunSharpening(const bool run)
 {
