@@ -20,6 +20,11 @@
 std::vector<frameInfo> Limiter::limitFrames(std::vector<frameInfo> frames)
 {
     size_t num_frames = frames.size();
+
+    if (limit_frames_num > num_frames)
+    {
+        throw std::runtime_error("frame limit is larger than number of frames");
+    }
     std::vector<frameInfo> selected_frames;
     std::vector<size_t> sorted_i(num_frames);
     std::vector<scoredFrame> scoredFrames;

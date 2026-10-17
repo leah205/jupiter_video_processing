@@ -84,6 +84,7 @@ void VideoProcessor::alignFrames(std::vector<frameInfo> &frames)
 cv::Mat VideoProcessor::stackFrames(const std::vector<frameInfo> &frames) const
 {
     cv::Mat output;
+
     std::cout << "stacking " << frames.size() << " frames..." << std::endl;
     output = stack_frames(frames);
 

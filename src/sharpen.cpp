@@ -70,8 +70,26 @@ void WaveletSharpener::runSharpening(const cv::Mat &image, cv::Mat &result) cons
     // free wavelet coefficients
 }
 
+/**
+ * @brief adds wavelet layer and corresponding amplification factor for sharpening
+ *
+ *
+ *
+ * @param level layer for wavelet decomposition, specifies spatial scale for sharpening
+ * @param amplification amplification factor, specifies factor to multiply decomposed wavelet coefficients
+ */
+
 void WaveletSharpener::addLevelSharpening(const int level, const double amplification)
 {
+    if (level > 5 || level < 1)
+    {
+        throw std::runtime_error("wavelet sharpening layer must be between 1 and 5");
+    }
+
+    if (amplification <= 0)
+    {
+        throw std::runtime_error("amplification must be positive");
+    }
     config.level_sharpenings[level] = amplification;
 };
 
