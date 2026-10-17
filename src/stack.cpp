@@ -20,7 +20,7 @@
  * @return single-channel 16-bit cv::Mat
  */
 
-cv::Mat stack_frames(std::vector<frameInfo> frames)
+cv::Mat stack_frames(const std::vector<frameInfo> &frames)
 {
     cv::Mat stacked;
     size_t num_frames = frames.size();

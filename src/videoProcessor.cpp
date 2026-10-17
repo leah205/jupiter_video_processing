@@ -42,7 +42,7 @@ frameInfo VideoProcessor::processFrame(cv::Mat frame) const
  *
  * @param frames
  */
-std::vector<frameInfo> VideoProcessor::selectFrames(std::vector<frameInfo> frames)
+std::vector<frameInfo> VideoProcessor::selectFrames(const std::vector<frameInfo> &frames)
 {
     Limiter limiter(quality_scorer);
     const int stacked_frames_num = ceil(((double)(frames.size())) / 4);
@@ -55,12 +55,12 @@ std::vector<frameInfo> VideoProcessor::selectFrames(std::vector<frameInfo> frame
 /**
  * @brief aligns frames to reference
  *
- * returns aligned_frames vector to contain matrices of sharpest frames
+ * aligns frames to contain matrices of sharpest frames
  * with centroid aligned to first frame
  *
  * @param frames
  */
-std::vector<frameInfo> VideoProcessor::alignFrames(std::vector<frameInfo> frames)
+void VideoProcessor::alignFrames(std::vector<frameInfo> &frames)
 {
     Aligner aligner{};
     std::cout << "aligning frames..." << std::endl;
@@ -69,9 +69,8 @@ std::vector<frameInfo> VideoProcessor::alignFrames(std::vector<frameInfo> frames
     aligner.setRefFrame(ref_frame);
     for (size_t i = 1; i < frames.size(); i++)
     {
-        aligned_frames.push_back(aligner.alignFrame(frames[i]));
+        frames[i] = aligner.alignFrame(frames[i]);
     }
-    return aligned_frames;
 };
 
 /**
@@ -82,7 +81,7 @@ std::vector<frameInfo> VideoProcessor::alignFrames(std::vector<frameInfo> frames
  * @param frames
  */
 
-cv::Mat VideoProcessor::stackFrames(std::vector<frameInfo> frames) const
+cv::Mat VideoProcessor::stackFrames(const std::vector<frameInfo> &frames) const
 {
     cv::Mat output;
     std::cout << "stacking " << frames.size() << " frames..." << std::endl;
@@ -171,8 +170,8 @@ void VideoProcessor::processVideo(const std::string_view input_path, const std::
 { // make these return values
     std::vector<frameInfo> frames = readFrames(std::string{input_path});
     std::vector<frameInfo> selected_frames = selectFrames(frames);
-    std::vector<frameInfo> aligned_frames = alignFrames(selected_frames);
-    cv::Mat stacked_frame = stackFrames(aligned_frames);
+    alignFrames(selected_frames);
+    cv::Mat stacked_frame = stackFrames(selected_frames);
     subtract_background_signal(stacked_frame);
     stacked_frame.convertTo(stacked_frame, CV_16UC1, 65535.0 / 255.0);
     std::size_t pos = input_path.find_last_of('/');
