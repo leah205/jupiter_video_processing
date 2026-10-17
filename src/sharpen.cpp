@@ -6,6 +6,8 @@ extern "C"
 #include "wavelib.h"
 }
 
+static void showDetailMap(const cv::Mat &input, const cv::Mat &output);
+
 /**
  * @brief performs wavelet sharpening
  *
@@ -20,7 +22,7 @@ void WaveletSharpener::runSharpening(const cv::Mat &image, cv::Mat &result) cons
     std::cout << "sharpening..." << std::endl;
     cv::Mat input;
     int size = image.rows * image.cols;
-    std::vector<double> input_v(size * sizeof(double)), diff_v(size * sizeof(double)), output_v(size * sizeof(double));
+    std::vector<double> input_v(size), diff_v(size), output_v(size);
     double *cLH, *cHL, *cHH;
     int ir, ic;
     image.convertTo(input, CV_64F, 255.0 / 65535.0);
@@ -56,6 +58,9 @@ void WaveletSharpener::runSharpening(const cv::Mat &image, cv::Mat &result) cons
     // dispWT2Coeffs(cLL, ir, ic);
     iswt2(wt, wavecoeffs, output_v.data());
     result = cv::Mat(input.rows, input.cols, CV_64F, &output_v.front());
+
+    showDetailMap(input, result);
+
     result.convertTo(result, CV_16UC1, 65535.0 / 255.0);
 
     // wt2_summary(wt);
@@ -65,7 +70,7 @@ void WaveletSharpener::runSharpening(const cv::Mat &image, cv::Mat &result) cons
     // free wavelet coefficients
 }
 
-void WaveletSharpener::setLevelSharpening(const int level, const double amplification)
+void WaveletSharpener::addLevelSharpening(const int level, const double amplification)
 {
     config.level_sharpenings[level] = amplification;
 };
@@ -74,3 +79,20 @@ const SharpeningConfig &WaveletSharpener::getSharpenConfig() const
 {
     return config;
 };
+
+void showDetailMap(const cv::Mat &input, const cv::Mat &output)
+{
+    cv::Mat effect, effectColor;
+    cv::subtract(output, input, effect);
+    double maxAbs;
+    cv::minMaxLoc(effect, nullptr, &maxAbs);
+    maxAbs = std::max(maxAbs, 1e-9);
+
+    // Map [-maxAbs, +maxAbs] to [0, 255], with zero at 127/128.
+    effect.convertTo(effect, CV_8U, 127.5 / maxAbs, 127.5);
+
+    cv::applyColorMap(effect, effectColor, cv::COLORMAP_JET);
+
+    cv::imshow("Sharpening effect", effectColor);
+    cv::waitKey(0);
+}

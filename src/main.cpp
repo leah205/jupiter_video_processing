@@ -35,9 +35,16 @@ int main()
 
     std::string output_path = "output/";
 
-    int sharpen_level = 2;
-    double sharpen_amp = 1.3;
-    processor.setSharpeningLevel(sharpen_level, sharpen_amp);
+    int sharpen_level = 4;
+    double sharpen_amp = 2.0;
+    processor.addSharpeningLevel(sharpen_level, sharpen_amp);
+    sharpen_level = 3;
+    sharpen_amp = 4.0;
+    processor.addSharpeningLevel(sharpen_level, sharpen_amp);
+    sharpen_level = 2;
+    sharpen_amp = 2.0;
+    processor.addSharpeningLevel(sharpen_level, sharpen_amp);
+
     processor.processVideo(input_path, output_path);
 
     // cv::imwrite(output_dir + output_file, output);

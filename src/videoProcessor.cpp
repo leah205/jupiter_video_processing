@@ -101,6 +101,8 @@ cv::Mat VideoProcessor::stackFrames(std::vector<frameInfo> frames) const
  */
 cv::Mat VideoProcessor::sharpenFrame(const cv::Mat &frame) const
 {
+    // WaveletSharpener sharpener(wavelet_levels);
+
     cv::Mat sharpened_frame;
     if (frame.empty())
     {
@@ -224,9 +226,9 @@ void VideoProcessor::saveSharpenedOutput(std::string_view output_path, std::stri
  * @param level
  * @param amplification
  */
-void VideoProcessor::setSharpeningLevel(int level, double amplification)
+void VideoProcessor::addSharpeningLevel(int level, double amplification)
 {
-    sharpener.setLevelSharpening(level, amplification);
+    sharpener.addLevelSharpening(level, amplification);
 }
 
 // void VideoProcessor::alignSelectedCentroidEcc()
