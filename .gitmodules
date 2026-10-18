@@ -1,0 +1,3 @@
+[submodule "external/wavelib"]
+	path = external/wavelib
+	url = git@github.com:rafat/wavelib.git
