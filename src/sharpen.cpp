@@ -20,7 +20,6 @@ static void showDetailMap(const cv::Mat &input, const cv::Mat &output);
 void WaveletSharpener::runSharpening(const cv::Mat &image, cv::Mat &result) const
 {
     std::cout << "sharpening..." << std::endl;
-    std::cout << config.decomp_levels << std::endl;
     wave_object obj = wave_init(config.method.c_str());
     cv::Mat input;
 
@@ -44,8 +43,6 @@ void WaveletSharpener::runSharpening(const cv::Mat &image, cv::Mat &result) cons
         cLH = getWT2Coeffs(wt, wavecoeffs, level, H, &ir, &ic);
         cHL = getWT2Coeffs(wt, wavecoeffs, level, V, &ir, &ic);
         cHH = getWT2Coeffs(wt, wavecoeffs, level, D, &ir, &ic);
-        std::cout << "sharpening layer: " << level << std::endl;
-        std::cout << "sharpening factr: " << amp << std::endl;
 
         for (int i = 0; i < ir; i++)
         {

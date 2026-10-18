@@ -34,14 +34,11 @@ std::vector<frameInfo> Limiter::limitFrames(std::vector<frameInfo> frames)
         scoredFrame new_frame{frames[i], quality_scorer.score(frames[i])};
         scoredFrames.push_back(new_frame);
     }
-    // sorted_l.resize(frames.size());
-    // std::cout << "frame quality score" << frames[0].quality_score << std::endl;
 
     std::iota(sorted_i.begin(), sorted_i.end(), 0);
     std::sort(sorted_i.begin(), sorted_i.end(), [&](size_t a, size_t b)
               { return scoredFrames[a].score > scoredFrames[b].score; });
 
-    // std::vector<size_t> selected_indices(sorted_l.begin(), sorted_l.begin() + limit_frames_num);
     for (int i = 0; i < limit_frames_num; i++)
     {
         selected_frames.push_back(static_cast<frameInfo>(scoredFrames[sorted_i[i]]));

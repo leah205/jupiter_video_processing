@@ -60,6 +60,7 @@ int main()
 
     for (size_t i = 0; i < filepaths.size(); i++)
     {
+        std::cout << "processing " << filepaths[i] << std::endl;
 
         try
         {

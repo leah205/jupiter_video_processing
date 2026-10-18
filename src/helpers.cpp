@@ -126,6 +126,6 @@ void subtract_background_signal(cv::Mat &frame)
     cv::Mat background_mask;
     cv::bitwise_not(planet_mask, background_mask);
     double background_signal = cv::mean(frame, background_mask)[0];
-    std::cout << "correcting for detected background signal of " << background_signal << std::endl;
+    // std::cout << "correcting for detected background signal of " << background_signal << std::endl;
     cv::subtract(frame, background_signal, frame);
 }

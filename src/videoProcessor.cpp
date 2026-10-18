@@ -48,7 +48,6 @@ std::vector<frameInfo> VideoProcessor::selectFrames(const std::vector<frameInfo>
     const int stacked_frames_num = ceil(((double)(frames.size())) / 4);
     limiter.setLimitFrameNum(stacked_frames_num);
     std::vector<frameInfo> selected_frames = limiter.limitFrames(frames);
-    limiter.compare_methods(frames);
     return selected_frames;
 }
 
@@ -127,17 +126,9 @@ std::vector<frameInfo> VideoProcessor::readFrames(const std::string input_path) 
     int frame_num = cap.get(cv::CAP_PROP_FRAME_COUNT);
     int fps = cap.get(cv::CAP_PROP_FPS);
 
-    std::cout << "number of frames: " << frame_num << std::endl;
-    std::cout << "frames per second: " << fps << std::endl;
-
     if (!cap.isOpened())
     {
-        // std::cout << "Error: video object was not opened successfully" << std::endl;
         throw std::runtime_error("Error: video object was not opened successfully");
-    }
-    else
-    {
-        std::cout << "Video opened successfully" << std::endl;
     }
 
     while (true)
