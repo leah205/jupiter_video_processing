@@ -121,8 +121,7 @@ void save_output(std::string_view output, std::string_view prefix, const cv::Mat
  */
 void subtract_background_signal(cv::Mat &frame)
 {
-    cv::imshow("frame", frame);
-    cv::waitKey(0);
+
     cv::Mat planet_mask = get_planet_mask(frame);
     cv::Mat background_mask;
     cv::bitwise_not(planet_mask, background_mask);

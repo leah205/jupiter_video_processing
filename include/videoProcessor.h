@@ -11,7 +11,7 @@
 class VideoProcessor
 {
 private:
-    static constexpr int wavelet_levels = 5;
+    static constexpr int wavelet_levels = 4;
     FrameQuality quality_scorer = FrameQuality(QualityMetric::GRADIENT);
     std::vector<frameInfo> frames;
     std::string input_dir;
@@ -20,7 +20,8 @@ private:
     WaveletSharpener sharpener;
 
 public:
-    VideoProcessor() : sharpener(wavelet_levels)
+    VideoProcessor()
+        : sharpener(wavelet_levels)
 
     {
     };
@@ -41,17 +42,17 @@ public:
 
     cv::Mat sharpenFrame(const cv::Mat &frame) const;
 
-    void setSharpeningLevel(int level, double amplification);
+    void addSharpeningLevel(int level, double amplification);
 
-    std::vector<frameInfo> selectFrames(std::vector<frameInfo> frames);
+    std::vector<frameInfo> selectFrames(const std::vector<frameInfo> &frames);
 
     std::vector<frameInfo> readFrames(const std::string input_path) const;
 
     void processVideo(const std::string_view input_path, const std::string_view output_path);
 
-    cv::Mat stackFrames(std::vector<frameInfo> frames) const;
+    cv::Mat stackFrames(const std::vector<frameInfo> &frames) const;
 
-    std::vector<frameInfo> alignFrames(std::vector<frameInfo> frames);
+    void alignFrames(std::vector<frameInfo> &frames);
 
     void saveSharpenedOutput(std::string_view output_path, std::string_view output_prefix, cv::Mat frame) const;
 

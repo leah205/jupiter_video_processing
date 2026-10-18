@@ -20,7 +20,10 @@ static void showDetailMap(const cv::Mat &input, const cv::Mat &output);
 void WaveletSharpener::runSharpening(const cv::Mat &image, cv::Mat &result) const
 {
     std::cout << "sharpening..." << std::endl;
+    std::cout << config.decomp_levels << std::endl;
+    wave_object obj = wave_init(config.method.c_str());
     cv::Mat input;
+
     int size = image.rows * image.cols;
     std::vector<double> input_v(size), diff_v(size), output_v(size);
     double *cLH, *cHL, *cHH;
@@ -59,7 +62,7 @@ void WaveletSharpener::runSharpening(const cv::Mat &image, cv::Mat &result) cons
     iswt2(wt, wavecoeffs, output_v.data());
     result = cv::Mat(input.rows, input.cols, CV_64F, &output_v.front());
 
-    showDetailMap(input, result);
+    // showDetailMap(input, result);
 
     result.convertTo(result, CV_16UC1, 65535.0 / 255.0);
 

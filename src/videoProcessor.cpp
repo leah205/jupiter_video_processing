@@ -101,7 +101,6 @@ cv::Mat VideoProcessor::stackFrames(const std::vector<frameInfo> &frames) const
  */
 cv::Mat VideoProcessor::sharpenFrame(const cv::Mat &frame) const
 {
-    // WaveletSharpener sharpener(wavelet_levels);
 
     cv::Mat sharpened_frame;
     if (frame.empty())
@@ -133,8 +132,8 @@ std::vector<frameInfo> VideoProcessor::readFrames(const std::string input_path) 
 
     if (!cap.isOpened())
     {
-        std::cout << "Error: video object was not opened successfully" << std::endl;
-        throw -1;
+        // std::cout << "Error: video object was not opened successfully" << std::endl;
+        throw std::runtime_error("Error: video object was not opened successfully");
     }
     else
     {
@@ -169,6 +168,7 @@ std::vector<frameInfo> VideoProcessor::readFrames(const std::string input_path) 
 
 void VideoProcessor::processVideo(const std::string_view input_path, const std::string_view output_path)
 { // make these return values
+
     std::vector<frameInfo> frames = readFrames(std::string{input_path});
     std::vector<frameInfo> selected_frames = selectFrames(frames);
     alignFrames(selected_frames);

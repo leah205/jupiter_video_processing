@@ -3,6 +3,7 @@
 #include <numeric>
 #include <cmath>
 #include <string>
+#include <filesystem>
 
 #include "videoProcessor.h"
 #include "optimisation.h"
@@ -15,23 +16,32 @@
 
 // g++ main.cpp -pg -O0  -g -o my_program $(pkg-config --cflags --libs opencv4)
 
+static bool ends_with(std::string_view str, std::string_view suffix)
+{
+    return str.size() >= suffix.size() && str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
 int main()
 {
     double duration = static_cast<double>(cv::getTickCount());
-    // FrameQuality quality_scorer = FrameQuality(QualityMetric::GRADIENT);
     VideoProcessor processor;
 
-    std::string input_path = "data/2026-03-18-0236_9-Jupiter_656HIA.avi";
-    // std::string filename = "2026-03-18-0241_0-Jupiter_620CH4.avi";
+    namespace fs = std::filesystem;
+    fs::path input_dir = "data";
 
-    // std::string filename = "2026-03-18-0239_0-Jupiter_632OI.avi";
+    std::vector<std::string> filepaths;
 
-    // std::string filename = "2026-03-18-0704_1-Jupiter_685NIR.avi";
-
-    // std::string filename = "2026-03-18-0706_3-Jupiter_450BLU.avi";
-
-    // std::string input_dir = "../data/";
-    // std::string path = input_dir + filename;
+    for (auto &entry : fs::directory_iterator(input_dir))
+    {
+        if (entry.is_regular_file())
+        {
+            std::string name = entry.path().filename().string();
+            if (ends_with(name, ".avi"))
+            {
+                filepaths.push_back(input_dir.string() + "/" + name);
+            }
+        }
+    }
 
     std::string output_path = "output/";
 
@@ -41,16 +51,28 @@ int main()
     sharpen_level = 3;
     sharpen_amp = 4.0;
     processor.addSharpeningLevel(sharpen_level, sharpen_amp);
-    sharpen_level = 2;
-    sharpen_amp = 2.0;
-    processor.addSharpeningLevel(sharpen_level, sharpen_amp);
+    // sharpen_level = 2;
+    // sharpen_amp = 2.0;
+    // processor.addSharpeningLevel(sharpen_level, sharpen_amp);
 
-    processor.processVideo(input_path, output_path);
+    for (size_t i = 0; i < filepaths.size(); i++)
+    {
+        if (i < 2)
+        {
+            continue;
+        }
 
-    // cv::imwrite(output_dir + output_file, output);
+        try
+        {
+            processor.processVideo(filepaths[i], output_path);
+        }
+        catch (const std::exception &e)
+        {
+            std::cout << "failed to process " << filepaths[i] << ": " << e.what() << std::endl;
+        }
+    }
+
     // // processor.getMaskAreas();
-    // // cv::imshow("final", processor.getOutput());
-    // // cv::waitKey(0);
 
     // cv::VideoCapture r_cap("../registax/2026-03-18-0236_9-Jupiter_656HIAStack600.png");
     // // cv::VideoCapture r_cap("../registax/2026-03-18-0239_0-Jupiter_632OIStack600.png");

@@ -22,30 +22,19 @@ void sharpen(const cv::Mat &image, cv::Mat &result);
 class WaveletSharpener
 {
 private:
-    wave_object obj;
-    double *input;
-    double *wavecoeffs;
     SharpeningConfig config;
 
 public:
-<<<<<<< HEAD
-    WaveletSharpener(int levels = 6, std::string method = "db4") : config{.decomp_levels = levels, .method = method, .level_sharpenings = {}}
-=======
-<<<<<<< HEAD
-    WaveletSharpener(int levels = 6, std::string method = "db4") : config{.decomp_levels = levels, .method = method, .level_sharpenings = {}}
-=======
-    WaveletSharpener(int levels = 6, std::string method = "db4") : config{.decomp_levels = levels, .method = method}
->>>>>>> c9400f3d70e0425a88a1e40c960fb0144108d831
->>>>>>> 9f830abb1be67a7f701a4a06fe7d7a54328157aa
-    {
-        obj = wave_init(method.c_str());
-    };
+    WaveletSharpener(int levels = 4, std::string method = "db4") : config{.decomp_levels = levels,
+                                                                          .method = method,
+                                                                          .level_sharpenings = {}} {
+                                                                   };
 
     void runSharpening(const cv::Mat &image, cv::Mat &result) const;
 
     const SharpeningConfig &getSharpenConfig() const;
 
-    void setLevelSharpening(const int level, const double amplification);
+    void addLevelSharpening(const int level, const double amplification);
 };
 
 #endif
