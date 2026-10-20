@@ -6,5 +6,9 @@ gmon.out
 *.d
 bin/
 build/
-wavelib/
+lib/
+20260318
+temp/
+Bin/
+LogFile.txt
 # registax/
