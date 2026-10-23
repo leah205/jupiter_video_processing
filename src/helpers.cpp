@@ -1,6 +1,30 @@
 #include <opencv2/opencv.hpp>
 #include "helpers.h"
 #include <string>
+#include <filesystem>
+
+static bool ends_with(std::string_view str, std::string_view suffix)
+{
+    return str.size() >= suffix.size() && str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
+std::vector<std::string> get_avi_files(fs::path input_dir)
+{
+    std::vector<std::string> filepaths;
+
+    for (auto &entry : fs::directory_iterator(input_dir))
+    {
+        if (entry.is_regular_file())
+        {
+            std::string name = entry.path().filename().string();
+            if (ends_with(name, ".avi"))
+            {
+                filepaths.push_back(input_dir.string() + "/" + name);
+            }
+        }
+    }
+    return filepaths;
+}
 
 /**
  * @brief print information on cv::Mat object
