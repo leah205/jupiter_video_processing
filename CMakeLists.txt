@@ -28,30 +28,44 @@ file(GLOB SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
 )
 
-add_executable(jupiter ${SOURCES})
 
-target_include_directories(jupiter PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/external/wavelib/header"
-    ${OpenCV_INCLUDE_DIRS}
+
+list(REMOVE_ITEM SOURCES
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/experiments/experiments.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/optimisation.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/test.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/test_helpers.cpp"
 )
 
-target_link_directories(jupiter PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/external/wavelib/Bin"
-)
+add_executable(jupiter src/main.cpp ${SOURCES})
+add_executable(experiment src/experiments/experiment.cpp ${SOURCES})
 
-target_link_libraries(jupiter PRIVATE
-    ${OpenCV_LIBS}
-    wavelib
-    wauxlib
-    plog::plog
-)
+foreach(target jupiter experiment)
 
-target_compile_options(jupiter PRIVATE
-    -Wall
-    -Wextra
-    -g
-)
+    target_include_directories(${target} PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/include"
+        "${CMAKE_CURRENT_SOURCE_DIR}/external/wavelib/header"
+        ${OpenCV_INCLUDE_DIRS}
+    )
+
+    target_link_directories(${target} PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/external/wavelib/Bin"
+    )
+
+    target_link_libraries(${target} PRIVATE
+        ${OpenCV_LIBS}
+        wavelib
+        wauxlib
+        plog::plog
+    )
+
+    target_compile_options(${target} PRIVATE
+        -Wall
+        -Wextra
+        -g
+    )
+endforeach()
 
 option(ENABLE_PROFILING "Enable gprof profiling" OFF)
 
