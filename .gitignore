@@ -11,4 +11,5 @@ lib/
 temp/
 Bin/
 LogFile.txt
+external/
 # registax/
