@@ -5,15 +5,10 @@
 #include <plog/Initializers/RollingFileInitializer.h>
 
 #include "videoProcessor.h"
-#include "optimisation.h"
-#include "helpers.h"
-#include "test_helpers.h"
 #include "helpers.h"
 #include "align.h"
 #include "stack.h"
 #include "quality.h"
-
-// launch registax with gio launch R..
 
 int main()
 {
@@ -25,17 +20,12 @@ int main()
     fs::path input_dir = "data/20260318UT";
     PLOG_INFO << "Processing all .avi files from " << input_dir.string();
 
-    std::string output_path = "sharpen_exp/oi/";
-    std::string filter = "OI";
-    int sharpen_level = 4;
-    double sharpen_amp = 2.0;
-    processor.addSharpeningLevel(sharpen_level, sharpen_amp);
-    sharpen_level = 3;
-    sharpen_amp = 5.0;
-    processor.addSharpeningLevel(sharpen_level, sharpen_amp);
-    // sharpen_level = 2;
-    // sharpen_amp = 2.0;
-    // processor.addSharpeningLevel(sharpen_level, sharpen_amp);
+    std::string output_path = "output/20260318UT/";
+
+    processor.addSharpeningLevel(2, 6.0);
+    processor.addSharpeningLevel(3, 5.0);
+    processor.addSharpeningLevel(4, 2.0);
+
     int failed_count = 0;
     std::vector<std::string> filepaths = get_avi_files(input_dir);
 

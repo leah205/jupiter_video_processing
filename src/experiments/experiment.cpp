@@ -5,9 +5,7 @@
 #include <plog/Initializers/RollingFileInitializer.h>
 
 #include "videoProcessor.h"
-#include "optimisation.h"
 #include "helpers.h"
-#include "test_helpers.h"
 #include "helpers.h"
 #include "align.h"
 #include "stack.h"

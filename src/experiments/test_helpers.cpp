@@ -1,6 +1,5 @@
 #include <opencv2/opencv.hpp>
 #include "test_helpers.h"
-
 /**
  * @brief adds white pixels throughout image randomly
  *

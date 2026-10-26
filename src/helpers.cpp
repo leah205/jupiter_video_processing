@@ -8,6 +8,15 @@ static bool ends_with(std::string_view str, std::string_view suffix)
     return str.size() >= suffix.size() && str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
 }
 
+/**
+ * @brief Get the avi files object
+ *
+ * Returns a list of all the filenames with the .avi extension in input directory
+ *
+ * @param input_dir
+ * @return std::vector<std::string>
+ */
+
 std::vector<std::string> get_avi_files(fs::path input_dir)
 {
     std::vector<std::string> filepaths;
@@ -132,7 +141,7 @@ cv::Mat get_inner_planet_mask(cv::Mat mask)
 void save_output(std::string_view output, std::string_view prefix, const cv::Mat &frame)
 {
     std::string output_file{output};
-    output_file += std::string{prefix} + ".png";
+    output_file += std::string{prefix} + "-Stack_" + "Aligned" + ".png";
     cv::imwrite(output_file, frame);
 }
 
@@ -150,6 +159,5 @@ void subtract_background_signal(cv::Mat &frame)
     cv::Mat background_mask;
     cv::bitwise_not(planet_mask, background_mask);
     double background_signal = cv::mean(frame, background_mask)[0];
-    // std::cout << "correcting for detected background signal of " << background_signal << std::endl;
     cv::subtract(frame, background_signal, frame);
 }

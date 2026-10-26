@@ -1,7 +1,6 @@
 #include <opencv2/opencv.hpp>
 #include "quality.h"
 #include "frameInfo.h"
-#include "test_helpers.h"
 #include "helpers.h"
 
 /**

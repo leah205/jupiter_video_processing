@@ -11,11 +11,9 @@
 #include "stack.h"
 #include "align.h"
 #include "helpers.h"
-#include "optimisation.h"
 #include "videoProcessor.h"
 #include "frameInfo.h"
 
-#include "test_helpers.h"
 #include "sharpen.h"
 
 /**
@@ -184,7 +182,7 @@ void VideoProcessor::processVideo(const std::string_view input_path, const std::
  * @param run
  */
 
-void VideoProcessor::setRunSharpening(const bool run)
+constexpr void VideoProcessor::setRunSharpening(const bool run)
 {
     run_sharpening = run;
 }
@@ -204,7 +202,7 @@ void VideoProcessor::saveSharpenedOutput(std::string_view output_path, std::stri
             levels_str += "_" + std::to_string(level) + "X" + rounded_amp;
         }
 
-        cv::imwrite(std::string{output_path} + std::string{prefix} + "WV" + levels_str + "_" + config.method + ".png", frame);
+        cv::imwrite(std::string{output_path} + std::string{prefix} + "-Stack" + "_" + "WV-" + "Aligned" + ".png", frame);
     }
 }
 
@@ -217,70 +215,7 @@ void VideoProcessor::saveSharpenedOutput(std::string_view output_path, std::stri
  * @param level
  * @param amplification
  */
-void VideoProcessor::addSharpeningLevel(int level, double amplification)
+constexpr void VideoProcessor::addSharpeningLevel(int level, double amplification)
 {
     sharpener.addLevelSharpening(level, amplification);
 }
-
-// void VideoProcessor::alignSelectedCentroidEcc()
-// {
-//     frameInfo ref_frame = frames[selected_frames[0]];
-//     cv::Point ref_cm = get_center_of_mass(ref_frame.planet_mask);
-//     aligned_frames.push_back(ref_frame.frame);
-
-//     double mean_corr = 0;
-//     double min_corr = 0;
-//     double mean_shiftmag = 0;
-//     double max_shiftmag = 0;
-
-//     int flag = 1;
-
-//     for (int i = 1; i < selected_frames.size(); i++)
-//     {
-//         frameInfo frame = frames[selected_frames[i]];
-//         frame.cm = get_center_of_mass(frame.planet_mask);
-//         cv::Mat aligned_mat = get_aligned_by_centroid(aligned_mat, frame.cm, ref_cm);
-//         // cv::imshow("aligned", aligned_mat);
-//         // cv::waitKey(0);
-
-//         cv::Mat new_aligned;
-//         double shift_mag = transform_ecc(ref_frame.frame, aligned_mat, new_aligned);
-//         // cv::imshow("new aligned", new_aligned);
-//         // cv::waitKey(0);
-//         double corr = compute_ecc(frame.frame, new_aligned);
-
-//         aligned_frames.push_back(new_aligned);
-
-//         mean_corr += corr;
-//         min_corr = std::min(corr, min_corr);
-
-//         mean_shiftmag += shift_mag;
-//         max_shiftmag = std::max(shift_mag, max_shiftmag);
-//         // std::cout << shift_mag << std::endl;
-//         if (shift_mag > 1.1 && flag)
-//         {
-//             flag = 0;
-//             min_corr = corr;
-
-//             Histogram1D h;
-//             cv::imwrite("histogram.png", h.getHistogramImage(frame.frame));
-
-//             // cv::imwrite("centroid_gradient_diff.png", generate_diff(ref_frame, aligned_mat));
-//             // cv::imwrite("ecc_gradient_diff.png", generate_diff(ref_frame, new_aligned));
-
-//             // cv::imshow("centroid to ref", generate_diff(ref_frame, aligned_mat));
-//             // cv::waitKey(0);
-
-//             // cv::imshow("ecc to ref", generate_diff(ref_frame, new_aligned));
-//             // cv::waitKey(0);
-//         }
-//     }
-//     mean_corr = mean_corr / (selected_frames.size() - 1);
-//     mean_shiftmag = mean_shiftmag / (selected_frames.size() - 1);
-
-//     std::cout << "min coor: " << min_corr << std::endl;
-//     std::cout << "mean coor: " << mean_corr << std::endl;
-
-//     std::cout << "mean shift mag: " << mean_shiftmag << std::endl;
-//     std::cout << "max shift mag: " << max_shiftmag << std::endl;
-// }

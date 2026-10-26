@@ -5,7 +5,6 @@
 #include <cmath>
 #include "limit.h"
 #include "videoProcessor.h"
-#include "test_helpers.h"
 #include "helpers.h"
 
 /**
