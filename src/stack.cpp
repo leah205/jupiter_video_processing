@@ -6,7 +6,6 @@
 #include "stack.h"
 #include "helpers.h"
 #include "align.h"
-#include "optimisation.h"
 // #include "videoProcessor.h"
 #include "frameInfo.h"
 

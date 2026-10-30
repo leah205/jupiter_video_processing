@@ -36,20 +36,6 @@ frameInfo VideoProcessor::processFrame(cv::Mat frame) const
 };
 
 /**
- * @brief gets top 25% sharpest frames
- *
- * @param frames
- */
-std::vector<frameInfo> VideoProcessor::selectFrames(const std::vector<frameInfo> &frames)
-{
-    Limiter limiter(quality_scorer);
-    const int stacked_frames_num = ceil(((double)(frames.size())) / 4);
-    limiter.setLimitFrameNum(stacked_frames_num);
-    std::vector<frameInfo> selected_frames = limiter.limitFrames(frames);
-    return selected_frames;
-}
-
-/**
  * @brief aligns frames to reference
  *
  * aligns frames to contain matrices of sharpest frames
@@ -156,16 +142,22 @@ std::vector<frameInfo> VideoProcessor::readFrames(const std::string input_path) 
  */
 
 void VideoProcessor::processVideo(const std::string_view input_path, const std::string_view output_path)
-{ // make these return values
+{
+    std::size_t pos = input_path.find_last_of('/');
+    std::string_view filename = input_path.substr(pos + 1);
+    std::string filter = get_filter(input_path);
 
-    std::vector<frameInfo> frames = readFrames(std::string{input_path});
-    std::vector<frameInfo> selected_frames = selectFrames(frames);
+    std::vector<frameInfo>
+        frames = readFrames(std::string{input_path});
+
+    const int stacked_frames_num = ceil(((double)(frames.size())) / 4);
+    std::vector<frameInfo> selected_frames = ::selectFrames(quality_scorer, frames, stacked_frames_num);
+
     alignFrames(selected_frames);
     cv::Mat stacked_frame = stackFrames(selected_frames);
     subtract_background_signal(stacked_frame);
     stacked_frame.convertTo(stacked_frame, CV_16UC1, 65535.0 / 255.0);
-    std::size_t pos = input_path.find_last_of('/');
-    std::string_view filename = input_path.substr(pos + 1);
+
     std::string_view prefix = filename.substr(0, filename.size() - 4);
     save_output(output_path, prefix, stacked_frame);
 
@@ -215,7 +207,7 @@ void VideoProcessor::saveSharpenedOutput(std::string_view output_path, std::stri
  * @param level
  * @param amplification
  */
-constexpr void VideoProcessor::addSharpeningLevel(int level, double amplification)
+void VideoProcessor::addSharpeningLevel(int level, double amplification)
 {
     sharpener.addLevelSharpening(level, amplification);
 }

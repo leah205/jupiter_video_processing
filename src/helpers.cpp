@@ -161,3 +161,18 @@ void subtract_background_signal(cv::Mat &frame)
     double background_signal = cv::mean(frame, background_mask)[0];
     cv::subtract(frame, background_signal, frame);
 }
+
+std::string get_filter(const std::string_view filename)
+{
+    const std::vector<std::string> filters = {"620CH4", "647NH3", "656HIA", "632OI", "685NIR", "550GRN", "450BLU"};
+
+    for (int i = 0; i < filters.size(); i++)
+    {
+        if (filename.find(filters[i]) != std::string::npos)
+        {
+            return filters[i];
+        }
+    }
+
+    throw std::runtime_error("filename does not contain specified filter");
+}
