@@ -4,9 +4,17 @@
 #include "frameInfo.h"
 #include "quality.h"
 #include "sharpen.h"
+#include <map>
 
 #ifndef VIDEO_H
 #define VIDEO_H
+
+typedef struct
+{
+    float stack_percentage;
+    WaveletSharpener sharpener;
+
+} FilterConfig;
 
 class VideoProcessor
 {
@@ -16,6 +24,7 @@ private:
     std::vector<frameInfo> frames;
     std::string input_dir;
     std::string output_dir;
+    std::map<std::string, FilterConfig> stack_amounts = {};
     bool run_sharpening = true;
     WaveletSharpener sharpener;
 
@@ -27,18 +36,6 @@ public:
     };
 
     frameInfo processFrame(cv::Mat frame) const;
-
-    // void alignSelectedFramesByCentroid();
-
-    // void alignSelectedCentroidEcc();
-
-    // void getMaskAreas();
-
-    // void compareStacks();
-
-    // std::vector<frameInfo> getSelected();
-
-    // cv::Mat getSharpenedOutput();
 
     cv::Mat sharpenFrame(const cv::Mat &frame) const;
 
@@ -56,7 +53,7 @@ public:
 
     void saveSharpenedOutput(std::string_view output_path, std::string_view output_prefix, cv::Mat frame) const;
 
-    void setRunSharpening(const bool run);
+    constexpr void setRunSharpening(const bool run);
 };
 
 #endif

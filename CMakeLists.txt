@@ -33,7 +33,6 @@ file(GLOB SOURCES CONFIGURE_DEPENDS
 list(REMOVE_ITEM SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/experiments/experiments.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/optimisation.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/test.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/test_helpers.cpp"
 )

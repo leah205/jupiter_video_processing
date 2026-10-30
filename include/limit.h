@@ -11,22 +11,21 @@ typedef struct scoredFrame : frameInfo
     double score;
 } scoredFrame;
 
-class Limiter
-{
-private:
-    const FrameQuality &quality_scorer;
-    int limit_frames_num;
-    std::vector<frameInfo> limitedFrames;
+// class Limiter
+// {
+// private:
+//     const FrameQuality &quality_scorer;
+//     int limit_frames_num;
+//     std::vector<frameInfo> limitedFrames;
 
-public:
-    Limiter(const FrameQuality &q) : quality_scorer(q) {};
+// public:
+//     Limiter(const FrameQuality &q) : quality_scorer(q) {};
 
-    std::vector<frameInfo> limitFrames(std::vector<frameInfo>);
+//     std::vector<frameInfo> limitFrames(std::vector<frameInfo>);
 
-    void setLimitFrameNum(int num);
-    void compare_methods(std::vector<frameInfo> frames);
-};
+//     void setLimitFrameNum(int num);
+// };
+
+std::vector<frameInfo> selectFrames(const FrameQuality &scorer, const std::vector<frameInfo> &frames, int limit_num);
 
 #endif
-
-// std::vector<size_t> get_sharpest_indices(std::vector<frameInfo> frames, int select_amount);
