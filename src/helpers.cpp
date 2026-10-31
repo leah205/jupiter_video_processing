@@ -141,7 +141,7 @@ cv::Mat get_inner_planet_mask(cv::Mat mask)
 void save_output(std::string_view output, std::string_view prefix, const cv::Mat &frame)
 {
     std::string output_file{output};
-    output_file += std::string{prefix} + "-Stack_" + "Aligned" + ".png";
+    output_file += std::string{prefix} + "_Aligned" + ".png";
     cv::imwrite(output_file, frame);
 }
 
@@ -164,7 +164,7 @@ void subtract_background_signal(cv::Mat &frame)
 
 std::string get_filter(const std::string_view filename)
 {
-    const std::vector<std::string> filters = {"620CH4", "647NH3", "656HIA", "632OI", "685NIR", "550GRN", "450BLU"};
+    const std::vector<std::string> filters = {"620", "647", "656", "632", "685", "550", "450"};
 
     for (int i = 0; i < filters.size(); i++)
     {

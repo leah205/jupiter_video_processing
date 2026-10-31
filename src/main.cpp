@@ -21,12 +21,14 @@ int main()
     PLOG_INFO << "Processing all .avi files from " << input_dir.string();
 
     std::string output_path = "output/20260318UT/";
-
+    processor.setStackPercentage(0.25);
+    processor.setStackPercentage(0.5, {"550"});
     processor.addSharpeningLevel(2, 6.0);
     processor.addSharpeningLevel(3, 5.0);
     processor.addSharpeningLevel(4, 2.0);
 
     int failed_count = 0;
+    // std::vector<std::string> filepaths;
     std::vector<std::string> filepaths = get_avi_files(input_dir);
 
     for (size_t i = 0; i < filepaths.size(); i++)

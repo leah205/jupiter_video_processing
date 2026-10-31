@@ -143,14 +143,21 @@ std::vector<frameInfo> VideoProcessor::readFrames(const std::string input_path) 
 
 void VideoProcessor::processVideo(const std::string_view input_path, const std::string_view output_path)
 {
+
     std::size_t pos = input_path.find_last_of('/');
     std::string_view filename = input_path.substr(pos + 1);
     std::string filter = get_filter(input_path);
-
     std::vector<frameInfo>
         frames = readFrames(std::string{input_path});
+    if (!frames.size())
+    {
+        throw std::runtime_error("frames vector is empty for: " + std::string{filename});
+    }
 
-    const int stacked_frames_num = ceil(((double)(frames.size())) / 4);
+    int stacked_frames_num;
+    float stack_perc = (select_config.count(filter)) ? select_config[filter] : select_config["default"];
+    stacked_frames_num = ceil(stack_perc * frames.size());
+    std::cout << "selecting " + std::to_string(stack_perc) + " of frames" << std::endl;
     std::vector<frameInfo> selected_frames = ::selectFrames(quality_scorer, frames, stacked_frames_num);
 
     alignFrames(selected_frames);
@@ -158,7 +165,7 @@ void VideoProcessor::processVideo(const std::string_view input_path, const std::
     subtract_background_signal(stacked_frame);
     stacked_frame.convertTo(stacked_frame, CV_16UC1, 65535.0 / 255.0);
 
-    std::string_view prefix = filename.substr(0, filename.size() - 4);
+    std::string prefix = std::string{filename.substr(0, filename.size() - 4)} + "_Stacked";
     save_output(output_path, prefix, stacked_frame);
 
     if (run_sharpening)
@@ -194,7 +201,7 @@ void VideoProcessor::saveSharpenedOutput(std::string_view output_path, std::stri
             levels_str += "_" + std::to_string(level) + "X" + rounded_amp;
         }
 
-        cv::imwrite(std::string{output_path} + std::string{prefix} + "-Stack" + "_" + "WV-" + "Aligned" + ".png", frame);
+        cv::imwrite(std::string{output_path} + std::string{prefix} + "_" + "WV-" + "Aligned" + ".png", frame);
     }
 }
 
@@ -209,5 +216,28 @@ void VideoProcessor::saveSharpenedOutput(std::string_view output_path, std::stri
  */
 void VideoProcessor::addSharpeningLevel(int level, double amplification)
 {
+    // auto &sharpener = sharpen_config["default"];
     sharpener.addLevelSharpening(level, amplification);
 }
+
+void VideoProcessor::setStackPercentage(float percentage)
+{
+    select_config["default"] = percentage;
+}
+
+/**
+ * @brief configures amount of frames to stack for individual filter
+ *
+ * @param percentage between 0 and 1
+ * @param filter string wavelength
+ */
+
+void VideoProcessor::setStackPercentage(float percentage, std::vector<std::string> filters)
+{
+    for (auto &filter : filters)
+    {
+        select_config[filter] = percentage;
+    }
+}
+
+// void addSharpeningLevel(int level, double amplification, std::string filter);
