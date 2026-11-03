@@ -75,24 +75,6 @@ cv::Mat VideoProcessor::stackFrames(const std::vector<frameInfo> &frames) const
 }
 
 /**
- * @brief sharpens frame
- *
- *
- * runs wavelet sharpening on frame and returns sharpened output
- *
- * @param frame
- */
-cv::Mat VideoProcessor::sharpenFrame(const cv::Mat &frame) const
-{
-
-    cv::Mat sharpened_frame;
-    if (frame.empty())
-    {
-        throw std::runtime_error("no output matrix exists to sharpen");
-    }
-    sharpener.runSharpening(frame, sharpened_frame);
-    return sharpened_frame;
-}
 
 /**
  * @brief reads frames from .avi file into vector of processed frameInfo objects
@@ -149,6 +131,8 @@ void VideoProcessor::processVideo(const std::string_view input_path, const std::
     std::string filter = get_filter(input_path);
     std::vector<frameInfo>
         frames = readFrames(std::string{input_path});
+    // cv::imshow("first frame unprocessed", frames[0].frame);
+    // cv::waitKey(0);
     if (!frames.size())
     {
         throw std::runtime_error("frames vector is empty for: " + std::string{filename});
@@ -156,11 +140,14 @@ void VideoProcessor::processVideo(const std::string_view input_path, const std::
 
     int stacked_frames_num;
     float stack_perc = (select_config.count(filter)) ? select_config[filter] : select_config["default"];
+    const WaveletSharpener &sharpener = (sharpen_config.count(filter)) ? sharpen_config[filter] : sharpen_config["default"];
     stacked_frames_num = ceil(stack_perc * frames.size());
     std::cout << "selecting " + std::to_string(stack_perc) + " of frames" << std::endl;
     std::vector<frameInfo> selected_frames = ::selectFrames(quality_scorer, frames, stacked_frames_num);
-
+    std::cout << "select num: " << selected_frames.size() << std::endl;
     alignFrames(selected_frames);
+    // cv::imshow("first frame", selected_frames[0].frame);
+    // cv::waitKey(0);
     cv::Mat stacked_frame = stackFrames(selected_frames);
     subtract_background_signal(stacked_frame);
     stacked_frame.convertTo(stacked_frame, CV_16UC1, 65535.0 / 255.0);
@@ -170,7 +157,7 @@ void VideoProcessor::processVideo(const std::string_view input_path, const std::
 
     if (run_sharpening)
     {
-        cv::Mat sharpened_frame = sharpenFrame(stacked_frame);
+        cv::Mat sharpened_frame = sharpener.runSharpening(stacked_frame);
         saveSharpenedOutput(output_path, prefix, sharpened_frame);
     }
 }
@@ -208,16 +195,44 @@ void VideoProcessor::saveSharpenedOutput(std::string_view output_path, std::stri
 /**
  * @brief Set the Sharpening Level object
  *
- * configure a spatial scale (decomposition level)
+ * configure a set of ampplifications one for each spatial scale (decomposition level)
  * to enhance the contrast of(sharpen)
  *
  * @param level
  * @param amplification
  */
-void VideoProcessor::addSharpeningLevel(int level, double amplification)
+void VideoProcessor::setSharpening(const SharpeningMap &sharpen_map)
 {
-    // auto &sharpener = sharpen_config["default"];
-    sharpener.addLevelSharpening(level, amplification);
+    WaveletSharpener sharpener;
+    for (const auto &[level, amp] : sharpen_map)
+    {
+        sharpener.addLevelSharpening(level, amp);
+    }
+    sharpen_config["default"] = sharpener;
+}
+
+/**
+ * @brief Set the Sharpening Level object
+ *
+ * configure a set of amplification, one for each spatial scale (decomposition level)
+ * to enhance the contrast of(sharpen) the output image
+ *
+ * @param level
+ * @param amplification
+ * @param filters
+ */
+void VideoProcessor::setSharpening(const SharpeningMap &sharpen_map, const std::vector<std::string> &filters)
+{
+    for (const auto &filter : filters)
+    {
+        WaveletSharpener sharpener;
+
+        for (const auto &[level, amp] : sharpen_map)
+        {
+            sharpener.addLevelSharpening(level, amp);
+        }
+        sharpen_config[filter] = sharpener;
+    }
 }
 
 void VideoProcessor::setStackPercentage(float percentage)

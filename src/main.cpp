@@ -22,10 +22,9 @@ int main()
 
     std::string output_path = "output/20260318UT/";
     processor.setStackPercentage(0.25);
-    processor.setStackPercentage(0.5, {"550"});
-    processor.addSharpeningLevel(2, 6.0);
-    processor.addSharpeningLevel(3, 5.0);
-    processor.addSharpeningLevel(4, 2.0);
+    // processor.setStackPercentage(0.5, {"647"});
+    processor.setSharpening({{2, 6.0}, {3, 5.0}, {4, 2.0}});
+    // processor.setSharpening({{2, 15.0}}, {"647"});
 
     int failed_count = 0;
     // std::vector<std::string> filepaths;

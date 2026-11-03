@@ -17,11 +17,12 @@ static void showDetailMap(const cv::Mat &input, const cv::Mat &output);
  * @param image
  * @param result
  */
-void WaveletSharpener::runSharpening(const cv::Mat &image, cv::Mat &result) const
+cv::Mat WaveletSharpener::runSharpening(const cv::Mat &image) const
 {
     std::cout << "sharpening..." << std::endl;
     wave_object obj = wave_init(config.method.c_str());
     cv::Mat input;
+    cv::Mat result;
 
     int size = image.rows * image.cols;
     std::vector<double> input_v(size), diff_v(size), output_v(size);
@@ -36,6 +37,7 @@ void WaveletSharpener::runSharpening(const cv::Mat &image, cv::Mat &result) cons
 
     for (const auto &[level, amp] : config.level_sharpenings)
     {
+        std::cout << "level: " << level << ", amp: " << amp << std::endl;
         char H[] = "H";
         char V[] = "V";
         char D[] = "D";
@@ -62,12 +64,15 @@ void WaveletSharpener::runSharpening(const cv::Mat &image, cv::Mat &result) cons
     // showDetailMap(input, result);
 
     result.convertTo(result, CV_16UC1, 65535.0 / 255.0);
+    // cv::imshow("sharpened", result);
+    // cv::waitKey(0);
 
     // wt2_summary(wt);
     free(wavecoeffs);
     wave_free(obj);
     wt2_free(wt);
-    // free wavelet coefficients
+
+    return result;
 }
 
 /**
