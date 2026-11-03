@@ -26,12 +26,13 @@ The image processing pipeline consists of four main steps:
 
 - selecting frames to stack
 - aligning these frames to a reference frame
-- stacking frames
+- stacking frame
+- postprocessing
 - sharpening
 
 ### Selecting frames to stack
 
-The processing pipeline selects the 25% sharpest frames to stack. In order to select these frames, it uses the average gradient magnitude calculated over the surface of Jupiter. Higher average gradient magnitude corresponds to a higher contrasst image.
+The processing pipeline selects the 25% sharpest frames to stack. In order to select these frames, it uses the average gradient magnitude calculated over the surface of Jupiter. Higher average gradient magnitude corresponds to an image that has larger image intensity variation.
 
 ### Aligning frames
 
@@ -43,12 +44,25 @@ The frames are then stacked by computing the average of the selected frames. The
 
 ### Post-processing
 
-The background noise is then computed as the average pixel intensity of all pixels not on the disk. This value is subtracted from the image
+The background noise estimate is then computed as the average pixel intensity of all pixels not on the disk. This value is subtracted from the image
 
 ### Sharpening
 
 Sharpening is performed by doing wavelet decomposition on the output and sharpening at certain spatial scales. We use the Daubechies-4 wavelet decomposition as default. We also use a stationary wavelet transform to prevent image translation from affecting sharpening.
 
+## Inputs
+
+The pipeline takes an input directory and performs batch video processing on all of the .avi files within. The input directory can be specified in main.cpp
+
+## Outputs
+
+The pipeline performs alignment and stacking and writes the result into the specified output directory in main.cpp. The sharpened result is also saved in the output directory with the WV suffix.
+
+## Logging
+
+A log of the run can be found in LogFile.txt. The log specifies which files were processed, the duration of the run, and whether any files failed.
+
 ## Tools
 
 - OpenCV
+- Plog

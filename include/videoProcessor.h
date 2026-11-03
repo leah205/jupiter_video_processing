@@ -9,13 +9,6 @@
 #ifndef VIDEO_H
 #define VIDEO_H
 
-typedef struct
-{
-    float stack_percentage;
-    WaveletSharpener sharpener;
-
-} FilterConfig;
-
 class VideoProcessor
 {
 private:
@@ -24,24 +17,29 @@ private:
     std::vector<frameInfo> frames;
     std::string input_dir;
     std::string output_dir;
-    std::map<std::string, FilterConfig> stack_amounts = {};
+    std::map<std::string, float> select_config = {};
+    std::map<std::string, WaveletSharpener> sharpen_config = {};
     bool run_sharpening = true;
     WaveletSharpener sharpener;
 
 public:
-    VideoProcessor()
-        : sharpener(wavelet_levels)
+    VideoProcessor() : sharpener(wavelet_levels)
 
     {
+        sharpen_config["default"] = WaveletSharpener{wavelet_levels};
     };
 
     frameInfo processFrame(cv::Mat frame) const;
 
     cv::Mat sharpenFrame(const cv::Mat &frame) const;
 
-    void addSharpeningLevel(int level, double amplification);
+    void setSharpening(const SharpeningMap &sharpen_map);
 
-    std::vector<frameInfo> selectFrames(const std::vector<frameInfo> &frames);
+    void setSharpening(const SharpeningMap &sharpen_map, const std::vector<std::string> &filters);
+
+    void setStackPercentage(float percentage);
+
+    void setStackPercentage(float percentage, std::vector<std::string> filters);
 
     std::vector<frameInfo> readFrames(const std::string input_path) const;
 

@@ -1,5 +1,7 @@
 
 # run with: cmake --build build -j
+# reset: cmake --fresh -S . -B build
+
 
 cmake_minimum_required(VERSION 3.16)
 
@@ -37,10 +39,12 @@ list(REMOVE_ITEM SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/test_helpers.cpp"
 )
 
-add_executable(jupiter src/main.cpp ${SOURCES})
-add_executable(experiment src/experiments/experiment.cpp ${SOURCES})
+message(STATUS "Sources: ${SOURCES}")
 
-foreach(target jupiter experiment)
+add_executable(jupiter src/main.cpp ${SOURCES})
+# add_executable(experiment src/experiments/experiment.cpp ${SOURCES})
+
+foreach(target jupiter)
 
     target_include_directories(${target} PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/include"

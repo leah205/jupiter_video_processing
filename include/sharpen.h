@@ -30,7 +30,7 @@ public:
                                                                           .level_sharpenings = {}} {
                                                                    };
 
-    void runSharpening(const cv::Mat &image, cv::Mat &result) const;
+    cv::Mat runSharpening(const cv::Mat &image) const;
 
     const SharpeningConfig &getSharpenConfig() const;
 
