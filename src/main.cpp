@@ -12,15 +12,14 @@
 
 int main()
 {
-
     double duration = static_cast<double>(cv::getTickCount());
     VideoProcessor processor;
     plog::init(plog::info, "LogFile.txt");
 
-    fs::path input_dir = "data/20260318UT";
+    fs::path input_dir = "video_data/20260318UT";
     PLOG_INFO << "Processing all .avi files from " << input_dir.string();
 
-    std::string output_path = "output/20260318UT/";
+    std::string output_path = "png_data/20260318UT/";
     processor.setStackPercentage(0.25);
     // processor.setStackPercentage(0.5, {"647"});
     processor.setSharpening({{2, 6.0}, {3, 5.0}, {4, 2.0}});
@@ -43,7 +42,7 @@ int main()
         catch (const std::exception &e)
         {
             std::cout << "failed to process " << filepaths[i] << ": " << e.what() << std::endl;
-            PLOG_ERROR << e.what() << " " << filepaths[i];
+            PLOG_ERROR << filepaths[i] << ": " << e.what() << " " << filepaths[i];
             failed_count++;
         }
     }
