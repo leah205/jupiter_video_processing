@@ -1,12 +1,11 @@
 # import subprocess
-
-
 import json
 import os
 import shutil
 from pathlib import Path
 
 from python.convert_fits import convert_file_fits
+from python.logger import logger
 
 PROJECT_DIR = Path(".")
 EXECUTABLE = PROJECT_DIR / "build" / "jupiter"
@@ -22,8 +21,8 @@ def get_file_identifier(meta_path: Path):
 
 def get_camera_file(file_identifier: str, input_dir: Path):
     camera_filename = file_identifier + ".CameraSettings.txt"
-    if not (input_dir / camera_filename).exists():
-        print("camera metdata file not found")
+    # if not (input_dir / camera_filename).exists():
+    #     print("camera metdata file not found")
     print(str(input_dir / camera_filename))
     return input_dir / camera_filename
 
@@ -65,16 +64,25 @@ def main():
     with open(file="config.json", mode="r") as config_json:
         config = json.load(config_json)
         output_dir = Path(config["files"]["output_dir"])
+        video_dir = Path(config["files"]["video_dir"])
+        png_dir = Path(config["files"]["png_dir"])
         output_dir.parent.mkdir(parents=True, exist_ok=True)
+        logger.info(
+            "Converting files in "
+            + str(video_dir)
+            + " and"
+            + str(dir)
+            + "into unprocessed L1 fits"
+        )
 
         run_convert_fits_pipeline(
-            input_dir=Path(config["files"]["video_dir"]),
-            png_dir=Path(config["files"]["png_dir"]),
+            input_dir=video_dir,
+            png_dir=png_dir,
             output_dir=output_dir,
         )
         shutil.copy2("config.json", output_dir)
 
-    print("completed convertsion to unprocessed L1 fits")
+        logger.info("wrote unprocessed fits files into " + str(output_dir))
 
 
 if __name__ == "__main__":

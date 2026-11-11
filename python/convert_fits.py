@@ -6,6 +6,8 @@ from typing import Any
 import planetmapper
 from planetmapper.observation import Observation
 
+from python.logger import logger
+
 First = True
 params = []
 
@@ -48,7 +50,7 @@ def add_metadata(observation: Observation, cmr_path: Path, meta_path: Path):
             data = json.load(metadata_file)
             stack_num: int = data["stacked_frames"]
     else:
-        print("failed to add some headers:" + str(meta_path) + " not found")
+        logger.warning("failed to add some headers:" + str(meta_path) + " not found")
 
     if cmr_path.exists():
         with open(str(cmr_path), "r") as cf:
@@ -79,7 +81,7 @@ def add_metadata(observation: Observation, cmr_path: Path, meta_path: Path):
                             value=str(stack_num * exposure_ms) + "ms",
                         )
     else:
-        print("failed to add some headers:" + str(cmr_path) + " not found")
+        logger.warning("failed to add some headers:" + str(cmr_path) + " not found")
 
     observation.append_to_header(keyword="NUMSTACK", value=(stack_num))
 
