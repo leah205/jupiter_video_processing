@@ -22,7 +22,9 @@ int main()
     std::string output_path = "png_data/20260318UT/";
     processor.setStackPercentage(0.25);
     // processor.setStackPercentage(0.5, {"647"});
-    processor.setSharpening({{2, 6.0}, {3, 5.0}, {4, 2.0}});
+    // processor.setSharpening({{2, 6.0}, {3, 5.0}, {4, 2.0}});
+    processor.setSharpening(SharpenConfig::DEFAULT);
+    processor.setSharpening(SharpenConfig::COARSE, {"647NH3"});
     // processor.setSharpening({{2, 15.0}}, {"647"});
 
     int failed_count = 0;

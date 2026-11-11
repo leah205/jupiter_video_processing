@@ -146,7 +146,7 @@ void VideoProcessor::processVideo(const std::string_view input_path, const std::
 
     int stacked_frames_num;
     float stack_perc = (select_config.count(filter)) ? select_config[filter] : select_config["default"];
-    const WaveletSharpener &sharpener = (sharpen_config.count(filter)) ? sharpen_config[filter] : sharpen_config["default"];
+    const WaveletSharpener &sharpener = (filter_sharpen_config.count(filter)) ? filter_sharpen_config[filter] : filter_sharpen_config["default"];
     stacked_frames_num = ceil(stack_perc * frames.size());
     std::cout << "selecting " + std::to_string(stack_perc) + " of frames" << std::endl;
     std::vector<frameInfo> selected_frames = ::selectFrames(quality_scorer, frames, stacked_frames_num);
@@ -166,14 +166,9 @@ void VideoProcessor::processVideo(const std::string_view input_path, const std::
     if (run_sharpening)
     {
         sharpened_frame = sharpener.runSharpening(stacked_frame);
-        // saveSharpenedOutput(output_path, prefix, sharpened_frame);
     }
-    cv::imshow("sharpened", sharpened_frame);
-    cv::waitKey(0);
 
     saveOutput(metadata, stacked_frame, sharpened_frame, output_path);
-
-    // save_output(output_path, prefix, stacked_frame);
 }
 
 /**
@@ -206,24 +201,24 @@ constexpr void VideoProcessor::setRunSharpening(const bool run)
 //     }
 // }
 
-/**
- * @brief Set the Sharpening Level object
- *
- * configure a set of ampplifications one for each spatial scale (decomposition level)
- * to enhance the contrast of(sharpen)
- *
- * @param level
- * @param amplification
- */
-void VideoProcessor::setSharpening(const SharpeningMap &sharpen_map)
-{
-    WaveletSharpener sharpener;
-    for (const auto &[level, amp] : sharpen_map)
-    {
-        sharpener.addLevelSharpening(level, amp);
-    }
-    sharpen_config["default"] = sharpener;
-}
+// /**
+//  * @brief Set the Sharpening Level object
+//  *
+//  * configure a set of ampplifications one for each spatial scale (decomposition level)
+//  * to enhance the contrast of(sharpen)
+//  *
+//  * @param level
+//  * @param amplification
+//  */
+// void VideoProcessor::setSharpening(const SharpeningMap &sharpen_map)
+// {
+//     WaveletSharpener sharpener;
+//     for (const auto &[level, amp] : sharpen_map)
+//     {
+//         sharpener.addLevelSharpening(level, amp);
+//     }
+//     filter_sharpen_config["default"] = sharpener;
+// }
 
 /**
  * @brief Set the Sharpening Level object
@@ -235,8 +230,17 @@ void VideoProcessor::setSharpening(const SharpeningMap &sharpen_map)
  * @param amplification
  * @param filters
  */
-void VideoProcessor::setSharpening(const SharpeningMap &sharpen_map, const std::vector<std::string> &filters = {})
+void VideoProcessor::setSharpening(const SharpeningMap &sharpen_map, const std::vector<std::string> &filters)
 {
+    if (!filters.size())
+    {
+        WaveletSharpener sharpener;
+        for (const auto &[level, amp] : sharpen_map)
+        {
+            sharpener.addLevelSharpening(level, amp);
+        }
+        filter_sharpen_config["default"] = sharpener;
+    }
 
     for (const auto &filter : filters)
     {
@@ -246,8 +250,14 @@ void VideoProcessor::setSharpening(const SharpeningMap &sharpen_map, const std::
         {
             sharpener.addLevelSharpening(level, amp);
         }
-        sharpen_config[filter] = sharpener;
+        filter_sharpen_config[filter] = sharpener;
     }
+};
+
+void VideoProcessor::setSharpening(SharpenConfig configType, const std::vector<std::string> &filters)
+{
+    const auto &sharpen_map = sharpen_configs[static_cast<int>(configType)];
+    setSharpening(sharpen_map, filters);
 }
 
 void VideoProcessor::setStackPercentage(float percentage)

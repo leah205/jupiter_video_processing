@@ -116,6 +116,6 @@ void showDetailMap(const cv::Mat &input, const cv::Mat &output)
 
     cv::applyColorMap(effect, effectColor, cv::COLORMAP_JET);
 
-    cv::imshow("Sharpening effect", effectColor);
-    cv::waitKey(0);
+    // cv::imshow("Sharpening effect", effectColor);
+    // cv::waitKey(0);
 }
