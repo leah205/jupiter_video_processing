@@ -10,16 +10,23 @@
 #include "stack.h"
 #include "quality.h"
 
+#include <fstream>
+#include <nlohmann/json.hpp>
+using nlohmann::json;
+
 int main()
 {
     double duration = static_cast<double>(cv::getTickCount());
+    std::ifstream config_f("config.json");
+    json config_data = json::parse(config_f);
+    auto output_dir = config_data["files"]["png_dir"].get<fs::path>();
+    auto input_dir = config_data["files"]["video_dir"].get<fs::path>();
+
     VideoProcessor processor;
     plog::init(plog::info, "LogFile.txt");
 
-    fs::path input_dir = "video_data/20260318UT";
     PLOG_INFO << "Processing all .avi files from " << input_dir.string();
 
-    std::string output_path = "png_data/20260318UT/";
     processor.setStackPercentage(0.25);
     // processor.setStackPercentage(0.5, {"647"});
     // processor.setSharpening({{2, 6.0}, {3, 5.0}, {4, 2.0}});
@@ -38,7 +45,7 @@ int main()
 
         try
         {
-            processor.processVideo(filepaths[i], output_path);
+            processor.processVideo(filepaths[i], std::string{output_dir});
             PLOG_INFO << "processed " << filepaths[i];
         }
         catch (const std::exception &e)
