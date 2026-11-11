@@ -48,14 +48,15 @@ def run_convert_fits_pipeline(input_dir: Path, png_dir: Path, output_dir: Path):
 
                 png_meta_file = filepath
 
-    camera_file = get_camera_file(file_identifier, input_dir)  # need to implement
-    _ = convert_file_fits(
-        png_path=stacked_png_file,
-        cmr_path=camera_file,
-        output_path=output_dir / file_identifier,
-        meta_path=png_meta_file,
-        params=params,
-    )
+        camera_file = get_camera_file(file_identifier, input_dir)  # need to implement
+
+        params = convert_file_fits(
+            png_path=stacked_png_file,
+            cmr_path=camera_file,
+            output_path=output_dir,
+            meta_path=png_meta_file,
+            params=params,
+        )
 
 
 def main():

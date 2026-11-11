@@ -43,38 +43,43 @@ def create_observation(input_file, time) -> Observation:
 
 def add_metadata(observation: Observation, cmr_path: Path, meta_path: Path):
     stack_num = 0
-    with open(meta_path, "r") as metadata_file:
-        data = json.load(metadata_file)
-        stack_num: int = data["stacked_frames"]
+    if meta_path.exists():
+        with open(meta_path, "r") as metadata_file:
+            data = json.load(metadata_file)
+            stack_num: int = data["stacked_frames"]
+    else:
+        print("failed to add some headers:" + str(meta_path) + " not found")
 
-    with open(str(cmr_path), "r") as cf:
-        for line in cf:
-            pair = line.strip()
-            if "iOptron" in pair:
-                startIndex = pair.index("=")
-                commaIndex = pair.find(",", startIndex)
-                value1 = pair[startIndex + 4 : commaIndex]
-                value2 = pair[pair.find("=", commaIndex) + 1 :]
-                observation.append_to_header(
-                    "SHRPCAP RA", formatType(value1), hierarch_keyword=False
-                )
-                observation.append_to_header(
-                    "SHRPCAP Dec", formatType(value2), hierarch_keyword=False
-                )
-
-            elif "=" in pair:
-                key = pair[: pair.index("=")]
-                value = pair[pair.index("=") + 1 :]
-                observation.append_to_header(
-                    "SHRPCAP " + key, formatType(value), hierarch_keyword=False
-                )
-                if key == "Exposure":
-                    exposure_ms = float(value.split("ms")[0])
-
+    if cmr_path.exists():
+        with open(str(cmr_path), "r") as cf:
+            for line in cf:
+                pair = line.strip()
+                if "iOptron" in pair:
+                    startIndex = pair.index("=")
+                    commaIndex = pair.find(",", startIndex)
+                    value1 = pair[startIndex + 4 : commaIndex]
+                    value2 = pair[pair.find("=", commaIndex) + 1 :]
                     observation.append_to_header(
-                        keyword="EXPOSURE",
-                        value=str(stack_num * exposure_ms) + "ms",
+                        "SHRPCAP RA", formatType(value1), hierarch_keyword=False
                     )
+                    observation.append_to_header(
+                        "SHRPCAP Dec", formatType(value2), hierarch_keyword=False
+                    )
+
+                elif "=" in pair:
+                    key = pair[: pair.index("=")]
+                    value = pair[pair.index("=") + 1 :]
+                    observation.append_to_header(
+                        "SHRPCAP " + key, formatType(value), hierarch_keyword=False
+                    )
+                    if key == "Exposure" and stack_num:
+                        exposure_ms = float(value.split("ms")[0])
+                        observation.append_to_header(
+                            keyword="EXPOSURE",
+                            value=str(stack_num * exposure_ms) + "ms",
+                        )
+    else:
+        print("failed to add some headers:" + str(cmr_path) + " not found")
 
     observation.append_to_header(keyword="NUMSTACK", value=(stack_num))
 
@@ -83,16 +88,8 @@ def convert_file_fits(
     png_path: Path, cmr_path: Path, output_path: Path, meta_path: Path, params
 ) -> tuple[float, float, float, float] | Any:
     fn = png_path.name
-
-    with open(meta_path, "r") as metadata_file:
-        data = json.load(metadata_file)
-        date_prefix: str = data["date_prefix"]
-        filter: str = data["filter"]
     time = fn[0:10] + "T" + fn[11:13] + ":" + fn[13:15]
     observation = create_observation(png_path, time)
-
-    # print("******************")
-    # print("2##########observation.backplanes=",observation.backplanes.keys())
 
     if not params:
         coords = observation.run_gui()
@@ -100,53 +97,14 @@ def convert_file_fits(
         print("######### params1=", params)
     else:
         observation.set_disc_params(params[0], params[1], params[2], params[3])
+
     add_metadata(observation, cmr_path, meta_path)
-
-    # observation.add_header_metadata()
-    # observation.append_to_header('HEIRARCH SHRPCAP '+'TESTKEY','This is a test',hierarch_keyword=False)
-    # filetype = fn[fn.index('_') + 1: fn.index('-')]
-
-    # populate header with camera metadata
 
     output_path = output_path / "unprocessed_L1"
     os.makedirs(output_path, exist_ok=True)
     observation.save_observation(output_path / fn.replace(".png", ".fits"))
     observation.save_mapped_observation(output_path / fn.replace(".png", "map.fits"))
     return params
-
-
-# def convert_png_fits(obskey, input_path, output_path):
-#     sys.path.append("../processes")
-
-#     # path="../Data_Samples/" + obskey + "/"
-#     # path = input_path + "/" + obskey + "/"
-#     path = input_path + "/" + obskey + "/"
-#     l1Files = os.listdir(path)
-#     # print(path)
-#     # print(l1Files)
-#     obs_map = H.getL1AProcessingFiles(l1Files)
-#     print(obs_map)
-
-#     # planetmapper.set_kernel_path("~/Jupiter")
-
-#     # outputs fits into unprocessed_l1 file
-#     # def createFits(file_list, camera_obs_list, obs):
-#     #     global First
-#     #     global params
-#     #     for i, fn in enumerate(file_list):
-#     #         dir_path = output_path + "/" + obskey + "/" + obs + "/unprocessed_L1/"
-#     #         os.makedirs(dir_path, exist_ok=True)
-#     #         observation.save_observation(dir_path + "/" + fn.replace(".png", ".fits"))
-#     #         observation.save_mapped_observation(
-#     #             dir_path + "/" + fn.replace(".png", "map.fits")
-#     #         )
-
-#     # # creates fits files for each observation
-#     # for obs in obs_map:
-#     #     file_list = obs_map[obs]
-#     #     camera_obs_list = H.getCameraObservations(l1Files)["data"][obs]
-#     #     createFits(file_list, camera_obs_list, obs)
-#     #     First = False
 
 
 def formatType(value):
