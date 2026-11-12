@@ -254,7 +254,7 @@ void VideoProcessor::setSharpening(const SharpeningMap &sharpen_map, const std::
     }
 };
 
-void VideoProcessor::setSharpening(SharpenConfig configType, const std::vector<std::string> &filters)
+void VideoProcessor::setSharpening(SharpenPreset configType, const std::vector<std::string> &filters)
 {
     const auto &sharpen_map = sharpen_configs[static_cast<int>(configType)];
     setSharpening(sharpen_map, filters);
@@ -286,7 +286,8 @@ void VideoProcessor::saveOutput(const json metadata, const cv::Mat &frame, const
     std::string date_prefix = metadata["date_prefix"].get<std::string>();
     std::string folder_name = date_prefix + "_" + metadata["filter"].get<std::string>();
     std::string output_path = std::string{output} + "/" + folder_name;
-    std::filesystem::create_directory(output_path);
+
+    std::filesystem::create_directories(output_path);
     std::string output_stacked = output_path + "/" + date_prefix + "_stacked.png";
     cv::imwrite(output_stacked, frame);
 
