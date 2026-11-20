@@ -5,7 +5,7 @@ import shutil
 from pathlib import Path
 
 from python.convert_fits import convert_file_fits
-from python.logger import logger
+from python.logger import initialize_logger, logger
 
 PROJECT_DIR = Path(".")
 EXECUTABLE = PROJECT_DIR / "build" / "jupiter"
@@ -66,7 +66,10 @@ def main():
         output_dir = Path(config["files"]["output_dir"])
         video_dir = Path(config["files"]["video_dir"])
         png_dir = Path(config["files"]["png_dir"])
+        initialize_logger(str(output_dir))
+
         output_dir.parent.mkdir(parents=True, exist_ok=True)
+        # Path(str(output_dir) + "/LogFile.txt").touch()
         logger.info(
             "Converting files in "
             + str(video_dir)
@@ -76,9 +79,7 @@ def main():
         )
 
         run_convert_fits_pipeline(
-            input_dir=video_dir,
-            png_dir=png_dir,
-            output_dir=output_dir,
+            input_dir=video_dir, png_dir=png_dir, output_dir=output_dir
         )
         shutil.copy2("config.json", output_dir)
 

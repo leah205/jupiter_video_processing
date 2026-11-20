@@ -1,0 +1,16 @@
+{
+    "video_input_dir": "data/20260318UT",
+    "png_output_dir": "output",
+    "fits_output_dir": "FITS",
+    "filters": ["620CH4", "647NH3", "656HIA", "632OI", "685NIR", "550GRN", "450BLU", "889CH4"],
+    "video_config": {
+        "default": {
+            "stack_percentage": 0.25,
+            "sharpening": "default"
+        }, 
+        "889": {
+            "stack_percentage": 0.5,
+            "sharpening": "coarse"
+        }
+    }
+}

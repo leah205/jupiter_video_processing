@@ -5,9 +5,25 @@
 #include "quality.h"
 #include "sharpen.h"
 #include <map>
+#include <nlohmann/json.hpp>
+
+using nlohmann::json;
 
 #ifndef VIDEO_H
 #define VIDEO_H
+
+enum class SharpenPreset
+{
+    DEFAULT,
+    COARSE,
+    COUNT
+};
+
+// typedef struct FilterConfig
+// {
+//     std::vector<WaveletSharpener> sharpen_config{};
+//     int stack_perc{};
+// } FilterConfig;
 
 class VideoProcessor
 {
@@ -18,24 +34,40 @@ private:
     std::string input_dir;
     std::string output_dir;
     std::map<std::string, float> select_config = {};
-    std::map<std::string, WaveletSharpener> sharpen_config = {};
+    std::map<std::string, WaveletSharpener> filter_sharpen_config = {};
+    std::vector<SharpeningMap> sharpen_configs{static_cast<int>(SharpenPreset::COUNT), SharpeningMap{}};
+    // std::vector<FilterConfig> filter_configs;
+    std::vector<std::string> filters;
     bool run_sharpening = true;
     WaveletSharpener sharpener;
+    typedef struct VideoData
+    {
+        int total_frames{};
+        int num_stacked{};
+        double stack_percentage{};
+        std::string filter{};
+        std::string sharpening{};
+        std::string date_prefix{};
+
+    } VideoData;
 
 public:
     VideoProcessor() : sharpener(wavelet_levels)
 
     {
-        sharpen_config["default"] = WaveletSharpener{wavelet_levels};
+        sharpen_configs[static_cast<int>(SharpenPreset::DEFAULT)] = {{2, 6.0}, {3, 5.0}, {4, 2.0}};
+        sharpen_configs[static_cast<int>(SharpenPreset::COARSE)] = {{3, 3.0}, {4, 2.0}};
+        filter_sharpen_config["default"] = WaveletSharpener{wavelet_levels};
+        setSharpening(SharpenPreset::DEFAULT);
     };
 
     frameInfo processFrame(cv::Mat frame) const;
 
-    cv::Mat sharpenFrame(const cv::Mat &frame) const;
+    void saveOutput(const json metadata, const cv::Mat &frame, const cv::Mat &sharpened_frame, const std::string_view output) const;
 
-    void setSharpening(const SharpeningMap &sharpen_map);
+    void setSharpening(const enum SharpenPreset, const std::vector<std::string> &filters = {});
 
-    void setSharpening(const SharpeningMap &sharpen_map, const std::vector<std::string> &filters);
+    void setSharpening(const SharpeningMap &sharpen_map, const std::vector<std::string> &filters = {});
 
     void setStackPercentage(float percentage);
 
@@ -49,7 +81,7 @@ public:
 
     void alignFrames(std::vector<frameInfo> &frames);
 
-    void saveSharpenedOutput(std::string_view output_path, std::string_view output_prefix, cv::Mat frame) const;
+    void setFilters(std::vector<std::string> &filters);
 
     constexpr void setRunSharpening(const bool run);
 };

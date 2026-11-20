@@ -1,15 +1,19 @@
 import json
 import os
+import warnings
 from pathlib import Path
 from typing import Any
 
 import planetmapper
+from astropy.io.fits.verify import VerifyWarning
 from planetmapper.observation import Observation
 
 from python.logger import logger
 
 First = True
 params = []
+
+warnings.filterwarnings("ignore", category=VerifyWarning)
 
 
 def create_observation(input_file, time) -> Observation:
