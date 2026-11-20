@@ -1,9 +1,10 @@
 
+
 # run with: cmake --build build -j
 # reset: cmake --fresh -S . -B build
 
 
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.20)
 
 project(Jupiter LANGUAGES CXX)
 
@@ -14,6 +15,11 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Dependencies
 find_package(OpenCV REQUIRED)
 
+# CMakeLists.txt
+find_package(nlohmann_json 3.11.3 REQUIRED)
+
+
+
 include(FetchContent)
 
 FetchContent_Declare(
@@ -22,6 +28,8 @@ FetchContent_Declare(
     GIT_TAG 1.1.11
     GIT_SHALLOW TRUE
 )
+
+
 
 FetchContent_MakeAvailable(plog)
 
@@ -53,7 +61,7 @@ foreach(target jupiter)
     )
 
     target_link_directories(${target} PRIVATE
-        "${CMAKE_CURRENT_SOURCE_DIR}/external/wavelib/Bin"
+        "${CMAKE_CURRENT_SOURCE_DIR}/external/wavelib/build/Bin"
     )
 
     target_link_libraries(${target} PRIVATE
@@ -61,6 +69,7 @@ foreach(target jupiter)
         wavelib
         wauxlib
         plog::plog
+        nlohmann_json::nlohmann_json
     )
 
     target_compile_options(${target} PRIVATE

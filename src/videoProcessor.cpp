@@ -5,6 +5,9 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include <filesystem>
+#include <nlohmann/json.hpp>
+#include <fstream>
 
 #include <cmath>
 
@@ -15,6 +18,8 @@
 #include "frameInfo.h"
 
 #include "sharpen.h"
+
+using nlohmann::json;
 
 /**
  * @brief processes frame and returns frameInfo object
@@ -125,9 +130,9 @@ std::vector<frameInfo> VideoProcessor::readFrames(const std::string input_path) 
 
 void VideoProcessor::processVideo(const std::string_view input_path, const std::string_view output_path)
 {
-
     std::size_t pos = input_path.find_last_of('/');
     std::string_view filename = input_path.substr(pos + 1);
+    cv::Mat sharpened_frame{};
     std::string filter = get_filter(input_path);
     std::vector<frameInfo>
         frames = readFrames(std::string{input_path});
@@ -140,26 +145,30 @@ void VideoProcessor::processVideo(const std::string_view input_path, const std::
 
     int stacked_frames_num;
     float stack_perc = (select_config.count(filter)) ? select_config[filter] : select_config["default"];
-    const WaveletSharpener &sharpener = (sharpen_config.count(filter)) ? sharpen_config[filter] : sharpen_config["default"];
+    const WaveletSharpener &sharpener = (filter_sharpen_config.count(filter)) ? filter_sharpen_config[filter] : filter_sharpen_config["default"];
     stacked_frames_num = ceil(stack_perc * frames.size());
     std::cout << "selecting " + std::to_string(stack_perc) + " of frames" << std::endl;
     std::vector<frameInfo> selected_frames = ::selectFrames(quality_scorer, frames, stacked_frames_num);
     std::cout << "select num: " << selected_frames.size() << std::endl;
     alignFrames(selected_frames);
-    // cv::imshow("first frame", selected_frames[0].frame);
-    // cv::waitKey(0);
+
     cv::Mat stacked_frame = stackFrames(selected_frames);
     subtract_background_signal(stacked_frame);
     stacked_frame.convertTo(stacked_frame, CV_16UC1, 65535.0 / 255.0);
 
     std::string prefix = std::string{filename.substr(0, filename.size() - 4)} + "_Stacked";
-    save_output(output_path, prefix, stacked_frame);
 
+    json metadata =
+        {
+            {"orig_frames", frames.size()}, {"stacked_frames", stacked_frames_num}, {"stack_perc", stack_perc}, {"filter", filter}, {"date_prefix", filename.substr(0, filename.find("-Jupiter"))}};
+
+    json a = {{"orig_frames", frames.size()}};
     if (run_sharpening)
     {
-        cv::Mat sharpened_frame = sharpener.runSharpening(stacked_frame);
-        saveSharpenedOutput(output_path, prefix, sharpened_frame);
+        sharpened_frame = sharpener.runSharpening(stacked_frame);
     }
+
+    saveOutput(metadata, stacked_frame, sharpened_frame, output_path);
 }
 
 /**
@@ -173,43 +182,43 @@ constexpr void VideoProcessor::setRunSharpening(const bool run)
     run_sharpening = run;
 }
 
-void VideoProcessor::saveSharpenedOutput(std::string_view output_path, std::string_view prefix, cv::Mat frame) const
-{
-    if (run_sharpening == true)
-    {
-        auto &config = sharpener.getSharpenConfig();
-        std::string levels_str;
-        for (const auto &[level, amp] : config.level_sharpenings)
-        {
-            std::ostringstream oss;
-            oss << std::fixed << std::setprecision(2) << amp;
-            std::string rounded_amp = oss.str();
+// void VideoProcessor::saveSharpenedOutput(std::string_view output_path, std::string_view prefix, cv::Mat frame) const
+// {
+//     if (run_sharpening == true)
+//     {
+//         auto &config = sharpener.getSharpenConfig();
+//         std::string levels_str;
+//         for (const auto &[level, amp] : config.level_sharpenings)
+//         {
+//             std::ostringstream oss;
+//             oss << std::fixed << std::setprecision(2) << amp;
+//             std::string rounded_amp = oss.str();
 
-            levels_str += "_" + std::to_string(level) + "X" + rounded_amp;
-        }
+//             levels_str += "_" + std::to_string(level) + "X" + rounded_amp;
+//         }
 
-        cv::imwrite(std::string{output_path} + std::string{prefix} + "_" + "WV-" + "Aligned" + ".png", frame);
-    }
-}
+//         cv::imwrite(std::string{output_path} + std::string{prefix} + "_" + "WV-" + "Aligned" + ".png", frame);
+//     }
+// }
 
-/**
- * @brief Set the Sharpening Level object
- *
- * configure a set of ampplifications one for each spatial scale (decomposition level)
- * to enhance the contrast of(sharpen)
- *
- * @param level
- * @param amplification
- */
-void VideoProcessor::setSharpening(const SharpeningMap &sharpen_map)
-{
-    WaveletSharpener sharpener;
-    for (const auto &[level, amp] : sharpen_map)
-    {
-        sharpener.addLevelSharpening(level, amp);
-    }
-    sharpen_config["default"] = sharpener;
-}
+// /**
+//  * @brief Set the Sharpening Level object
+//  *
+//  * configure a set of ampplifications one for each spatial scale (decomposition level)
+//  * to enhance the contrast of(sharpen)
+//  *
+//  * @param level
+//  * @param amplification
+//  */
+// void VideoProcessor::setSharpening(const SharpeningMap &sharpen_map)
+// {
+//     WaveletSharpener sharpener;
+//     for (const auto &[level, amp] : sharpen_map)
+//     {
+//         sharpener.addLevelSharpening(level, amp);
+//     }
+//     filter_sharpen_config["default"] = sharpener;
+// }
 
 /**
  * @brief Set the Sharpening Level object
@@ -223,6 +232,16 @@ void VideoProcessor::setSharpening(const SharpeningMap &sharpen_map)
  */
 void VideoProcessor::setSharpening(const SharpeningMap &sharpen_map, const std::vector<std::string> &filters)
 {
+    if (!filters.size())
+    {
+        WaveletSharpener sharpener;
+        for (const auto &[level, amp] : sharpen_map)
+        {
+            sharpener.addLevelSharpening(level, amp);
+        }
+        filter_sharpen_config["default"] = sharpener;
+    }
+
     for (const auto &filter : filters)
     {
         WaveletSharpener sharpener;
@@ -231,8 +250,14 @@ void VideoProcessor::setSharpening(const SharpeningMap &sharpen_map, const std::
         {
             sharpener.addLevelSharpening(level, amp);
         }
-        sharpen_config[filter] = sharpener;
+        filter_sharpen_config[filter] = sharpener;
     }
+};
+
+void VideoProcessor::setSharpening(SharpenPreset configType, const std::vector<std::string> &filters)
+{
+    const auto &sharpen_map = sharpen_configs[static_cast<int>(configType)];
+    setSharpening(sharpen_map, filters);
 }
 
 void VideoProcessor::setStackPercentage(float percentage)
@@ -249,10 +274,28 @@ void VideoProcessor::setStackPercentage(float percentage)
 
 void VideoProcessor::setStackPercentage(float percentage, std::vector<std::string> filters)
 {
+
     for (auto &filter : filters)
     {
         select_config[filter] = percentage;
     }
 }
 
-// void addSharpeningLevel(int level, double amplification, std::string filter);
+void VideoProcessor::saveOutput(const json metadata, const cv::Mat &frame, const cv::Mat &sharpened_frame, const std::string_view output) const
+{
+    std::string date_prefix = metadata["date_prefix"].get<std::string>();
+    std::string folder_name = date_prefix + "_" + metadata["filter"].get<std::string>();
+    std::string output_path = std::string{output} + "/" + folder_name;
+
+    std::filesystem::create_directories(output_path);
+    std::string output_stacked = output_path + "/" + date_prefix + "_stacked.png";
+    cv::imwrite(output_stacked, frame);
+
+    if (!sharpened_frame.empty())
+    {
+        std::string output_sharpened = output_path + "/" + date_prefix + "_sharpened.png";
+        cv::imwrite(output_sharpened, sharpened_frame);
+    }
+    std::ofstream metadata_file(output_path + "/" + "metadata.json");
+    metadata_file << metadata.dump(4);
+};

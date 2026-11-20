@@ -164,7 +164,7 @@ void subtract_background_signal(cv::Mat &frame)
 
 std::string get_filter(const std::string_view filename)
 {
-    const std::vector<std::string> filters = {"620", "647", "656", "632", "685", "550", "450"};
+    const std::vector<std::string> filters = {"620CH4", "647NH3", "656HIA", "632OI", "685NIR", "550GRN", "450BLU", "889CH4"};
 
     for (int i = 0; i < filters.size(); i++)
     {
