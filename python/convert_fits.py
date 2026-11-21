@@ -47,9 +47,11 @@ def create_observation(input_file, time) -> Observation:
     return observation
 
 
-def add_metadata(observation: Observation, cmr_path: Path | None, meta_path: Path):
+def add_metadata(
+    observation: Observation, cmr_path: Path | None, meta_path: Path | None
+):
     stack_num = 0
-    if meta_path.exists():
+    if meta_path:
         with open(meta_path, "r") as metadata_file:
             data = json.load(metadata_file)
             stack_num: int = data["stacked_frames"]
@@ -95,7 +97,11 @@ def add_metadata(observation: Observation, cmr_path: Path | None, meta_path: Pat
 
 
 def convert_file_fits(
-    png_path: Path, cmr_path: Path | None, output_path: Path, meta_path: Path, params
+    png_path: Path,
+    cmr_path: Path | None,
+    output_path: Path,
+    meta_path: Path | None,
+    params,
 ) -> tuple[float, float, float, float] | Any:
     fn = png_path.name
     time = fn[0:10] + "T" + fn[11:13] + ":" + fn[13:15]

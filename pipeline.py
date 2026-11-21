@@ -42,7 +42,7 @@ def group_files_by_prefix(folder):
         filepath = os.path.join(folder, filename)
 
         if os.path.isfile(filepath):
-            prefix = filename[:16]
+            prefix = filename[:15]
             groups[prefix].append(filename)
 
     return dict(groups)
@@ -50,9 +50,9 @@ def group_files_by_prefix(folder):
 
 def run_convert_fits_pipeline(input_dir: Path, png_dir: Path, output_dir: Path):
     params = None
-    png_meta_file = Path()
-    stacked_png_file = Path()
-    sharpened_png_file = Path()
+    png_meta_file = None
+    stacked_png_file = None
+    sharpened_png_file = None
     file_identifier = ""
 
     groups = group_files_by_prefix(png_dir)
@@ -62,20 +62,33 @@ def run_convert_fits_pipeline(input_dir: Path, png_dir: Path, output_dir: Path):
             filepath = str(png_dir) + "/" + file
             if file.endswith("stacked.png"):
                 stacked_png_file = Path(filepath)
-            if file.endswith("sharpened.png"):
+            if file.endswith("WV.png"):
                 sharpened_png_file = Path(filepath)
             if file.endswith(".json"):
                 png_meta_file = Path(filepath)
 
         camera_file = get_camera_file(prefix, input_dir)  # need to implement
 
-        params = convert_file_fits(
-            png_path=stacked_png_file,
-            cmr_path=camera_file,
-            output_path=output_dir,
-            meta_path=png_meta_file,
-            params=params,
-        )
+        if not stacked_png_file:
+            logger.error("could not find stacked: " + prefix)
+        else:
+            params = convert_file_fits(
+                png_path=stacked_png_file,
+                cmr_path=camera_file,
+                output_path=output_dir,
+                meta_path=png_meta_file,
+                params=params,
+            )
+        if not sharpened_png_file:
+            logger.error("could not find sharpened: " + prefix)
+        else:
+            params = convert_file_fits(
+                png_path=sharpened_png_file,
+                cmr_path=camera_file,
+                output_path=output_dir,
+                meta_path=png_meta_file,
+                params=params,
+            )
 
 
 def main():
