@@ -85,14 +85,13 @@ def add_metadata(observation: Observation, cmr_path: Path | None, meta_path: Pat
                             exposure_ms = float(value.split("s")[0]) * 1000
                         else:
                             exposure_ms = float(value.split("ms")[0])
-                        observation.append_to_header(
-                            keyword="EXPOSURE",
-                            value=str(stack_num * exposure_ms) + "ms",
+                        observation.header["TOTAL_EXPOSURE"] = (
+                            str(stack_num * exposure_ms) + "ms"
                         )
+
     else:
         logger.warning("failed to add some headers:" + str(cmr_path) + " not found")
-
-    observation.append_to_header(keyword="NUMSTACK", value=(stack_num))
+    observation.header["NUMSTACK"] = stack_num
 
 
 def convert_file_fits(
