@@ -6,6 +6,21 @@ extern "C"
 #include "wavelib.h"
 }
 
+using nlohmann::json;
+
+json WaveletSharpener::get_sharpening_config() const
+{
+    json levels_config;
+    for (const auto &[level, amp] : config.level_sharpenings)
+    {
+        double rounded_amp = std::round(amp * 100.0) / 100.0;
+        levels_config[std::to_string(level)] = rounded_amp;
+    };
+    std::cout << levels_config.dump() << std::endl;
+    json json_config = {{"method", config.method}, {"sharpening levels", levels_config}};
+    return json_config;
+}
+
 static void showDetailMap(const cv::Mat &input, const cv::Mat &output);
 
 /**

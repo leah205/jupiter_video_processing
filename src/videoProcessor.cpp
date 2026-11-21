@@ -6,7 +6,6 @@
 #include <sstream>
 #include <iomanip>
 #include <filesystem>
-#include <nlohmann/json.hpp>
 #include <fstream>
 
 #include <cmath>
@@ -157,12 +156,10 @@ void VideoProcessor::processVideo(const std::string_view input_path, const std::
     stacked_frame.convertTo(stacked_frame, CV_16UC1, 65535.0 / 255.0);
 
     std::string prefix = std::string{filename.substr(0, filename.size() - 4)} + "_Stacked";
-
     json metadata =
         {
-            {"orig_frames", frames.size()}, {"stacked_frames", stacked_frames_num}, {"stack_perc", stack_perc}, {"filter", filter}, {"date_prefix", filename.substr(0, filename.find("-Jupiter"))}};
+            {"orig_frames", frames.size()}, {"stacked_frames", stacked_frames_num}, {"stack_perc", stack_perc}, {"filter", filter}, {"date_prefix", filename.substr(0, filename.find("-Jupiter"))}, {"sharpening_config", sharpener.get_sharpening_config()}};
 
-    json a = {{"orig_frames", frames.size()}};
     if (run_sharpening)
     {
         sharpened_frame = sharpener.runSharpening(stacked_frame);
@@ -284,18 +281,19 @@ void VideoProcessor::setStackPercentage(float percentage, std::vector<std::strin
 void VideoProcessor::saveOutput(const json metadata, const cv::Mat &frame, const cv::Mat &sharpened_frame, const std::string_view output) const
 {
     std::string date_prefix = metadata["date_prefix"].get<std::string>();
-    std::string folder_name = date_prefix + "_" + metadata["filter"].get<std::string>();
-    std::string output_path = std::string{output} + "/" + folder_name;
+    std::string filter = metadata["filter"].get<std::string>();
+    std::string prefix = date_prefix + "-Jupiter_" + filter + "_";
+    std::string output_path = std::string{output};
 
     std::filesystem::create_directories(output_path);
-    std::string output_stacked = output_path + "/" + date_prefix + "_stacked.png";
+    std::string output_stacked = output_path + "/" + prefix + "stacked.png";
     cv::imwrite(output_stacked, frame);
 
     if (!sharpened_frame.empty())
     {
-        std::string output_sharpened = output_path + "/" + date_prefix + "_sharpened.png";
+        std::string output_sharpened = output_path + "/" + prefix + "WV.png";
         cv::imwrite(output_sharpened, sharpened_frame);
     }
-    std::ofstream metadata_file(output_path + "/" + "metadata.json");
+    std::ofstream metadata_file(output_path + "/" + prefix + "metadata.json");
     metadata_file << metadata.dump(4);
 };

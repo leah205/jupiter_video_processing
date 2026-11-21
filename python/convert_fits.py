@@ -47,7 +47,7 @@ def create_observation(input_file, time) -> Observation:
     return observation
 
 
-def add_metadata(observation: Observation, cmr_path: Path, meta_path: Path):
+def add_metadata(observation: Observation, cmr_path: Path | None, meta_path: Path):
     stack_num = 0
     if meta_path.exists():
         with open(meta_path, "r") as metadata_file:
@@ -56,7 +56,7 @@ def add_metadata(observation: Observation, cmr_path: Path, meta_path: Path):
     else:
         logger.warning("failed to add some headers:" + str(meta_path) + " not found")
 
-    if cmr_path.exists():
+    if cmr_path:
         with open(str(cmr_path), "r") as cf:
             for line in cf:
                 pair = line.strip()
@@ -79,7 +79,12 @@ def add_metadata(observation: Observation, cmr_path: Path, meta_path: Path):
                         "SHRPCAP " + key, formatType(value), hierarch_keyword=False
                     )
                     if key == "Exposure" and stack_num:
-                        exposure_ms = float(value.split("ms")[0])
+                        print(value)
+                        exposure_ms = 0
+                        if not "ms" in value:
+                            exposure_ms = float(value.split("s")[0]) * 1000
+                        else:
+                            exposure_ms = float(value.split("ms")[0])
                         observation.append_to_header(
                             keyword="EXPOSURE",
                             value=str(stack_num * exposure_ms) + "ms",
@@ -91,7 +96,7 @@ def add_metadata(observation: Observation, cmr_path: Path, meta_path: Path):
 
 
 def convert_file_fits(
-    png_path: Path, cmr_path: Path, output_path: Path, meta_path: Path, params
+    png_path: Path, cmr_path: Path | None, output_path: Path, meta_path: Path, params
 ) -> tuple[float, float, float, float] | Any:
     fn = png_path.name
     time = fn[0:10] + "T" + fn[11:13] + ":" + fn[13:15]

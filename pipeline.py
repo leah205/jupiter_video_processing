@@ -1,7 +1,9 @@
-# import subprocess
 import json
 import os
 import shutil
+
+# import subprocess
+from collections import defaultdict
 from pathlib import Path
 
 from python.convert_fits import convert_file_fits
@@ -19,12 +21,31 @@ def get_file_identifier(meta_path: Path):
     return date_prefix + "-Jupiter_" + filter
 
 
-def get_camera_file(file_identifier: str, input_dir: Path):
-    camera_filename = file_identifier + ".CameraSettings.txt"
-    # if not (input_dir / camera_filename).exists():
-    #     print("camera metdata file not found")
-    print(str(input_dir / camera_filename))
+def get_camera_file(prefix: str, input_dir: Path) -> Path | None:
+    camera_filename = file = next(
+        (
+            f
+            for f in os.listdir(input_dir)
+            if f.startswith(prefix) and f.endswith("CameraSettings.txt")
+        ),
+        None,
+    )
+    if not camera_filename:
+        return None
     return input_dir / camera_filename
+
+
+def group_files_by_prefix(folder):
+    groups = defaultdict(list)
+
+    for filename in os.listdir(folder):
+        filepath = os.path.join(folder, filename)
+
+        if os.path.isfile(filepath):
+            prefix = filename[:16]
+            groups[prefix].append(filename)
+
+    return dict(groups)
 
 
 def run_convert_fits_pipeline(input_dir: Path, png_dir: Path, output_dir: Path):
@@ -34,20 +55,19 @@ def run_convert_fits_pipeline(input_dir: Path, png_dir: Path, output_dir: Path):
     sharpened_png_file = Path()
     file_identifier = ""
 
-    for folder_path in png_dir.iterdir():
-        if os.path.isfile(folder_path):
-            continue
-        for filepath in folder_path.iterdir():
-            if filepath.name.endswith("stacked.png"):
-                stacked_png_file = filepath
-            if filepath.name.endswith("sharpened.png"):
-                sharpened_png_file = filepath
-            if filepath.name.endswith(".json"):
-                file_identifier = get_file_identifier(filepath)
+    groups = group_files_by_prefix(png_dir)
 
-                png_meta_file = filepath
+    for prefix, files in groups.items():
+        for file in files:
+            filepath = str(png_dir) + "/" + file
+            if file.endswith("stacked.png"):
+                stacked_png_file = Path(filepath)
+            if file.endswith("sharpened.png"):
+                sharpened_png_file = Path(filepath)
+            if file.endswith(".json"):
+                png_meta_file = Path(filepath)
 
-        camera_file = get_camera_file(file_identifier, input_dir)  # need to implement
+        camera_file = get_camera_file(prefix, input_dir)  # need to implement
 
         params = convert_file_fits(
             png_path=stacked_png_file,
@@ -60,28 +80,32 @@ def run_convert_fits_pipeline(input_dir: Path, png_dir: Path, output_dir: Path):
 
 def main():
     # _ = subprocess.run([str(EXECUTABLE)], check=True)
+
     print("video processing complete")
-    with open(file="config.json", mode="r") as config_json:
+    with open(file="config/config.json", mode="r") as config_json:
         config = json.load(config_json)
-        output_dir = Path(config["files"]["output_dir"])
-        video_dir = Path(config["files"]["video_dir"])
-        png_dir = Path(config["files"]["png_dir"])
+        date_string = config["date_string"]
+        output_dir = Path(config["fits_output_dir"]) / date_string
+        video_dir = Path(config["video_input_dir"]) / date_string  # pyright: ignore[reportAny]
+        png_dir = Path(config["png_output_dir"]) / date_string
+        print(output_dir)
+        os.makedirs(output_dir, exist_ok=True)
+
         initialize_logger(str(output_dir))
 
-        output_dir.parent.mkdir(parents=True, exist_ok=True)
         # Path(str(output_dir) + "/LogFile.txt").touch()
         logger.info(
             "Converting files in "
             + str(video_dir)
-            + " and"
-            + str(dir)
+            + " and "
+            + str(png_dir)
             + "into unprocessed L1 fits"
         )
 
         run_convert_fits_pipeline(
             input_dir=video_dir, png_dir=png_dir, output_dir=output_dir
         )
-        shutil.copy2("config.json", output_dir)
+        shutil.copy2("config/config.json", output_dir)
 
         logger.info("wrote unprocessed fits files into " + str(output_dir))
 

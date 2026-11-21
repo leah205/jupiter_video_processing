@@ -2,6 +2,7 @@
 #include "helpers.h"
 #include <string>
 #include <filesystem>
+#include "sharpen.h"
 
 static bool ends_with(std::string_view str, std::string_view suffix)
 {

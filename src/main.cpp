@@ -17,15 +17,31 @@ using nlohmann::json;
 int main()
 {
     double duration = static_cast<double>(cv::getTickCount());
-    std::ifstream config_f("config.json");
+    std::ifstream config_f("config/config.json");
     json config_data = json::parse(config_f);
-    auto output_dir = config_data["files"]["png_dir"].get<fs::path>();
-    auto input_dir = config_data["files"]["video_dir"].get<fs::path>();
+    std::cout << config_data.dump() << std::endl;
+    std::string date_string = config_data["date_string"].get<std::string>();
+    std::string output_dir = config_data["png_output_dir"].get<std::string>() + "/" + date_string;
+    std::string input_dir = config_data["video_input_dir"].get<std::string>() + "/" + date_string;
+    std::string fits_dir = config_data["fits_output_dir"].get<std::string>() + "/" + date_string;
+    std::string log_file = fits_dir + "/LogFile.txt";
+    fs::create_directories(output_dir);
+    fs::create_directories(fits_dir);
+
+    if (!std::filesystem::exists(log_file))
+    {
+        std::ofstream file(log_file);
+        file.close();
+    }
+
+    // auto output_dir = (config_data["png_output_dir"]).get<fs::path>();
+    // auto input_dir = config_data["video_input_dir"].get<fs::path>();
 
     VideoProcessor processor;
-    plog::init(plog::info, "LogFile.txt");
 
-    PLOG_INFO << "Processing all .avi files from " << input_dir.string();
+    plog::init(plog::info, log_file.c_str());
+
+    PLOG_INFO << "Processing all .avi files from " << input_dir;
 
     processor.setStackPercentage(0.25);
     // processor.setStackPercentage(0.5, {"647"});
@@ -36,7 +52,7 @@ int main()
 
     int failed_count = 0;
     // std::vector<std::string> filepaths;
-    std::vector<std::string> filepaths = get_avi_files(input_dir);
+    std::vector<std::string> filepaths = get_avi_files(fs::path(input_dir));
 
     for (size_t i = 0; i < filepaths.size(); i++)
     {
@@ -45,7 +61,7 @@ int main()
 
         try
         {
-            processor.processVideo(filepaths[i], std::string{output_dir});
+            processor.processVideo(filepaths[i], output_dir);
             PLOG_INFO << "processed " << filepaths[i];
         }
         catch (const std::exception &e)
