@@ -1,9 +1,8 @@
 import json
 import os
 import shutil
+import subprocess
 import time
-
-# import subprocess
 from collections import defaultdict
 from pathlib import Path
 
@@ -57,15 +56,17 @@ def run_convert_fits_pipeline(input_dir: Path, png_dir: Path, output_dir: Path):
     png_meta_file = None
     stacked_png_file = None
     sharpened_png_file = None
+    logger.info("running processL1X on: " + str(png_dir))
 
     groups = group_files_by_prefix(png_dir)
 
     for prefix, files in groups.items():
         for file in files:
             filepath = str(png_dir) + "/" + file
-            if file.endswith("stacked.png"):
+            if file.endswith(".png") and (not "WV" in file):
                 stacked_png_file = Path(filepath)
             if file.endswith("WV.png"):
+                print("hello?")
                 sharpened_png_file = Path(filepath)
             if file.endswith(".json"):
                 png_meta_file = Path(filepath)
@@ -93,23 +94,23 @@ def run_convert_fits_pipeline(input_dir: Path, png_dir: Path, output_dir: Path):
                     params=params,
                 )
                 success_count += 1
-            except:
-                logger.error(f"failed to convert {file} into unprocessed fits")
+            except Exception as e:
+                logger.error(f"failed to convert {file} into unprocessed fits: {e}")
                 fail_count += 1
 
         duration = time.perf_counter() - start
-        logger.info(
-            f"{success_count} files successfully converted into unproessed fits, {fail_count} failed"
-        )
-        logger.info(f"total duration of processL1X: {duration:.4f} seconds")
-        logger.info("wrote unprocessed fits files into " + str(output_dir))
+        shutil.copy2("config/config.json", output_dir)
+
+    logger.info(f"files processed: {success_count}")
+    logger.info(f"files failed: {fail_count}")
+    logger.info("wrote unprocessed L1 fits files to " + str(output_dir))
+    logger.info(f"Duration of processL1X: {duration:.4f} seconds")
 
 
 def main():
+    start = time.perf_counter()
 
     with open(file="config/config.json", mode="r") as config_json:
-        # _ = subprocess.run([str(EXECUTABLE)], check=True)
-
         config = json.load(config_json)
         date_string = config["date_string"]
         output_dir = Path(config["fits_output_dir"]) / date_string
@@ -119,13 +120,20 @@ def main():
         os.makedirs(output_dir, exist_ok=True)
 
         initialize_logger(str(output_dir))
+        logger.info("")
+        logger.info("")
 
-        logger.info("running pipeline on " + date_string)
+        # run video processing cpp
+        _ = subprocess.run([str(EXECUTABLE)], check=True)
+        logger.info("")
 
+        # processL1X
         run_convert_fits_pipeline(
             input_dir=video_dir, png_dir=png_dir, output_dir=output_dir
         )
-        shutil.copy2("config/config.json", output_dir)
+    duration = time.perf_counter() - start
+    logger.info("")
+    logger.info(f"total duration of pipeline: {duration:.4f} seconds")
 
 
 if __name__ == "__main__":

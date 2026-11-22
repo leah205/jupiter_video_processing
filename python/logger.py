@@ -20,4 +20,3 @@ def initialize_logger(output_dir: str) -> None:
         )
     )
     logger.addHandler(handler)
-    logger.info("")

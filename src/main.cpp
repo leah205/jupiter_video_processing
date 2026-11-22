@@ -40,8 +40,9 @@ int main()
     VideoProcessor processor;
 
     plog::init(plog::info, log_file.c_str());
+    PLOG_INFO << "Running video processing on : " << input_dir;
 
-    PLOG_INFO << "Processing all .avi files from " << input_dir;
+    // PLOG_INFO << "Processing all .avi files from " << input_dir;
 
     processor.setStackPercentage(0.25);
     // processor.setStackPercentage(0.5, {"647"});
@@ -62,7 +63,7 @@ int main()
         try
         {
             processor.processVideo(filepaths[i], output_dir);
-            PLOG_INFO << "processed " << filepaths[i];
+            // PLOG_INFO << "processed " << filepaths[i];
         }
         catch (const std::exception &e)
         {
@@ -74,8 +75,10 @@ int main()
 
     duration = static_cast<double>(cv::getTickCount()) - duration;
     duration /= cv::getTickFrequency();
-    std::cout << "duration of program: " << duration << " s" << std::endl;
+    std::cout << "duration of video processing: " << duration << " s" << std::endl;
     PLOG_INFO << "files processed: " << filepaths.size() - failed_count;
     PLOG_INFO << "files failed: " << failed_count;
-    PLOG_INFO << "duration of run: " << duration << "s";
+    PLOG_INFO << "wrote video processing output to: " << output_dir;
+
+    PLOG_INFO << "duration of video processing run: " << duration << "s";
 }

@@ -282,16 +282,16 @@ void VideoProcessor::saveOutput(const json metadata, const cv::Mat &frame, const
 {
     std::string date_prefix = metadata["date_prefix"].get<std::string>();
     std::string filter = metadata["filter"].get<std::string>();
-    std::string prefix = date_prefix + "-Jupiter_" + filter + "_";
+    std::string prefix = date_prefix + "-Jupiter_" + filter;
     std::string output_path = std::string{output};
 
     std::filesystem::create_directories(output_path);
-    std::string output_stacked = output_path + "/" + prefix + "stacked.png";
+    std::string output_stacked = output_path + "/" + prefix + ".png";
     cv::imwrite(output_stacked, frame);
 
     if (!sharpened_frame.empty())
     {
-        std::string output_sharpened = output_path + "/" + prefix + "WV.png";
+        std::string output_sharpened = output_path + "/" + prefix + "_WV.png";
         cv::imwrite(output_sharpened, sharpened_frame);
     }
     std::ofstream metadata_file(output_path + "/" + prefix + ".json");
