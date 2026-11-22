@@ -294,6 +294,6 @@ void VideoProcessor::saveOutput(const json metadata, const cv::Mat &frame, const
         std::string output_sharpened = output_path + "/" + prefix + "WV.png";
         cv::imwrite(output_sharpened, sharpened_frame);
     }
-    std::ofstream metadata_file(output_path + "/" + prefix + "metadata.json");
+    std::ofstream metadata_file(output_path + "/" + prefix + ".json");
     metadata_file << metadata.dump(4);
 };
