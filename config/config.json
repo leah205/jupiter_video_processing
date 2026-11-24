@@ -8,10 +8,11 @@
         "default": {
             "stack_percentage": 0.25,
             "sharpening": "default"
-        }, 
-        "889": {
+        },
+          "889CH4": {
             "stack_percentage": 0.5,
             "sharpening": "coarse"
         }
+      
     }
 }

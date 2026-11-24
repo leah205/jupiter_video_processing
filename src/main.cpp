@@ -14,6 +14,45 @@
 #include <nlohmann/json.hpp>
 using nlohmann::json;
 
+SharpenPreset get_sharpen_preset(std::string_view string_preset)
+{
+    if (string_preset == "default")
+    {
+        return SharpenPreset::DEFAULT;
+    }
+    else if (string_preset == "coarse")
+    {
+        return SharpenPreset::COARSE;
+    }
+    else
+    {
+        PLOG_ERROR << std::string{string_preset} << " is not a valid sharpening configuration. Using default instead";
+        return SharpenPreset::DEFAULT;
+    }
+}
+
+void configure_processor(json config_data, VideoProcessor &processor)
+{
+    processor.setFilters(config_data["filters"].get<std::vector<std::string>>());
+
+    for (auto &[filter, filter_config] : config_data["video_config"].items())
+    {
+        float stack_percentage = filter_config["stack_percentage"];
+        std::string str_preset = filter_config["sharpening"].get<std::string>();
+        SharpenPreset preset = get_sharpen_preset(str_preset);
+        if (filter == "default")
+        {
+            processor.setStackPercentage(stack_percentage);
+            processor.setSharpening(preset);
+        }
+        else
+        {
+            processor.setStackPercentage(stack_percentage, std::vector<std::string>{filter});
+            processor.setSharpening(preset, std::vector<std::string>{filter});
+        }
+    }
+}
+
 int main()
 {
     double duration = static_cast<double>(cv::getTickCount());
@@ -34,21 +73,27 @@ int main()
         file.close();
     }
 
-    // auto output_dir = (config_data["png_output_dir"]).get<fs::path>();
-    // auto input_dir = config_data["video_input_dir"].get<fs::path>();
-
     VideoProcessor processor;
 
     plog::init(plog::info, log_file.c_str());
     PLOG_INFO << "Running video processing on : " << input_dir;
 
     // PLOG_INFO << "Processing all .avi files from " << input_dir;
+    try
+    {
+        configure_processor(config_data, processor);
+    }
+    catch (const std::exception &e)
+    {
+        PLOG_ERROR << "sharpening configuration: " << e.what();
+    }
+    // array?
 
-    processor.setStackPercentage(0.25);
-    // processor.setStackPercentage(0.5, {"647"});
-    // processor.setSharpening({{2, 6.0}, {3, 5.0}, {4, 2.0}});
-    processor.setSharpening(SharpenPreset::DEFAULT);
-    processor.setSharpening(SharpenPreset::COARSE, {"889CH4"});
+    // processor.setStackPercentage(0.25);
+    // processor.setStackPercentage(0.5, {"889H4"});
+    // // processor.setSharpening({{2, 6.0}, {3, 5.0}, {4, 2.0}});
+    // processor.setSharpening(SharpenPreset::DEFAULT);
+    // processor.setSharpening(SharpenPreset::COARSE, {"889CH4"});
     // processor.setSharpening({{2, 15.0}}, {"647"});
 
     int failed_count = 0;

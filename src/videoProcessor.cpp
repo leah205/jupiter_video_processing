@@ -179,44 +179,6 @@ constexpr void VideoProcessor::setRunSharpening(const bool run)
     run_sharpening = run;
 }
 
-// void VideoProcessor::saveSharpenedOutput(std::string_view output_path, std::string_view prefix, cv::Mat frame) const
-// {
-//     if (run_sharpening == true)
-//     {
-//         auto &config = sharpener.getSharpenConfig();
-//         std::string levels_str;
-//         for (const auto &[level, amp] : config.level_sharpenings)
-//         {
-//             std::ostringstream oss;
-//             oss << std::fixed << std::setprecision(2) << amp;
-//             std::string rounded_amp = oss.str();
-
-//             levels_str += "_" + std::to_string(level) + "X" + rounded_amp;
-//         }
-
-//         cv::imwrite(std::string{output_path} + std::string{prefix} + "_" + "WV-" + "Aligned" + ".png", frame);
-//     }
-// }
-
-// /**
-//  * @brief Set the Sharpening Level object
-//  *
-//  * configure a set of ampplifications one for each spatial scale (decomposition level)
-//  * to enhance the contrast of(sharpen)
-//  *
-//  * @param level
-//  * @param amplification
-//  */
-// void VideoProcessor::setSharpening(const SharpeningMap &sharpen_map)
-// {
-//     WaveletSharpener sharpener;
-//     for (const auto &[level, amp] : sharpen_map)
-//     {
-//         sharpener.addLevelSharpening(level, amp);
-//     }
-//     filter_sharpen_config["default"] = sharpener;
-// }
-
 /**
  * @brief Set the Sharpening Level object
  *
@@ -229,6 +191,7 @@ constexpr void VideoProcessor::setRunSharpening(const bool run)
  */
 void VideoProcessor::setSharpening(const SharpeningMap &sharpen_map, const std::vector<std::string> &filters)
 {
+
     if (!filters.size())
     {
         WaveletSharpener sharpener;
@@ -241,6 +204,10 @@ void VideoProcessor::setSharpening(const SharpeningMap &sharpen_map, const std::
 
     for (const auto &filter : filters)
     {
+        if ((std::find(m_filters.begin(), m_filters.end(), filter) == m_filters.end()))
+        {
+            throw std::runtime_error("failed to add configuration for invalid filter: " + filter);
+        }
         WaveletSharpener sharpener;
 
         for (const auto &[level, amp] : sharpen_map)
@@ -274,8 +241,17 @@ void VideoProcessor::setStackPercentage(float percentage, std::vector<std::strin
 
     for (auto &filter : filters)
     {
+        if ((std::find(m_filters.begin(), m_filters.end(), filter) == m_filters.end()))
+        {
+            throw std::runtime_error("failed to add configuration for invalid filter: " + filter);
+        }
         select_config[filter] = percentage;
     }
+}
+
+void VideoProcessor::setFilters(const std::vector<std::string> &filters)
+{
+    m_filters = filters;
 }
 
 void VideoProcessor::saveOutput(const json metadata, const cv::Mat &frame, const cv::Mat &sharpened_frame, const std::string_view output) const
