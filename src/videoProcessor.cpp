@@ -144,6 +144,7 @@ void VideoProcessor::processVideo(const std::string_view input_path, const std::
 
     int stacked_frames_num;
     float stack_perc = (select_config.count(filter)) ? select_config[filter] : select_config["default"];
+    std::cout << "count" << select_config["default"] << std::endl;
     const WaveletSharpener &sharpener = (filter_sharpen_config.count(filter)) ? filter_sharpen_config[filter] : filter_sharpen_config["default"];
     stacked_frames_num = ceil(stack_perc * frames.size());
     std::cout << "selecting " + std::to_string(stack_perc) + " of frames" << std::endl;
@@ -204,10 +205,10 @@ void VideoProcessor::setSharpening(const SharpeningMap &sharpen_map, const std::
 
     for (const auto &filter : filters)
     {
-        if ((std::find(m_filters.begin(), m_filters.end(), filter) == m_filters.end()))
-        {
-            throw std::runtime_error("failed to add configuration for invalid filter: " + filter);
-        }
+        // if ((std::find(m_filters.begin(), m_filters.end(), filter) == m_filters.end()))
+        // {
+        //     throw std::runtime_error("failed to add configuration for invalid filter: " + filter);
+        // }
         WaveletSharpener sharpener;
 
         for (const auto &[level, amp] : sharpen_map)
@@ -238,7 +239,7 @@ void VideoProcessor::setStackPercentage(float percentage)
 
 void VideoProcessor::setStackPercentage(float percentage, std::vector<std::string> filters)
 {
-
+    std::cout << "hellloooooo" << std::endl;
     for (auto &filter : filters)
     {
         if ((std::find(m_filters.begin(), m_filters.end(), filter) == m_filters.end()))
@@ -273,3 +274,8 @@ void VideoProcessor::saveOutput(const json metadata, const cv::Mat &frame, const
     std::ofstream metadata_file(output_path + "/" + prefix + ".json");
     metadata_file << metadata.dump(4);
 };
+
+std::vector<std::string> VideoProcessor::getFilters(void) const
+{
+    return m_filters;
+}

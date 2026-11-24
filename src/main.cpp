@@ -9,13 +9,17 @@
 #include "align.h"
 #include "stack.h"
 #include "quality.h"
-
+#include <optional>
 #include <fstream>
 #include <nlohmann/json.hpp>
 using nlohmann::json;
 
-SharpenPreset get_sharpen_preset(std::string_view string_preset)
+std::optional<SharpenPreset> get_sharpen_preset(std::string_view string_preset)
 {
+    if (string_preset == "")
+    {
+        return std::nullopt;
+    }
     if (string_preset == "default")
     {
         return SharpenPreset::DEFAULT;
@@ -33,24 +37,44 @@ SharpenPreset get_sharpen_preset(std::string_view string_preset)
 
 void configure_processor(json config_data, VideoProcessor &processor)
 {
-    processor.setFilters(config_data["filters"].get<std::vector<std::string>>());
+    std::vector<std::string> filters = config_data["filters"].get<std::vector<std::string>>();
+    processor.setFilters(filters);
 
     for (auto &[filter, filter_config] : config_data["video_config"].items())
     {
-        float stack_percentage = filter_config["stack_percentage"];
-        std::string str_preset = filter_config["sharpening"].get<std::string>();
-        SharpenPreset preset = get_sharpen_preset(str_preset);
+        if (filter != "default" && (std::find(filters.begin(), filters.end(), filter) == filters.end()))
+        {
+            continue;
+        }
+
+        float stack_percentage = (filter_config.contains("stack_percentage")) ? filter_config["stack_percentage"].get<float>() : 0;
+        std::optional<SharpenPreset> preset = (filter_config.contains("sharpening")) ? get_sharpen_preset(filter_config["sharpening"].get<std::string>()) : std::nullopt;
         if (filter == "default")
         {
-            processor.setStackPercentage(stack_percentage);
-            processor.setSharpening(preset);
+            std::cout << "hiiii" << std::endl;
+            if (preset.has_value())
+            {
+                processor.setSharpening(preset.value());
+            }
+            if (stack_percentage)
+            {
+                processor.setStackPercentage(stack_percentage);
+            }
         }
         else
         {
-            processor.setStackPercentage(stack_percentage, std::vector<std::string>{filter});
-            processor.setSharpening(preset, std::vector<std::string>{filter});
+            if (preset.has_value())
+            {
+                processor.setSharpening(preset.value(), std::vector<std::string>{filter});
+            }
+            if (stack_percentage)
+            {
+                processor.setStackPercentage(stack_percentage, std::vector<std::string>{filter});
+            }
         }
     }
+    std::cout << "yo";
+    ;
 }
 
 int main()
@@ -64,6 +88,7 @@ int main()
     std::string input_dir = config_data["video_input_dir"].get<std::string>() + "/" + date_string;
     std::string fits_dir = config_data["fits_output_dir"].get<std::string>() + "/" + date_string;
     std::string log_file = fits_dir + "/LogFile.txt";
+    std::vector<std::string> filters{config_data["filters"].get<std::vector<std::string>>()};
     fs::create_directories(output_dir);
     fs::create_directories(fits_dir);
 
@@ -107,7 +132,11 @@ int main()
 
         try
         {
-            processor.processVideo(filepaths[i], output_dir);
+            std::string filter = get_filter(filepaths[i]);
+            if ((std::find(filters.begin(), filters.end(), filter) != filters.end()))
+            {
+                processor.processVideo(filepaths[i], output_dir);
+            }
             // PLOG_INFO << "processed " << filepaths[i];
         }
         catch (const std::exception &e)

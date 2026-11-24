@@ -83,6 +83,8 @@ public:
 
     void setFilters(const std::vector<std::string> &filters);
 
+    std::vector<std::string> getFilters(void) const;
+
     constexpr void setRunSharpening(const bool run);
 };
 
