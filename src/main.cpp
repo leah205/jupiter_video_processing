@@ -38,8 +38,10 @@ std::optional<SharpenPreset> get_sharpen_preset(std::string_view string_preset)
 void configure_processor(json config_data, VideoProcessor &processor)
 {
     std::vector<std::string> filters = config_data["filters"].get<std::vector<std::string>>();
+    std::cout << "config data " << config_data << std::endl;
+    bool run_sharpening = config_data.contains("run_sharpening") ? config_data["run_sharpening"].get<bool>() : false;
     processor.setFilters(filters);
-
+    processor.setRunSharpening(run_sharpening);
     for (auto &[filter, filter_config] : config_data["video_config"].items())
     {
         if (filter != "default" && (std::find(filters.begin(), filters.end(), filter) == filters.end()))
@@ -51,8 +53,7 @@ void configure_processor(json config_data, VideoProcessor &processor)
         std::optional<SharpenPreset> preset = (filter_config.contains("sharpening")) ? get_sharpen_preset(filter_config["sharpening"].get<std::string>()) : std::nullopt;
         if (filter == "default")
         {
-            std::cout << "hiiii" << std::endl;
-            if (preset.has_value())
+            if (preset.has_value() && run_sharpening)
             {
                 processor.setSharpening(preset.value());
             }
@@ -63,7 +64,7 @@ void configure_processor(json config_data, VideoProcessor &processor)
         }
         else
         {
-            if (preset.has_value())
+            if (preset.has_value() && run_sharpening)
             {
                 processor.setSharpening(preset.value(), std::vector<std::string>{filter});
             }
@@ -72,9 +73,7 @@ void configure_processor(json config_data, VideoProcessor &processor)
                 processor.setStackPercentage(stack_percentage, std::vector<std::string>{filter});
             }
         }
-    }
-    std::cout << "yo";
-    ;
+    };
 }
 
 int main()

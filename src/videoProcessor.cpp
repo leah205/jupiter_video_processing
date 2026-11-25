@@ -159,10 +159,11 @@ void VideoProcessor::processVideo(const std::string_view input_path, const std::
     std::string prefix = std::string{filename.substr(0, filename.size() - 4)} + "_Stacked";
     json metadata =
         {
-            {"orig_frames", frames.size()}, {"stacked_frames", stacked_frames_num}, {"stack_perc", stack_perc}, {"filter", filter}, {"date_prefix", filename.substr(0, filename.find("-Jupiter"))}, {"sharpening_config", sharpener.get_sharpening_config()}};
+            {"orig_frames", frames.size()}, {"stacked_frames", stacked_frames_num}, {"stack_perc", stack_perc}, {"filter", filter}, {"date_prefix", filename.substr(0, filename.find("-Jupiter"))}};
 
     if (run_sharpening)
     {
+        metadata["sharpen_config"] = sharpener.get_sharpening_config();
         sharpened_frame = sharpener.runSharpening(stacked_frame);
     }
 
@@ -175,7 +176,7 @@ void VideoProcessor::processVideo(const std::string_view input_path, const std::
  * @param run
  */
 
-constexpr void VideoProcessor::setRunSharpening(const bool run)
+void VideoProcessor::setRunSharpening(bool run)
 {
     run_sharpening = run;
 }

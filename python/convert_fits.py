@@ -64,7 +64,6 @@ def run_convert_fits_batch(input_dir: Path, png_dir: Path, output_dir: Path):
             if file.endswith(".png") and (not "WV" in file):
                 stacked_png_file = Path(filepath)
             if file.endswith("WV.png"):
-                print("hello?")
                 sharpened_png_file = Path(filepath)
             if file.endswith(".json"):
                 png_meta_file = Path(filepath)
@@ -81,7 +80,7 @@ def run_convert_fits_batch(input_dir: Path, png_dir: Path, output_dir: Path):
 
         for file_type, file in files_to_process.items():
             if not file:
-                logger.error(f"could not find {file_type} file for {prefix}")
+                # logger.error(f"could not find {file_type} file for {prefix}")
                 continue
             try:
                 params = convert_file_fits(
