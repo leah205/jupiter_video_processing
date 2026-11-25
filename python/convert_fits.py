@@ -172,12 +172,15 @@ def add_metadata(
                         print(value)
                         exposure_ms = 0
                         if not "ms" in value:
-                            exposure_ms = float(value.split("s")[0]) * 1000
+                            exposure_s = float(value.split("s")[0])
+                            observation.header["Total_Exposure"] = (
+                                str(stack_num * exposure_s) + "s"
+                            )
                         else:
                             exposure_ms = float(value.split("ms")[0])
-                        observation.header["TOTAL_EXPOSURE"] = (
-                            str(stack_num * exposure_ms) + "ms"
-                        )
+                            observation.header["Total_Exposure"] = (
+                                str(stack_num * exposure_ms) + "ms"
+                            )
 
     else:
         logger.warning("failed to add some headers:" + str(cmr_path) + " not found")
