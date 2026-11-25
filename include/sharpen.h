@@ -1,4 +1,5 @@
 #include <opencv2/opencv.hpp>
+#include <nlohmann/json.hpp>
 
 #ifndef SHARPEN_H
 #define SHARPEN_H
@@ -8,6 +9,7 @@ extern "C"
 #include "wavelib.h"
 }
 
+using nlohmann::json;
 using SharpeningMap = std::map<int, double>;
 
 struct SharpeningConfig
@@ -35,6 +37,7 @@ public:
     const SharpeningConfig &getSharpenConfig() const;
 
     void addLevelSharpening(const int level, const double amplification);
+    json get_sharpening_config() const;
 };
 
 #endif

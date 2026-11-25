@@ -3,11 +3,14 @@ import logging
 logger = logging.getLogger("pipeline")
 
 
-def initialize_logger(output_dir: str) -> None:
+def initialize_logger(log_file_s: str) -> None:
 
     logger.setLevel(logging.INFO)
+    # log_file_s = output_dir + "/LogFile.txt"
+    with open(log_file_s, "a") as _:
+        pass
 
-    handler = logging.FileHandler(output_dir + "/LogFile.txt", mode="a")
+    handler = logging.FileHandler(log_file_s, mode="a")
 
     handler.setLevel(logging.INFO)
 

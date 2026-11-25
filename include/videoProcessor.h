@@ -37,8 +37,8 @@ private:
     std::map<std::string, WaveletSharpener> filter_sharpen_config = {};
     std::vector<SharpeningMap> sharpen_configs{static_cast<int>(SharpenPreset::COUNT), SharpeningMap{}};
     // std::vector<FilterConfig> filter_configs;
-    std::vector<std::string> filters;
-    bool run_sharpening = true;
+    std::vector<std::string> m_filters;
+    bool run_sharpening = false;
     WaveletSharpener sharpener;
     typedef struct VideoData
     {
@@ -81,9 +81,11 @@ public:
 
     void alignFrames(std::vector<frameInfo> &frames);
 
-    void setFilters(std::vector<std::string> &filters);
+    void setFilters(const std::vector<std::string> &filters);
 
-    constexpr void setRunSharpening(const bool run);
+    std::vector<std::string> getFilters(void) const;
+
+    void setRunSharpening(bool run);
 };
 
 #endif

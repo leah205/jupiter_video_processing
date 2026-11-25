@@ -1,16 +1,23 @@
 {
-    "video_input_dir": "data/20260318UT",
-    "png_output_dir": "output",
-    "fits_output_dir": "FITS",
-    "filters": ["620CH4", "647NH3", "656HIA", "632OI", "685NIR", "550GRN", "450BLU", "889CH4"],
+    "video_input_dir": "video_data",
+    "png_output_dir": "results/png_data",
+    "fits_output_dir": "results/FITS",
+    "date_string": "20261110UT",
+    "filters": ["620CH4", "647NH3", "656HIA", "632OI", "685NIR", "550GRN", "450BLU",  "889CH4"],
+    "log_file": "results/LogFile.txt",
+    "run_sharpening": true,
     "video_config": {
         "default": {
             "stack_percentage": 0.25,
             "sharpening": "default"
-        }, 
-        "889": {
-            "stack_percentage": 0.5,
-            "sharpening": "coarse"
+        },
+          "889CH4": {
+            "sharpening": "coarse",
+            "stack_percentage": 0.5
         }
+        
+
+
+      
     }
 }
