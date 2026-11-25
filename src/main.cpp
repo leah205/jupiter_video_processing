@@ -3,7 +3,7 @@
 #include <string>
 #include <plog/Log.h>
 #include <plog/Initializers/RollingFileInitializer.h>
-
+#include <sstream>
 #include "videoProcessor.h"
 #include "helpers.h"
 #include "align.h"
@@ -86,7 +86,7 @@ int main()
     std::string output_dir = config_data["png_output_dir"].get<std::string>() + "/" + date_string;
     std::string input_dir = config_data["video_input_dir"].get<std::string>() + "/" + date_string;
     std::string fits_dir = config_data["fits_output_dir"].get<std::string>() + "/" + date_string;
-    std::string log_file = fits_dir + "/LogFile.txt";
+    std::string log_file = config_data["log_file"].get<std::string>();
     std::vector<std::string> filters{config_data["filters"].get<std::vector<std::string>>()};
     fs::create_directories(output_dir);
     fs::create_directories(fits_dir);
@@ -100,7 +100,15 @@ int main()
     VideoProcessor processor;
 
     plog::init(plog::info, log_file.c_str());
-    PLOG_INFO << "Running video processing on : " << input_dir;
+    std::string filter_str{};
+    for (size_t i = 0; i < filters.size(); i++)
+    {
+        if (i > 0)
+            filter_str += ",";
+        filter_str += filters[i];
+    }
+    PLOG_INFO
+        << "Running video processing on : " << filter_str << " in directory: " << input_dir;
 
     // PLOG_INFO << "Processing all .avi files from " << input_dir;
     try

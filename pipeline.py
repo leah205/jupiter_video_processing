@@ -20,10 +20,11 @@ def run_pipeline():
         output_dir = Path(config["fits_output_dir"]) / date_string
         video_dir = Path(config["video_input_dir"]) / date_string  # pyright: ignore[reportAny]
         png_dir = Path(config["png_output_dir"]) / date_string
+        log_file = Path(config["log_file"])
 
         os.makedirs(output_dir, exist_ok=True)
 
-        initialize_logger(str(output_dir))
+        initialize_logger(str(log_file))
         logger.info("")
         logger.info("")
 

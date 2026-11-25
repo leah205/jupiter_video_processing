@@ -1,9 +1,10 @@
 {
     "video_input_dir": "video_data",
-    "png_output_dir": "png_data",
-    "fits_output_dir": "FITS",
+    "png_output_dir": "results/png_data",
+    "fits_output_dir": "results/FITS",
     "date_string": "20261110UT",
     "filters": ["620CH4", "647NH3", "656HIA", "632OI", "685NIR", "550GRN", "450BLU",  "889CH4"],
+    "log_file": "results/LogFile.txt",
     "run_sharpening": false,
     "video_config": {
         "default": {
