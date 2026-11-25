@@ -5,18 +5,17 @@
     "date_string": "20261110UT",
     "filters": ["620CH4", "647NH3", "656HIA", "632OI", "685NIR", "550GRN", "450BLU",  "889CH4"],
     "log_file": "results/LogFile.txt",
-    "run_sharpening": false,
+    "run_sharpening": true,
     "video_config": {
         "default": {
             "stack_percentage": 0.25,
             "sharpening": "default"
         },
           "889CH4": {
-            "sharpening": "coarse"
-        }, 
-        "632OI": {
-            "stack_percentage": 0.2
+            "sharpening": "coarse",
+            "stack_percentage": 0.5
         }
+        
 
 
       
